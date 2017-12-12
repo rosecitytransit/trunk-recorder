@@ -56,7 +56,7 @@
 
 #include <osmosdr/source.h>
 
-#include <gnuradio/uhd/usrp_source.h>
+////#include <gnuradio/uhd/usrp_source.h>
 #include <gnuradio/msg_queue.h>
 #include <gnuradio/message.h>
 #include <gnuradio/blocks/file_sink.h>
@@ -795,9 +795,9 @@ void check_message_count(float timeDiff) {
         }
       }
 
-      if (msgs_decoded_per_second < 10) {
+//      if (msgs_decoded_per_second < 10) {
         BOOST_LOG_TRIVIAL(error) << "[" << sys->get_short_name() << "]\t Control Channel Message Decode Rate: " <<  msgs_decoded_per_second << "/sec, count:  " << sys->message_count;
-      }
+//      }
       sys->message_count = 0;
     }
   }
@@ -863,7 +863,7 @@ void monitor_messages() {
     }
     float timeDiff = currentTime - lastMsgCountTime;
 
-    if (timeDiff >= 3.0) {
+    if (timeDiff >= 60.0) {
       check_message_count(timeDiff);
       lastMsgCountTime = currentTime;
     }

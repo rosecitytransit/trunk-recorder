@@ -55,6 +55,7 @@ public:
 
 								char *get_converted_filename();
 								char *get_filename();
+                                                                char *get_filetime();
 								int get_sys_num();
 								std::string get_short_name();
 								void create_filename();
@@ -114,6 +115,7 @@ private:
 								bool emergency;
 								bool conventional;
 								char filename[255];
+                                                                char filetime[7];
 								char converted_filename[255];
 								char status_filename[255];
 								bool phase2_tdma;
