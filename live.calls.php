@@ -39,7 +39,8 @@ if (file_exists($dir."calllog.txt")) {
 	$filedata = file($dir."calllog.txt",FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 	$firstcall = true;
 	echo count($filedata);
-	$filedata = array_slice($filedata, $calls[1]);
+	if ($calls[1] <= count($filedata))
+		$filedata = array_slice($filedata, $calls[1]);
 	foreach ($filedata as $wholeline) {
 		if (substr($wholeline,-1) == ";")
 			$wholeline = substr($wholeline, 0, -1);

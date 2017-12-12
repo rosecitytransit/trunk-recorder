@@ -104,8 +104,48 @@ if (!isset($calls[0]) || ($calls[0] == "")) {
 		playlist.innerHTML="";
 		getcalls();
 	}
+
+function createXmlHttpRequest() {
+ try {
+   if (typeof ActiveXObject != 'undefined') {
+     return new ActiveXObject('Microsoft.XMLHTTP');
+   } else if (window["XMLHttpRequest"]) {
+     return new XMLHttpRequest();
+   }
+ } catch (e) {
+   changeStatus(e);
+ }
+ return null;
+};
+
+function downloadUrl(url, callback) {
+ var status = -1;
+ var request = createXmlHttpRequest();
+ if (!request) {
+   return false;
+ }
+
+ request.onreadystatechange = function() {
+   if (request.readyState == 4) {
+     try {
+       status = request.status;
+     } catch (e) {
+       // Usually indicates request timed out in FF.
+     }
+     if (status == 200) {
+       callback(request.responseText, request.status);
+       request.onreadystatechange = function() {};
+     }
+   }
+ }
+ request.open('GET', url, true);
+ try {
+   request.send(null);
+ } catch (e) {
+   changeStatus(e);
+ }
+};
 </script>
-<script type="text/javascript" src="util.js"></script>
 <style>.t {padding-right: 10px; display: table-cell; max-width: 550px;} .r {display: table-row;} .re {display: table-row; color: red;}</style>
 
 
@@ -161,7 +201,7 @@ for ($x = 1; $x <= 31; $x++) {
 unset($x); ?></select><input type="button" value="Day" onclick="changecalls(true, false);">
 	<br /><audio id="audioplayer" src="250ms.mp3" preload="none" tabindex="0" controls>
 		Sorry, your browser does not support HTML5 audio.
-	</audio><label><input id="autoplay" type="checkbox" checked="checked" />AutoPlay</label></form></div>
+	</audio><label><input id="autoplay" type="checkbox" checked="checked" />AutoPlay</label> &nbsp;&nbsp;<a href="index2.php">old version</a></form></div>
 
 	<p style="font-weight: bold; margin-top: 150px;">Click on a row to begin sequential playback in AutoPlay, click file size to download</p>
 
