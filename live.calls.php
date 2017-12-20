@@ -40,8 +40,8 @@ if (file_exists($dir."calllog.txt")) {
 	$firstcall = true;
 	echo count($filedata);
 	if ($calls[1] <= count($filedata))
-		$filedata = array_slice($filedata, $calls[1]);
-	foreach ($filedata as $wholeline) {
+		$filedata = array_slice($filedata, $calls[1], NULL, true);
+	foreach ($filedata as $linenum => $wholeline) {
 		if (substr($wholeline,-1) == ";")
 			$wholeline = substr($wholeline, 0, -1);
 		$allparts = explode(";", $wholeline);
@@ -51,13 +51,12 @@ if (file_exists($dir."calllog.txt")) {
 			if ($firstcall) {
 				echo " id=\"newcalls\"";
       				$firstcall = false; }
-			echo " class=\"r";
-			if ($section1[3] == "1") echo "e";
-			echo "\"><span class=\"t\">";
-			echo substr($section1[0],0,2).":".substr($section1[0],2,2).":".substr($section1[0],4,2)."</span><span class=\"t\">";
-			echo $section1[1]."s</span><span class=\"t\">";
+			if ($section1[3] == "1") echo " class=\"e\"";
+			echo "><span><a href=\"?".$calls[0]."+".$linenum."+".$calls[2]."\">#".$linenum."</a></span><span>";
+			echo substr($section1[0],0,2).":".substr($section1[0],2,2).":".substr($section1[0],4,2)."</span><span>";
+			echo $section1[1]."s</span><span>";
 			if (isset($talkgroups[$section1[2]])) echo $talkgroups[$section1[2]]; else echo $section1[2];
-			echo "</span><span class=\"t\">";
+			echo "</span><span>";
 			$sources = array_unique(explode(",", $allparts[1]));
 			foreach ($sources as $source) {
 				if (substr($source, -7, 3) == "280")
@@ -66,7 +65,7 @@ if (file_exists($dir."calllog.txt")) {
 					echo $source." ";
 			}
 			unset($source, $allparts[0], $allparts[1]);
-			echo "</span><span class=\"t\">";
+			echo "</span><span>";
 			//if (isset($allparts[2])) {
 				foreach ($allparts as $i => $section3) {
 					$freqs = explode(",", $section3);
@@ -77,7 +76,7 @@ if (file_exists($dir."calllog.txt")) {
 			//}
 			$file = $dir.$section1[0]."-".$section1[2].".mp3";
 			if (file_exists($file))
-				echo "</span><span class=\"t\"><a href=\"".$file."\">".round(filesize($file) / 1024)."k</a>";
+				echo "</span><span><a href=\"".$file."\">".round(filesize($file) / 1024)."k</a>";
 			echo "</span></div>";
 		}
 	}
@@ -89,9 +88,9 @@ elseif (file_exists($dir)) {
 chdir($dir);
 foreach (glob("*.mp3") as $file) {
   if ((substr($file,7,-4) == $calls[0]) || ($calls[0] == "ALL")) {
-    echo "<div class=\"r\"><span class=\"t\">";
-    echo substr($file,0,2).":".substr($file,2,2).":".substr($file,4,2)."</span><span class=\"t\">";
+    echo "<div><span>";
+    echo substr($file,0,2).":".substr($file,2,2).":".substr($file,4,2)."</span><span>";
     if (isset($talkgroups[substr($file,7,-4)])) echo $talkgroups[substr($file,7,-4)]; else echo substr($file,7,-4);
-    echo "</span><span class=\"t\">";
+    echo "</span><span>";
     echo "<a href=\"" . $dir . $file . "\">".round(filesize($file) / 1024)."k</a></span></div>"; } } }
 ?>
