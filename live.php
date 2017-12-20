@@ -13,13 +13,13 @@ if (!isset($calls[0]) || ($calls[0] == "")) {
 	echo "	var calls=\"ALL\";
 ";
 } else echo "	var calls=\"".$_SERVER['QUERY_STRING']."\";
-";
-?>
+"; ?>
 	var player;
 	var playlist;
 	var currentcall;
 	var channel;
 	var e;
+	var loadcalls;
 	function init() {
 		e = document.createElement('div');
 		player = document.getElementById('audioplayer');
@@ -30,10 +30,10 @@ if (!isset($calls[0]) || ($calls[0] == "")) {
 
 		playlist.addEventListener('click',function (e) {
 			//e.preventDefault();
-			if ((e.target.parentElement.nodeName == "DIV") && (e.target.parentElement != playlist) && e.target.parentElement.getElementsByTagName('a')[0]) {
+			if ((e.target.parentElement.nodeName == "DIV") && (e.target.parentElement != playlist) && e.target.parentElement.getElementsByTagName('a')[1]) {
 				playnext(e.target.parentElement);
 			}
-			else if ((e.target.parentElement == playlist) && e.target.getElementsByTagName('a')[0]) {
+			else if ((e.target.parentElement == playlist) && e.target.getElementsByTagName('a')[1]) {
 				playnext(e.target);
 			}
 		}, false);
@@ -46,10 +46,11 @@ if (!isset($calls[0]) || ($calls[0] == "")) {
 	}
 
 	window.onload=init;
-	var loadcalls=setInterval(getcalls, 20000);
+	<?php if (!isset($calls[1]))
+		echo "	var loadcalls=setInterval(getcalls, 20000);"; ?>
 
 	function getcalls() {
-		downloadUrl("live.calls.php?"+calls, function(data) {
+		downloadUrl("calls.php?"+calls, function(data) {
 			if (document.getElementById('newcalls'))
 				document.getElementById('newcalls').removeAttribute("id");
 			calls = calls+"+";
@@ -62,7 +63,7 @@ if (!isset($calls[0]) || ($calls[0] == "")) {
 			if (!currentcall && document.getElementById('newcalls')) {	//playnext
 				currentcall = document.getElementById('newcalls');
 				currentcall.style.fontWeight = "bold";
-				player.setAttribute('src',currentcall.getElementsByTagName('a')[0]);
+				player.setAttribute('src',currentcall.getElementsByTagName('a')[1]);
 				player.load();
 			}
 			if ((document.getElementById('autoplay').checked == true) && (player.ended == true) && document.getElementById('newcalls')) {
@@ -74,11 +75,11 @@ if (!isset($calls[0]) || ($calls[0] == "")) {
 
 	function playnext(nextcall) {
 		do {
-			if (nextcall.getElementsByTagName('a')[0]) {
+			if (nextcall.getElementsByTagName('a')[1]) {
 				currentcall.style.fontWeight = "normal";
 				currentcall = nextcall;
 				currentcall.style.fontWeight = "bold";
-				player.setAttribute('src',currentcall.getElementsByTagName('a')[0]);
+				player.setAttribute('src',currentcall.getElementsByTagName('a')[1]);
 				player.load();
 				player.play();
 				break;
@@ -91,7 +92,7 @@ if (!isset($calls[0]) || ($calls[0] == "")) {
 		calls = channel.value;
 		if (day)
 			calls += "+00";
-		else 
+		else
 			loadcalls=setInterval(getcalls, 20000);
 		if (!today) {
 			calls += "+"+document.getElementById("m").value+"-"+document.getElementById("d").value;
@@ -99,7 +100,7 @@ if (!isset($calls[0]) || ($calls[0] == "")) {
 			clearInterval(loadcalls);
 		}
 		document.title = newtitle;
-		document.getElementById('curchan').innerHTML = newtitle;
+		document.getElementById('curchan').innerHTML = "<a href=\"?"+calls+"\">"+newtitle+"</a>";
 		currentcall = "";
 		playlist.innerHTML="";
 		getcalls();
@@ -146,12 +147,14 @@ function downloadUrl(url, callback) {
  }
 };
 </script>
-<style>.t {padding-right: 10px; display: table-cell; max-width: 550px;} .r {display: table-row;} .re {display: table-row; color: red;}</style>
+<style>#theplaylist span {padding-right: 10px; display: table-cell; max-width: 550px;}
+#theplaylist div {display: table-row; cursor: default;} .e { color: red;}
+#theplaylist a { text-decoration: none;} #theplaylist { display: table; }</style>
 
 
 
 <body style="font-family: Arial;" ><div style="position:fixed; background: white; top: 0; width: 100%;">
-<h1><span id="curchan">King County Metro radio calls</span></h1>
+<h1 id="curchan">King County Metro radio calls</h1>
 <form action="" name="changecall">Channel(s): <select name="channels" id="channels">
 
 <?php $tglist = array('ALL'=>"ALL",
@@ -203,8 +206,8 @@ unset($x); ?></select><input type="button" value="Day" onclick="changecalls(true
 		Sorry, your browser does not support HTML5 audio.
 	</audio><label><input id="autoplay" type="checkbox" checked="checked" />AutoPlay</label> &nbsp;&nbsp;<a href="index2.php">old version</a></form></div>
 
-	<p style="font-weight: bold; margin-top: 150px;">Click on a row to begin sequential playback in AutoPlay, click file size to download</p>
+	<p style="font-weight: bold; margin-top: 150px;">Click on a row to play, click # for link, or click file size to download</p>
 
-	<div id="theplaylist" style="display: table;"></div>
+	<div id="theplaylist"></div>
 
 </body></html>
