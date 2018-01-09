@@ -149,7 +149,7 @@ function downloadUrl(url, callback) {
 </script>
 <style>#theplaylist span {padding-right: 10px; display: table-cell; max-width: 550px;}
 #theplaylist div {display: table-row; cursor: default;} .e { color: red;}
-#theplaylist a { text-decoration: none;} #theplaylist { display: table; }</style>
+#theplaylist a { text-decoration: none; color: black; } #theplaylist { display: table; }</style>
 
 
 
@@ -186,7 +186,7 @@ foreach ($tglist as $thistg => $thisvalue) {
 ';
 }
 unset($thistg); ?>
-</select><input type="button" value="Live" onclick="changecalls(false, true);"><input type="button" value="Today" onclick="changecalls(true, true);">
+</select><input type="button" value="Now" onclick="changecalls(false, true);"><input type="button" value="Today" onclick="changecalls(true, true);">
 <select name="m" id="m">
 <?php $themon = explode("-",$calls[2]);
 foreach (glob("2*/*", GLOB_ONLYDIR) as $mon) {
@@ -204,7 +204,8 @@ for ($x = 1; $x <= 31; $x++) {
 unset($x); ?></select><input type="button" value="Day" onclick="changecalls(true, false);">
 	<br /><audio id="audioplayer" src="250ms.mp3" preload="none" tabindex="0" controls>
 		Sorry, your browser does not support HTML5 audio.
-	</audio><label><input id="autoplay" type="checkbox" checked="checked" />AutoPlay</label> &nbsp;&nbsp;<a href="index2.php">old version</a></form></div>
+	</audio><label><input id="autoplay" type="checkbox" checked="checked" />AutoPlay</label> &nbsp;&nbsp;<a href="index2.php">old version</a>
+ <a href="http://kcmscanner.ddns.net/about.html">about</a></form></div>
 
 	<p style="font-weight: bold; margin-top: 150px;">Click on a row to play, click # for link, or click file size to download</p>
 

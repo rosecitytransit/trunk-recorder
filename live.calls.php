@@ -86,11 +86,13 @@ if (file_exists($dir."calllog.txt")) {
 
 elseif (file_exists($dir)) {
 chdir($dir);
+echo "00";
 foreach (glob("*.mp3") as $file) {
   if ((substr($file,7,-4) == $calls[0]) || ($calls[0] == "ALL")) {
     echo "<div><span>";
     echo substr($file,0,2).":".substr($file,2,2).":".substr($file,4,2)."</span><span>";
     if (isset($talkgroups[substr($file,7,-4)])) echo $talkgroups[substr($file,7,-4)]; else echo substr($file,7,-4);
     echo "</span><span>";
-    echo "<a href=\"" . $dir . $file . "\">".round(filesize($file) / 1024)."k</a></span></div>"; } } }
-?>
+    echo "<a href=\"" . $dir . $file . "\">".round(filesize($file) / 1024)."k</a></span></div>"; }
+} }
+else echo "00"; ?>
