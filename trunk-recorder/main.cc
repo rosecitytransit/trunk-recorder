@@ -54,7 +54,7 @@
 #include "systems/p25_parser.h"
 #include "systems/parser.h"
 
-#include "uploaders/stat_socket.h"
+//#include "uploaders/stat_socket.h"
 
 #include <websocketpp/config/asio_no_tls_client.hpp>
 #include <websocketpp/client.hpp>
@@ -66,7 +66,7 @@
 
 #include <osmosdr/source.h>
 
-#include <gnuradio/uhd/usrp_source.h>
+//#include <gnuradio/uhd/usrp_source.h>
 #include <gnuradio/msg_queue.h>
 #include <gnuradio/message.h>
 #include <gnuradio/blocks/file_sink.h>
@@ -94,7 +94,7 @@ SmartnetParser *smartnet_parser;
 P25Parser *p25_parser;
 
 Config config;
-stat_socket stats;
+//stat_socket stats;
 string default_mode;
 
 
@@ -541,7 +541,7 @@ bool start_recorder(Call *call, TrunkMessage message, System *sys) {
         recorder->start(call);
         call->set_recorder(recorder);
         call->set_state(recording);
-        stats.send_recorder(recorder);
+        //stats.send_recorder(recorder);
         recorder_found = true;
       } else {
         // not recording call either because the priority was too low or no
@@ -557,7 +557,7 @@ bool start_recorder(Call *call, TrunkMessage message, System *sys) {
         debug_recorder->start(call);
         call->set_debug_recorder(debug_recorder);
         call->set_debug_recording(true);
-        stats.send_recorder(debug_recorder);
+        //stats.send_recorder(debug_recorder);
         recorder_found = true;
       } else {
         // BOOST_LOG_TRIVIAL(info) << "\tNot debug recording call";
@@ -565,7 +565,7 @@ bool start_recorder(Call *call, TrunkMessage message, System *sys) {
 
       if (recorder_found) {
         // recording successfully started.
-        stats.send_call_start(call);
+        //stats.send_call_start(call);
         return true;
       }
     }
@@ -603,10 +603,10 @@ void stop_inactive_recorders() {
         if (call->get_idle_count() > 5) {
           Recorder * recorder = call->get_recorder();
           call->end_call();
-          stats.send_call_end(call);
+          //stats.send_call_end(call);
           call->restart_call();
-          if (recorder != NULL)
-            stats.send_recorder(recorder);
+          //if (recorder != NULL)
+            //stats.send_recorder(recorder);
         }
       }
       ++it;
@@ -617,9 +617,9 @@ void stop_inactive_recorders() {
         }
         Recorder * recorder = call->get_recorder();
         call->end_call();
-        stats.send_call_end(call);
-        if (recorder != NULL)
-          stats.send_recorder(recorder);
+        //stats.send_call_end(call);
+        //if (recorder != NULL)
+          //stats.send_recorder(recorder);
         it = calls.erase(it);
         delete call;
       } else {
@@ -631,7 +631,7 @@ void stop_inactive_recorders() {
   }
 
   if (ended_recording) {
-    stats.send_calls_active(calls);
+    //stats.send_calls_active(calls);
   }
   /*     for (vector<Source *>::iterator it = sources.begin(); it !=
      sources.end();
@@ -706,7 +706,7 @@ bool retune_recorder(TrunkMessage message, Call *call) {
 
 void current_system_status(TrunkMessage message, System *sys) {
   if (sys->update_status(message)){
-    stats.send_system(sys);
+//    stats.send_system(sys);
   }
 }
 
@@ -752,11 +752,11 @@ void handle_call(TrunkMessage message, System *sys) {
           if (!retuned) {
             Recorder * recorder = call->get_recorder();
             call->end_call();
-            stats.send_call_end(call);
+            //stats.send_call_end(call);
             it = calls.erase(it);
             delete call;
             call_found = false;
-            stats.send_recorder(recorder);
+            //stats.send_recorder(recorder);
           } else {
             call->update(message);
             call_retune = true;
@@ -787,9 +787,9 @@ void handle_call(TrunkMessage message, System *sys) {
     calls.push_back(call);
   }
 
-  if (call_retune || recording_started) {
-    stats.send_calls_active(calls);
-  }
+//  if (call_retune || recording_started) {
+//    stats.send_calls_active(calls);
+//  }
 }
 
 void unit_check() {
@@ -920,8 +920,8 @@ void retune_system(System *system) {
 }
 
 void check_message_count(float timeDiff) {
-  stats.send_config(sources, systems);
-  stats.send_sys_rates(systems, timeDiff);
+  //stats.send_config(sources, systems);
+  //stats.send_sys_rates(systems, timeDiff);
 
   for (std::vector<System *>::iterator it = systems.begin(); it != systems.end(); ++it) {
     System *sys = (System *)*it;
@@ -980,9 +980,9 @@ void monitor_messages() {
       return;
     }
 
-    if (config.status_server != "") {
-      stats.poll_one();
-    }
+    //if (config.status_server != "") {
+    //  stats.poll_one();
+    //}
 
     // BOOST_LOG_TRIVIAL(info) << "Messages waiting: "  << msg_queue->count();
     msg = msg_queue->delete_head_nowait();
@@ -1048,62 +1048,62 @@ bool monitor_system() {
 
 
     if ((system->get_system_type() == "conventional") || (system->get_system_type() == "conventionalP25")) {
-      std::vector<double> channels = system->get_channels();
-      int talkgroup                = 1;
-
-      for (vector<double>::iterator chan_it = channels.begin(); chan_it != channels.end(); chan_it++) {
-        double channel = *chan_it;
-
-        for (vector<Source *>::iterator src_it = sources.begin(); src_it != sources.end(); src_it++) {
-          source = *src_it;
-
-          if ((source->get_min_hz() <= channel) &&
-              (source->get_max_hz() >= channel)) {
-            // The source can cover the System's control channel
-            system->set_source(source);
-            system_added = true;
-
-            if (source->get_squelch_db() == 0) {
-              BOOST_LOG_TRIVIAL(error) << "[" << system->get_short_name() << "]\tSquelch needs to be specified for the Source for Conventional Systems";
-              system_added = false;
-            } else {
-              system_added = true;
-            }
-
-            BOOST_LOG_TRIVIAL(info) << "[" << system->get_short_name() << "]\tMonitoring Conventional Channel: " <<  FormatFreq(channel) << " Talkgroup: " << talkgroup;
-            Call_conventional *call = new Call_conventional(talkgroup, channel, system, config, &stats);
-            talkgroup++;
-            Talkgroup *talkgroup = system->find_talkgroup(call->get_talkgroup());
-
-            if (talkgroup) {
-              call->set_talkgroup_tag(talkgroup->alpha_tag);
-            }
-
-            if (system->get_system_type() == "conventional") {
-              analog_recorder_sptr rec;
-              rec = source->create_conventional_recorder(tb);
-              rec->start(call);
-              call->set_recorder((Recorder *)rec.get());
-              call->set_state(recording);
-              system->add_conventional_recorder(rec);
-              calls.push_back(call);
-              stats.send_recorder((Recorder *)rec.get());
-            } else { // has to be "conventionalP25"
-              p25conventional_recorder_sptr rec;
-              rec = source->create_conventionalP25_recorder(tb, system->get_delaycreateoutput());
-              rec->start(call);
-              call->set_recorder((Recorder *)rec.get());
-              call->set_state(recording);
-              system->add_conventionalP25_recorder(rec);
-              calls.push_back(call);
-              stats.send_recorder((Recorder *)rec.get());
-            }
-
-            // break out of the for loop
-            break;
-          }
-        }
-      }
+//      std::vector<double> channels = system->get_channels();
+//      int talkgroup                = 1;
+//
+//      for (vector<double>::iterator chan_it = channels.begin(); chan_it != channels.end(); chan_it++) {
+//        double channel = *chan_it;
+//
+//        for (vector<Source *>::iterator src_it = sources.begin(); src_it != sources.end(); src_it++) {
+//          source = *src_it;
+//
+//          if ((source->get_min_hz() <= channel) &&
+//              (source->get_max_hz() >= channel)) {
+//            // The source can cover the System's control channel
+//            system->set_source(source);
+//            system_added = true;
+//
+//            if (source->get_squelch_db() == 0) {
+//              BOOST_LOG_TRIVIAL(error) << "[" << system->get_short_name() << "]\tSquelch needs to be specified for the Source for Conventional Systems";
+//              system_added = false;
+//            } else {
+//              system_added = true;
+//            }
+//
+//            BOOST_LOG_TRIVIAL(info) << "[" << system->get_short_name() << "]\tMonitoring Conventional Channel: " <<  FormatFreq(channel) << " Talkgroup: " << talkgroup;
+//            Call_conventional *call = new Call_conventional(talkgroup, channel, system, config);
+//            talkgroup++;
+//            Talkgroup *talkgroup = system->find_talkgroup(call->get_talkgroup());
+//
+//            if (talkgroup) {
+//              call->set_talkgroup_tag(talkgroup->alpha_tag);
+//            }
+//
+//            if (system->get_system_type() == "conventional") {
+//              analog_recorder_sptr rec;
+//              rec = source->create_conventional_recorder(tb);
+//              rec->start(call);
+//              call->set_recorder((Recorder *)rec.get());
+//              call->set_state(recording);
+//              system->add_conventional_recorder(rec);
+//              calls.push_back(call);
+//              //stats.send_recorder((Recorder *)rec.get());
+//            } else { // has to be "conventionalP25"
+//              p25conventional_recorder_sptr rec;
+//              rec = source->create_conventionalP25_recorder(tb, system->get_delaycreateoutput());
+//              rec->start(call);
+//              call->set_recorder((Recorder *)rec.get());
+//              call->set_state(recording);
+//              system->add_conventionalP25_recorder(rec);
+//              calls.push_back(call);
+//              //stats.send_recorder((Recorder *)rec.get());
+//            }
+//
+//            // break out of the for loop
+//            break;
+//          }
+//        }
+//      }
     } else {
       double control_channel_freq = system->get_current_control_channel();
       BOOST_LOG_TRIVIAL(info) << "[" << system->get_short_name() << "]\tStarted with Control Channel: " << FormatFreq(control_channel_freq);
@@ -1162,9 +1162,9 @@ void add_logs(const F& fmt)
 
 void socket_connected()
 {
-  stats.send_config(sources, systems);
-  stats.send_systems(systems);
-  stats.send_calls_active(calls);
+  //stats.send_config(sources, systems);
+  //stats.send_systems(systems);
+  //stats.send_calls_active(calls);
 
   std::vector<Recorder *> recorders;
 
@@ -1176,7 +1176,7 @@ void socket_connected()
     recorders.insert(recorders.end(), sourceRecorders.begin(), sourceRecorders.end());
   }
 
-  stats.send_recorders(recorders);
+  //stats.send_recorders(recorders);
 }
 
 
@@ -1243,8 +1243,8 @@ int main(int argc, char **argv)
 
 
   load_config(config_file);
-  stats.initialize(&config, &socket_connected);
-  stats.open_stat();
+  //stats.initialize(&config, &socket_connected);
+  //stats.open_stat();
 
   if (config.log_file) {
     logging::add_file_log(

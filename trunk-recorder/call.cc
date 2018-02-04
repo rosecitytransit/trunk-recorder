@@ -157,9 +157,9 @@ void Call::end_call() {
     }
     this->get_recorder()->stop();
 
-    if (this->config.upload_server != "") {
-      send_call(this, sys, config);
-    } else {}
+//    if (this->config.upload_server != "") {
+//      send_call(this, sys, config);
+//    } else {}
 
     if (sys->get_upload_script().length() != 0) {
       BOOST_LOG_TRIVIAL(info) << "Running upload script: " << shell_command.str();

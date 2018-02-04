@@ -21,6 +21,8 @@
 # Project setup
 ########################################################################
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 cmake_minimum_required(VERSION 2.6)
 project(Trunk-Recorder CXX C)
 
@@ -103,11 +105,11 @@ endif()
 #find_package(LibRTLSDR)
 #find_package(LibMiriSDR)
 #find_package(LibbladeRF)
-find_package(GnuradioUHD)
+#find_package(GnuradioUHD)
 find_package(GrOsmoSDR)
-find_package(LibHackRF)
-find_package(UHD)
-find_package(OpenSSL REQUIRED)
+#find_package(LibHackRF)
+#find_package(UHD)
+#find_package(OpenSSL REQUIRED)
 
 if(NOT GNURADIO_RUNTIME_FOUND)
     message(FATAL_ERROR "GnuRadio Runtime required to build " ${CMAKE_PROJECT_NAME})
@@ -164,7 +166,7 @@ include_directories(
     ${CMAKE_BINARY_DIR}/include
     ${CMAKE_SOURCE_DIR}/lib/op25_repeater/lib
     ${CMAKE_SOURCE_DIR}/lib/op25_repeater/include
-    ${OPENSSL_INCLUDE_DIR}
+#    ${OPENSSL_INCLUDE_DIR}
     "lib"
 )
 
@@ -172,9 +174,9 @@ link_directories(
     ${Boost_LIBRARY_DIRS}
     ${GNURADIO_RUNTIME_LIBRARY_DIRS}
     ${GROSMOSDR_LIBRARIES_DIRS}
-    ${GNURADIO_UHD_LIBRARIES_DIRS}
-    ${UHD_LIBRARIES_DIRS}
-    ${OPENSSL_ROOT_DIR}/lib
+#    ${GNURADIO_UHD_LIBRARIES_DIRS}
+#    ${UHD_LIBRARIES_DIRS}
+#    ${OPENSSL_ROOT_DIR}/lib
 )
 
 #set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
@@ -206,9 +208,9 @@ list(APPEND trunk_recorder_sources
   trunk-recorder/main.cc
   trunk-recorder/formatter.cc
   trunk-recorder/source.cc
-  trunk-recorder/uploaders/uploader.cc
-  trunk-recorder/uploaders/call_uploader.cc
-  trunk-recorder/uploaders/stat_socket.cc
+ # trunk-recorder/uploaders/uploader.cc
+ # trunk-recorder/uploaders/call_uploader.cc
+ # trunk-recorder/uploaders/stat_socket.cc
   trunk-recorder/call_conventional.cc
   trunk-recorder/call.cc
   trunk-recorder/systems/smartnet_trunking.cc
@@ -244,4 +246,4 @@ target_compile_options(
 
 add_executable(recorder ${trunk_recorder_sources})
 
-target_link_libraries(recorder ssl crypto ${GNURADIO_PMT_LIBRARIES} ${GNURADIO_RUNTIME_LIBRARIES} ${GNURADIO_FILTER_LIBRARIES} ${GNURADIO_DIGITAL_LIBRARIES} ${GNURADIO_ANALOG_LIBRARIES} ${GNURADIO_AUDIO_LIBRARIES} ${GNURADIO_UHD_LIBRARIES} ${UHD_LIBRARIES} ${GNURADIO_BLOCKS_LIBRARIES} ${GROSMOSDR_LIBRARIES} ${Boost_LIBRARIES} ${LIBOP25_REPEATER_LIBRARIES} gnuradio-op25_repeater imbe_vocoder)
+target_link_libraries(recorder ${GNURADIO_PMT_LIBRARIES} ${GNURADIO_RUNTIME_LIBRARIES} ${GNURADIO_FILTER_LIBRARIES} ${GNURADIO_DIGITAL_LIBRARIES} ${GNURADIO_ANALOG_LIBRARIES} ${GNURADIO_AUDIO_LIBRARIES} ${GNURADIO_BLOCKS_LIBRARIES} ${GROSMOSDR_LIBRARIES} ${Boost_LIBRARIES} ${LIBOP25_REPEATER_LIBRARIES} gnuradio-op25_repeater imbe_vocoder)

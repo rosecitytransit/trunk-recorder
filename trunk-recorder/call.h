@@ -2,6 +2,7 @@
 #define CALL_H
 #include <sys/time.h>
 #include <boost/log/trivial.hpp>
+#include <signal.h>
 
 struct Call_Source {
 								long source;
@@ -28,7 +29,7 @@ struct Call_Error {
 
 class Recorder;
 #include <op25_repeater/include/op25_repeater/rx_status.h>
-#include "uploaders/call_uploader.h"
+//#include "uploaders/call_uploader.h"
 #include "config.h"
 #include "state.h"
 #include "systems/system.h"

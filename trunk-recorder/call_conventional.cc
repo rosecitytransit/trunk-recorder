@@ -41,5 +41,5 @@ void Call_conventional::set_recorder(Recorder *r) {
 void Call_conventional::recording_started()
 {
   start_time = time(NULL);
-  d_stat_socket->send_call_start(this);
+  //d_stat_socket->send_call_start(this);
 }
