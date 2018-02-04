@@ -1,0 +1,24 @@
+{ "sources": [
+{"center": 771250000.0,
+"rate": 2400000.0,
+"ppm": 1,
+"gain": 42,
+"digitalRecorders": 6,
+"driver": "osmosdr",
+"device": "rtl=00000002"},
+{"center": 773230000.0,
+"rate": 225001.0,
+"ppm": 1,
+"gain": 42,
+"digitalRecorders": 1,
+"driver": "osmosdr",
+"device": "rtl=00000001"}
+],
+"systems": [ {
+	"control_channels": [772056250],
+	"type": "p25",
+	"captureDir": "/var/www/html/radio/",
+	"talkgroupsFile": "ChanList.csv"
+	} ],
+"captureDir": "/var/www/html/radio/"
+}

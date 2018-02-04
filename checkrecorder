@@ -1,0 +1,8 @@
+#!/bin/sh
+#/usr/bin/php /var/www/html/alertsfeed/index.php
+if ([ "$(/sbin/pidof recorder)" = "" ]); then
+cd /home/wladcoat/trunk-recorder2/
+mv trunk1.log /home/wladcoat/trunk1_`date +%F-%H%M%S`.log
+mv trunk2.log /home/wladcoat/trunk2_`date +%F-%H%M%S`.log
+nohup ./recorder > trunk1.log 2>trunk2.log &
+fi

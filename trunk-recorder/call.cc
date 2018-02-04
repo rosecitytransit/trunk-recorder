@@ -3,17 +3,18 @@
 void Call::create_filename() {
   tm *ltm = localtime(&start_time);
 
-
   std::stringstream path_stream;
 
   path_stream << this->config.capture_dir <<  "/" << 1900 + ltm->tm_year << "/" <<  1 + ltm->tm_mon << "/" << ltm->tm_mday;
 
   boost::filesystem::create_directories(path_stream.str());
-  sprintf(filename,        "%s/%ld-%ld_%g.wav",
-          path_stream.str().c_str(), talkgroup, start_time, freq);
-  sprintf(status_filename, "%s/%ld-%ld_%g.json",
-          path_stream.str().c_str(), talkgroup, start_time, freq);
-
+if (source) {
+  sprintf(filename, "%s/%02d%02d%02d-%ld-%ld.wav",
+  path_stream.str().c_str(), ltm->tm_hour, ltm->tm_min, ltm->tm_sec, talkgroup, source);
+} else {
+  sprintf(filename, "%s/%02d%02d%02d-%ld.wav",						//sprintf(filename,        "%s/%ld-%ld_%g.wav",
+  path_stream.str().c_str(), ltm->tm_hour, ltm->tm_min, ltm->tm_sec, talkgroup);	//path_stream.str().c_str(), talkgroup, start_time, freq);
+}
   // sprintf(filename, "%s/%ld-%ld.wav",
   // path_stream.str().c_str(),talkgroup,start_time);
   // sprintf(status_filename, "%s/%ld-%ld.json",
@@ -32,6 +33,7 @@ Call::Call(long t, double f, Config c) {
   tdma            = false;
   encrypted       = false;
   emergency       = false;
+source = 0;
   this->create_filename();
 }
 
@@ -47,6 +49,7 @@ Call::Call(TrunkMessage message, Config c) {
   tdma            = message.tdma;
   encrypted       = message.encrypted;
   emergency       = message.emergency;
+  source = message.source;
   this->create_filename();
 }
 
@@ -65,44 +68,24 @@ void Call::stop_call() {
 }
 
 void Call::close_call() {
-  char shell_command[200];
+  char shell_command[200]; std::stringstream sourcestring; std::stringstream intstring;
 
   if (state == recording) {
     BOOST_LOG_TRIVIAL(error) << "Closing a recording call";
   }
   if ((state == stopping) || (state == recording)) {
     BOOST_LOG_TRIVIAL(info) << "Removing Recorded Call \tTG: " <<   this->get_talkgroup() << "\tLast Update: " << this->since_last_update() << " Call Elapsed: " << this->elapsed() << " Stopping Elapsed: " << this->stopping_elapsed();
-    std::ofstream myfile(status_filename);
     Call_Source *wav_src_list = get_recorder()->get_source_list();
     int wav_src_count = get_recorder()->get_source_count();
-
-    if (myfile.is_open())
-    {
-      myfile << "{\n";
-      myfile << "\"freq\": " << this->freq << ",\n";
-      myfile << "\"start_time\": " << this->start_time << ",\n";
-      myfile << "\"emergency\": " << this->emergency << ",\n";
-      myfile << "\"talkgroup\": " << this->talkgroup << ",\n";
-      myfile << "\"srcList\": [ ";
-
-      for (int i = 0; i < wav_src_count; i++) {
-        if (i != 0) {
-          myfile << ", " <<  wav_src_list[i].source;
-        } else {
-          myfile << wav_src_list[i].source;
-        }
-      }
-      myfile << " ]\n";
-      myfile << "}\n";
-      myfile.close();
+    for (int i = 0; i < wav_src_count; i++) {
+        intstring.str("-"); intstring << wav_src_list[i].source << "-";
+        if ((sourcestring.str().append("-").find(intstring.str())==std::string::npos) && (wav_src_list[i].source < 50000) && (i < 10))
+        { sourcestring << "-" << wav_src_list[i].source; }
     }
-    sprintf(shell_command, "./encode-upload.sh %s &", this->get_filename());
+    //+ this->emergency
+    sprintf(shell_command, "./encode-upload.sh %s %s &", this->get_filename(), sourcestring.str().c_str());  
 
     this->get_recorder()->close();
-
-    if (this->config.upload_server != "") {
-      send_call(this, config);
-    }
 
     int rc = system(shell_command);
   }

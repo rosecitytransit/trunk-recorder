@@ -7,10 +7,6 @@ void Source::set_antenna(std::string ant)
 {
   antenna = ant;
 
-  if (driver == "usrp") {
-    BOOST_LOG_TRIVIAL(info) << "Setting antenna to [" << antenna << "]";
-    cast_to_usrp_sptr(source_block)->set_antenna(antenna, 0);
-  }
 }
 
 std::string Source::get_antenna() {
@@ -68,10 +64,6 @@ void Source::set_gain(int r)
     cast_to_osmo_sptr(source_block)->set_gain(gain);
   }
 
-  if (driver == "usrp") {
-    gain = r;
-    cast_to_usrp_sptr(source_block)->set_gain(gain);
-  }
 }
 
 int Source::get_gain() {
@@ -339,20 +331,4 @@ Source::Source(double c, double r, double e, std::string drv, std::string dev)
     source_block = osmo_src;
   }
 
-  if (driver == "usrp") {
-    gr::uhd::usrp_source::sptr usrp_src;
-    usrp_src = gr::uhd::usrp_source::make(device, uhd::stream_args_t("fc32"));
-
-    BOOST_LOG_TRIVIAL(info) << "SOURCE TYPE USRP (UHD)";
-
-    BOOST_LOG_TRIVIAL(info) << "Setting sample rate to: " << rate;
-    usrp_src->set_samp_rate(rate);
-    actual_rate = usrp_src->get_samp_rate();
-    BOOST_LOG_TRIVIAL(info) << "Actual sample rate: " << actual_rate;
-    BOOST_LOG_TRIVIAL(info) << "Tunning to " << center + error << "hz";
-    usrp_src->set_center_freq(center + error, 0);
-
-
-    source_block = usrp_src;
-  }
 }

@@ -10,7 +10,7 @@ struct Call_Source {
 
 class Recorder;
 
-#include "uploader.h"
+
 #include "config.h"
 #include "state.h"
 #include "recorders/recorder.h"
@@ -64,8 +64,8 @@ private:
 								bool encrypted;
 								bool emergency;
 								char filename[160];
-								char status_filename[160];
 								int tdma;
+								long source;
 
 								Config config;
 								Recorder *recorder;

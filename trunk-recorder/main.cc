@@ -47,7 +47,7 @@
 
 #include <osmosdr/source.h>
 
-#include <gnuradio/uhd/usrp_source.h>
+
 #include <gnuradio/msg_queue.h>
 #include <gnuradio/message.h>
 #include <gnuradio/blocks/file_sink.h>
@@ -378,7 +378,7 @@ void stop_inactive_recorders() {
   for (vector<Call *>::iterator it = calls.begin(); it != calls.end();) {
     Call *call = *it;
 
-    if ((call->get_state() == stopping) && call->has_stopped() && (call->stopping_elapsed() > 2)) {
+    if ((call->get_state() == stopping) && call->has_stopped() && (((call->stopping_elapsed() > 2) && (call->get_talkgroup() > 1000)) || (call->stopping_elapsed() > 15))) {
       call->close_call();
       delete call;
       it = calls.erase(it);
@@ -397,7 +397,7 @@ void stop_inactive_recorders() {
   for (vector<Call *>::iterator it = calls.begin(); it != calls.end();) {
     Call *call = *it;
 
-    if ((call->get_state() == stopping) && (call->stopping_elapsed() > 45)) {
+    if ((call->get_state() == stopping) && (call->stopping_elapsed() > 360)) {
       BOOST_LOG_TRIVIAL(error) << "Killing long running call - TG: " << call->get_talkgroup();
       call->close_call();
       delete call;
@@ -407,10 +407,10 @@ void stop_inactive_recorders() {
     } // if rx is active
   }   // foreach loggers
 
-  for (vector<Source *>::iterator it = sources.begin(); it != sources.end(); it++) {
-    Source *source = *it;
-    source->clean_recorders();
-  }
+//  for (vector<Source *>::iterator it = sources.begin(); it != sources.end(); it++) {
+//    Source *source = *it;
+//    source->clean_recorders();
+//  }
 
   /*
      for (vector<Source *>::iterator it = sources.begin(); it != sources.end();
@@ -480,7 +480,7 @@ void assign_recorder(TrunkMessage message) {
     }
 
     // Does the call have the same talkgroup
-    if ((call->get_talkgroup() == message.talkgroup) && (call->get_state() != stopping)) {
+    if (call->get_talkgroup() == message.talkgroup) {		//&& ((call->get_state() != stopping) || (message.talkgroup < 1000))
       call_found = true;
 
       // Is the freq the same?
@@ -520,7 +520,7 @@ void assign_recorder(TrunkMessage message) {
         // "\tElapsed: " << call->elapsed() << "s \tSince update: " <<
         // call->since_last_update();
 
-        if (call->get_state() != stopping) {
+//        if ((call->get_state() != stopping) || (message.talkgroup < 1000)) {
           // if you are recording the call, stop
           if (call->get_state() == recording) {
             BOOST_LOG_TRIVIAL(info) << "\tFreq in use -  TG: " << message.talkgroup << "\tFreq: " << message.freq << "\tTDMA: " <<  message.tdma << "\t Ending Existing call\tTG: " <<  call->get_talkgroup() << "\tTMDA: " << call->get_tdma() << "\tElapsed: " << call->elapsed() << "s \tSince update: " <<  call->since_last_update();
@@ -529,13 +529,14 @@ void assign_recorder(TrunkMessage message) {
           call->close_call();
           delete call;
           it = calls.erase(it);
-        } else {
+//        } else {
           ++it; // move on to the next one
-        }
+//        }
       } else {
         ++it;   // move on to the next one
       }
     }
+//      BOOST_LOG_TRIVIAL(info) << "  call_found:" <<  call_found << "  msg.tg:" << message.talkgroup << "  get tg:" << call->get_talkgroup() << "  Old Freq: " << call->get_freq() << "  New Freq:" << message.freq << "  state:" << call->get_state();
   }
 
 
@@ -624,35 +625,28 @@ void unit_check() {
   tm    *ltm       = localtime(&starttime);
   char   unit_filename[160];
 
-  std::stringstream path_stream;
+  //std::stringstream path_stream;
 
-  path_stream << boost::filesystem::current_path().string() <<  "/" << 1900 +  ltm->tm_year << "/" << 1 + ltm->tm_mon << "/" << ltm->tm_mday;
+  //path_stream << boost::filesystem::current_path().string() <<  "/" << 1900 +  ltm->tm_year << "/" << 1 + ltm->tm_mon << "/" << ltm->tm_mday;
 
-  boost::filesystem::create_directories(path_stream.str());
+  //boost::filesystem::create_directories(path_stream.str());
 
 
-  for (it = unit_affiliations.begin(); it != unit_affiliations.end(); ++it) {
-    talkgroup_totals[it->second]++;
-  }
+//  for (it = unit_affiliations.begin(); it != unit_affiliations.end(); ++it) {
+//    talkgroup_totals[it->second]++;
+//  }
 
-  sprintf(unit_filename, "%s/%ld-unit_check.json", path_stream.str().c_str(), starttime);
+  //sprintf(unit_filename, "%s/%ld-unit_check.json", path_stream.str().c_str(), starttime);
 
-  ofstream myfile(unit_filename);
+  ofstream myfile("./units.log");
 
   if (myfile.is_open())
   {
-    myfile << "{\n";
-    myfile << "\"talkgroups\": {\n";
-
-    for (it = talkgroup_totals.begin(); it != talkgroup_totals.end(); ++it) {
-      if (it != talkgroup_totals.begin()) {
-        myfile << ",\n";
-      }
-      myfile << "\"" << it->first << "\": " << it->second;
+    for (it = unit_affiliations.begin(); it != unit_affiliations.end(); ++it) {
+      myfile << unit_affiliations[it->first] << "\n";
     }
-    myfile << "\n}\n}\n";
-    sprintf(shell_command, "./unit_check.sh %s > /dev/null 2>&1 &", unit_filename);
-    int rc = system(shell_command);
+    //sprintf(shell_command, "./unit_check.sh %s > /dev/null 2>&1 &", unit_filename);
+    int rc = system("./unit_check.sh");
     myfile.close();
   }
 }
@@ -675,6 +669,7 @@ void handle_message(std::vector<TrunkMessage>messages, System *sys) {
       break;
 
     case REGISTRATION:
+group_affiliation(message.source, 0);
       break;
 
     case DEREGISTRATION:
@@ -758,14 +753,14 @@ void monitor_messages() {
 
     float timeDiff = currentTime - lastMsgCountTime;
 
-    if (timeDiff >= 3.0) {
+    if (timeDiff >= 60.0) {
       msgs_decoded_per_second        = messagesDecodedSinceLastReport / timeDiff;
       messagesDecodedSinceLastReport = 0;
       lastMsgCountTime               = currentTime;
 
-      if (msgs_decoded_per_second < 10) {
+//      if (msgs_decoded_per_second < 10) {
         BOOST_LOG_TRIVIAL(error) << "\tControl Channel Message Decode Rate: " <<  msgs_decoded_per_second << "/sec";
-      }
+//      }
     }
 
     float statusTimeDiff = currentTime - lastStatusTime;
@@ -775,7 +770,7 @@ void monitor_messages() {
       print_status();
     }
     /*
-            if ((currentTime - lastUnitCheckTime) >= 300.0) {
+            if ((currentTime - lastUnitCheckTime) >= 60.0) {
                 unit_check();
                 lastUnitCheckTime = currentTime;
             }

@@ -1,0 +1,29 @@
+{ "sources": [
+{"center": 771000000.0,
+"rate": 2400000.0,
+"ppm": 59,
+"gain": 42,
+"digitalRecorders": 6,
+"driver": "osmosdr",
+"device": "rtl=00000001"},
+{"center": 772750000.0,
+"rate": 1152000.0,
+"ppm": 1,
+"gain": 42,
+"digitalRecorders": 4,
+"driver": "osmosdr",
+"device": "rtl=00000002"}
+],
+"systems": [ {
+	"control_channels": [772056250],
+	"type": "p25",
+	"captureDir": "/var/www/html/radio/",
+	"talkgroupsFile": "ChanList.csv"
+	},
+	{ "control_channels": [769856250],
+	"type": "p25",
+	"captureDir": "/var/www/html/radio/",
+	"talkgroupsFile": "ChanList.csv"
+	} ],
+"captureDir": "/var/www/html/radio/"
+}

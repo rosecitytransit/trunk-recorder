@@ -67,7 +67,7 @@ double P25Parser::channel_id_to_frequency(int chan_id) {
       return temp_chan.frequency + temp_chan.step * int(channel / temp_chan.tdma);
     }
   }
-  BOOST_LOG_TRIVIAL(info) << "\tFind - ChanId " << chan_id << " map id " << id  << "Channel " << channel << " size " << channels.size() << " ! Not Found !";
+  //BOOST_LOG_TRIVIAL(info) << "\tFind - ChanId " << chan_id << " map id " << id  << "Channel " << channel << " size " << channels.size() << " ! Not Found !";
   return 0;
 }
 
@@ -292,10 +292,15 @@ std::vector<TrunkMessage>P25Parser::decode_tsbk(boost::dynamic_bitset<>& tsbk) {
           unsigned long sa = bitset_shift_mask(tsbk, 16, 0xffffff);
           unsigned long ta = bitset_shift_mask(tsbk, 40, 0xffffff);
 
+if ((sa < 1000) || ((ta > 2000) && (ta < 10000))) {
+          BOOST_LOG_TRIVIAL(error) << "SWITCHING on Grant: " << ta << "/" << sa;
+          message.talkgroup    = sa;
+          message.source       = ta; }
+else {
+          message.talkgroup    = ta;
+          message.source       = sa; }
           message.message_type = GRANT;
           message.freq         = f;
-          message.talkgroup    = ta;
-          message.source       = sa;
           message.tdma         = get_tdma_slot(ch);
           message.emergency    = false;
           message.encrypted    = false;
@@ -318,10 +323,15 @@ std::vector<TrunkMessage>P25Parser::decode_tsbk(boost::dynamic_bitset<>& tsbk) {
           unsigned long sa = bitset_shift_mask(tsbk, 16, 0xffffff);
           unsigned long ta = bitset_shift_mask(tsbk, 40, 0xffffff);
 
-          message.message_type = UPDATE;
-          message.freq         = f;
+if ((sa < 1000) || (sa > 40000) || ((ta > 2000) && (ta < 10000))) {
+          BOOST_LOG_TRIVIAL(error) << "SWITCHING on Update: " << ta << "/" << sa;
+          message.talkgroup    = sa;
+          message.source       = ta; }
+else {
           message.talkgroup    = ta;
-          message.source       = sa;
+          message.source       = sa; }
+          message.message_type = GRANT;
+          message.freq         = f;
           message.tdma         = get_tdma_slot(ch);
           message.emergency    = false;
           message.encrypted    = false;
