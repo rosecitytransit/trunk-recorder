@@ -172,10 +172,18 @@ std::vector<TrunkMessage>P25Parser::decode_mbt_data( unsigned long opcode, boost
           unsigned long sa = bitset_shift_mask(header, 48, 0xffffff);
           unsigned long ta = bitset_shift_mask(mbt_data, 24, 0xffffff);
 
+if ((sa < 1000) || ((ta > 2000) && (ta < 10000))) {
+          BOOST_LOG_TRIVIAL(error) << "SWITCHING on Grant: " << ta << "/" << sa;
+          message.talkgroup    = sa;
+          message.source       = ta; }
+else {
+          message.talkgroup    = ta;
+          message.source       = sa; }
+
           message.message_type = GRANT;
           message.freq         = f;
-          message.talkgroup    = ta;
-          message.source       = sa;
+//          message.talkgroup    = ta;
+//          message.source       = sa;
           message.emergency    = emergency;
           message.encrypted    = encrypted;
               if (get_tdma_slot(ch) >= 0) {
@@ -464,8 +472,15 @@ if (opcode == 0x00) { // group voice chan grant
 
       message.message_type = UPDATE;
       message.freq         = f;
-      message.talkgroup    = ta;
-      message.source       = sa;
+if ((sa < 1000) || (sa > 40000) || ((ta > 2000) && (ta < 10000))) {
+          BOOST_LOG_TRIVIAL(error) << "SWITCHING on Update: " << ta << "/" << sa;
+          message.talkgroup    = sa;
+          message.source       = ta; }
+else {
+          message.talkgroup    = ta;
+          message.source       = sa; }
+//      message.talkgroup    = ta;
+//      message.source       = sa;
       if (get_tdma_slot(ch) >= 0) {
         message.phase2_tdma = true;
         message.tdma_slot = get_tdma_slot(ch);

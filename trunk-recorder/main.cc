@@ -611,7 +611,7 @@ void stop_inactive_recorders() {
       }
       ++it;
     } else {
-      if (call->since_last_update() > config.call_timeout) {
+      if (((call->since_last_update() > config.call_timeout) && (call->get_talkgroup() > 1000)) || (call->since_last_update() > 15)) {
         if (call->get_state() == recording) {
           ended_recording = true;
         }
@@ -710,7 +710,15 @@ void current_system_status(TrunkMessage message, System *sys) {
   }
 }
 
-void unit_registration(long unit) {}
+void unit_registration(long unit) {
+  unit_affiliations[unit] = 0;
+  if ((unit > 1000) && (unit < 8000)) {
+    char   shell_command[200];
+    sprintf(shell_command, "./unitreg.php %li on &", unit);
+    system(shell_command);
+    int rc = system(shell_command);
+  }
+}
 
 void unit_deregistration(long unit) {
   std::map<long, long>::iterator it;
@@ -720,6 +728,14 @@ void unit_deregistration(long unit) {
   if (it != unit_affiliations.end()) {
     unit_affiliations.erase(it);
   }
+
+  if ((unit > 1000) && (unit < 8000)) {
+    char   shell_command[200];
+    sprintf(shell_command, "./unitreg.php %li off &", unit);
+    system(shell_command);
+    int rc = system(shell_command);
+  }
+
 }
 
 void group_affiliation(long unit, long talkgroup) {
@@ -802,33 +818,20 @@ void unit_check() {
 
   std::stringstream path_stream;
 
-  path_stream << boost::filesystem::current_path().string() <<  "/" << 1900 +  ltm->tm_year << "/" << 1 + ltm->tm_mon << "/" << ltm->tm_mday;
+  path_stream << boost::filesystem::current_path().string(); //<<  "/" << 1900 +  ltm->tm_year << "/" << 1 + ltm->tm_mon << "/" << ltm->tm_mday;
 
-  boost::filesystem::create_directories(path_stream.str());
+  //boost::filesystem::create_directories(path_stream.str());
 
-
-  for (it = unit_affiliations.begin(); it != unit_affiliations.end(); ++it) {
-    talkgroup_totals[it->second]++;
-  }
-
-  sprintf(unit_filename, "%s/%ld-unit_check.json", path_stream.str().c_str(), starttime);
+  sprintf(unit_filename, "%s/unitlog.txt", path_stream.str().c_str());
 
   ofstream myfile(unit_filename);
 
-  if (myfile.is_open())
-  {
-    myfile << "{\n";
-    myfile << "\"talkgroups\": {\n";
-
-    for (it = talkgroup_totals.begin(); it != talkgroup_totals.end(); ++it) {
-      if (it != talkgroup_totals.begin()) {
-        myfile << ",\n";
-      }
-      myfile << "\"" << it->first << "\": " << it->second;
+  if (myfile.is_open()) {
+    for (it = unit_affiliations.begin(); it != unit_affiliations.end(); ++it) {
+      myfile << it->first << ":" << it->second << "\n";
     }
-    myfile << "\n}\n}\n";
-    sprintf(shell_command, "./unit_check.sh %s > /dev/null 2>&1 &", unit_filename);
-    system(shell_command);
+    //sprintf(shell_command, "./unit_check.sh %s > /dev/null 2>&1 &", unit_filename);
+    //system(shell_command);
     //int rc = system(shell_command);
     myfile.close();
   }
@@ -849,6 +852,7 @@ void handle_message(std::vector<TrunkMessage>messages, System *sys) {
       break;
 
     case REGISTRATION:
+unit_registration(message.source);
       break;
 
     case DEREGISTRATION:
@@ -952,9 +956,9 @@ void check_message_count(float timeDiff) {
         sys->retune_attempts = 0;
       }
 
-      if (msgs_decoded_per_second < config.control_message_warn_rate || config.control_message_warn_rate == -1) {
+//      if (msgs_decoded_per_second < config.control_message_warn_rate || config.control_message_warn_rate == -1) {
         BOOST_LOG_TRIVIAL(error) << "[" << sys->get_short_name() << "]\t Control Channel Message Decode Rate: " <<  msgs_decoded_per_second << "/sec, count:  " << sys->message_count;
-      }
+//      }
     }
     sys->message_count = 0;
   }
@@ -1011,20 +1015,14 @@ void monitor_messages() {
         }
       }
 
-      /*
-              if ((currentTime - lastUnitCheckTime) >= 300.0) {
-                  unit_check();
-                  lastUnitCheckTime = currentTime;
-              }
-       */
-
       msg.reset();
     } else {
       usleep(1000 * 10);
     }
     float timeDiff = currentTime - lastMsgCountTime;
 
-    if (timeDiff >= 3.0) {
+    if (timeDiff >= 60.0) {
+      unit_check();
       check_message_count(timeDiff);
       lastMsgCountTime = currentTime;
     }

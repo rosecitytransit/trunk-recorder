@@ -13,16 +13,16 @@ void Call::create_filename() {
 
   std::stringstream path_stream;
 
-  path_stream << this->config.capture_dir << "/" << sys->get_short_name() << "/" << 1900 + ltm->tm_year << "/" <<  1 + ltm->tm_mon << "/" << ltm->tm_mday;
+  path_stream << this->config.capture_dir << "/" << 1900 + ltm->tm_year << "/" <<  1 + ltm->tm_mon << "/" << ltm->tm_mday;
 
   boost::filesystem::create_directories(path_stream.str());
   int nchars;
-  nchars = snprintf(filename,   255,        "%s/%ld-%ld_%g.wav",  path_stream.str().c_str(), talkgroup, start_time, curr_freq);
+  nchars = snprintf(filename,   255,        "%s/%02d%02d%02d-%ld.wav",  path_stream.str().c_str(), ltm->tm_hour, ltm->tm_min, ltm->tm_sec, talkgroup);
 
   if (nchars >= 255) {
     BOOST_LOG_TRIVIAL(error) << "Call: Path longer than 160 charecters";
   }
-  nchars = snprintf(status_filename,  255,  "%s/%ld-%ld_%g.json", path_stream.str().c_str(), talkgroup, start_time, curr_freq);
+  nchars = snprintf(status_filename,  255,  "%s/calllog.txt",  path_stream.str().c_str());
 
   if (nchars >= 255) {
     BOOST_LOG_TRIVIAL(error) << "Call: Path longer than 160 charecters";
@@ -32,6 +32,8 @@ void Call::create_filename() {
   if (nchars >= 255) {
     BOOST_LOG_TRIVIAL(error) << "Call: Path longer than 255 charecters";
   }
+
+sprintf(filetime, "%02d%02d%02d", ltm->tm_hour, ltm->tm_min, ltm->tm_sec);
 
   // sprintf(filename, "%s/%ld-%ld.wav",
   // path_stream.str().c_str(),talkgroup,start_time);
@@ -59,6 +61,7 @@ Call::Call(long t, double f, System *s, Config c) {
   tdma_slot       = 0;
   encrypted       = false;
   emergency       = false;
+source = 0;
   set_freq(f);
   this->create_filename();
   this->update_talkgroup_display();
@@ -84,6 +87,7 @@ Call::Call(TrunkMessage message, System *s, Config c) {
   tdma_slot       = message.tdma_slot;
   encrypted       = message.encrypted;
   emergency       = message.emergency;
+source = message.source;
   set_freq(message.freq);
   add_source(message.source);
   this->create_filename();
@@ -117,38 +121,44 @@ void Call::end_call() {
     }
 
     if (sys->get_call_log()) {
-      std::ofstream myfile(status_filename);
+      std::ofstream myfile(status_filename, std::ofstream::app);
 
 
-      if (myfile.is_open())
-      {
-        myfile << "{\n";
-        myfile << "\"freq\": " << this->curr_freq << ",\n";
-        myfile << "\"start_time\": " << this->start_time << ",\n";
-        myfile << "\"stop_time\": " << this->stop_time << ",\n";
-        myfile << "\"emergency\": " << this->emergency << ",\n";
+      if (myfile.is_open()) {
+        myfile << "\n";
+        myfile << this->get_filetime() << "," << (this->stop_time - this->start_time) << "," << this->talkgroup << "," << this->emergency << ";";
         //myfile << "\"source\": \"" << this->get_recorder()->get_source()->get_device() << "\",\n";
-        myfile << "\"talkgroup\": " << this->talkgroup << ",\n";
-        myfile << "\"srcList\": [ ";
+
+        myfile << this->source << ";";
 
         for (int i = 0; i < src_count; i++) {
-          if (i != 0) {
-            myfile << ", ";
-          }
-          myfile << "{\"src\": " << std::fixed << src_list[i].source << ", \"time\": " << src_list[i].time << ", \"pos\": " << src_list[i].position << "}";
-        }
-        myfile << " ],\n";
-        myfile << "\"freqList\": [ ";
+          myfile << src_list[i].source;
 
-        for (int i = 0; i < freq_count; i++) {
-          if (i != 0) {
-            myfile << ", ";
+          if ((src_list[i].source < 8000) && (src_list[i].source > 1000)) {
+            const int MAX_BUFFER = 10;
+            std::string cmd="./getblock.php ";
+            cmd += src_list[i].source;
+            char buffer[MAX_BUFFER];
+            FILE *stream = popen(cmd.c_str(), "r");
+            if (stream){
+              myfile << ":";
+              while (!feof(stream)) {
+              if (fgets(buffer, MAX_BUFFER, stream) != NULL) {
+                myfile << buffer;
+              }
+            }
+          pclose(stream);
           }
-          myfile << "{ \"freq\": " << std::fixed <<  freq_list[i].freq << ", \"time\": " << freq_list[i].time << ", \"pos\": " << freq_list[i].position << ", \"len\": " << freq_list[i].total_len << ", \"error_count\": " << freq_list[i].error_count << ", \"spike_count\": " << freq_list[i].spike_count << "}";
         }
-        myfile << " ]\n";
-        myfile << "}\n";
-        myfile.close();
+        if (i < (src_count-1)) {
+          myfile << ",";
+        }
+      }
+
+      for (int i = 0; i < freq_count; i++) {
+        myfile << ";" << (freq_list[i].freq/1000000) << "," << freq_list[i].total_len << "," << freq_list[i].error_count << "," << freq_list[i].spike_count;
+      }
+      myfile.close();
       }
     }
 
@@ -403,6 +413,10 @@ char * Call::get_converted_filename() {
 
 char * Call::get_filename() {
   return filename;
+}
+
+char * Call::get_filetime() {
+  return filetime;
 }
 
 char * Call::get_status_filename() {

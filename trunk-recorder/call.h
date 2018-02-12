@@ -56,6 +56,7 @@ public:
 
 								char *get_converted_filename();
 								char *get_filename();
+char *get_filetime();
 								int get_sys_num();
 								std::string get_short_name();
 								void create_filename();
@@ -121,10 +122,12 @@ protected:
 								bool encrypted;
 								bool emergency;
 								char filename[255];
+char filetime[7];
 								char converted_filename[255];
 								char status_filename[255];
 								bool phase2_tdma;
 								int tdma_slot;
+long source;
 								double _final_length;
 
 								Config config;
