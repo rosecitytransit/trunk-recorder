@@ -79,6 +79,8 @@ namespace logging  = boost::log;
 namespace keywords = boost::log::keywords;
 namespace src      = boost::log::sources;
 namespace sinks    = boost::log::sinks;
+namespace expr = boost::log::expressions;
+
 int Recorder::rec_counter = 0;
 
 std::vector<Source *> sources;
@@ -611,9 +613,10 @@ void stop_inactive_recorders() {
       }
       ++it;
     } else {
-      if (((call->since_last_update() > config.call_timeout) && (call->get_talkgroup() > 1000)) || (call->since_last_update() > 15)) {
+      if (((call->since_last_update() > config.call_timeout) && (call->get_talkgroup() > 1000) && (call->get_talkgroup() < 4000)) || ((call->since_last_update() > 60) && (call->get_state() != recording))) {
         if (call->get_state() == recording) {
           ended_recording = true;
+          BOOST_LOG_TRIVIAL(error) << "Ending active call: TG: " << std::dec <<  call->get_talkgroup() << " secs since last: " << call->since_last_update();
         }
         Recorder * recorder = call->get_recorder();
         call->end_call();
@@ -714,7 +717,7 @@ void unit_registration(long unit) {
   unit_affiliations[unit] = 0;
   if ((unit > 1000) && (unit < 8000)) {
     char   shell_command[200];
-    sprintf(shell_command, "./unitreg.php %li on &", unit);
+    sprintf(shell_command, "php unitreg.php %li on &", unit);
     system(shell_command);
     int rc = system(shell_command);
   }
@@ -731,7 +734,7 @@ void unit_deregistration(long unit) {
 
   if ((unit > 1000) && (unit < 8000)) {
     char   shell_command[200];
-    sprintf(shell_command, "./unitreg.php %li off &", unit);
+    sprintf(shell_command, "php unitreg.php %li off &", unit);
     system(shell_command);
     int rc = system(shell_command);
   }
@@ -740,6 +743,15 @@ void unit_deregistration(long unit) {
 
 void group_affiliation(long unit, long talkgroup) {
   unit_affiliations[unit] = talkgroup;
+
+  if ((unit > 1000) && (unit < 8000)) {
+    char   shell_command[200];
+    sprintf(shell_command, "php unitreg.php %li %li &", unit, talkgroup);
+    system(shell_command);
+    int rc = system(shell_command);
+  }
+
+
 }
 
 void handle_call(TrunkMessage message, System *sys) {
@@ -754,6 +766,17 @@ void handle_call(TrunkMessage message, System *sys) {
     if (call_found && (call->get_talkgroup() == message.talkgroup) && (call->get_sys_num() == message.sys_num)) {
       BOOST_LOG_TRIVIAL(info) << "\tALERT! Update - Total calls: " <<  calls.size() << "\tTalkgroup: " << message.talkgroup << "\tOld Freq: " <<  call->get_freq() << "\tNew Freq: " << message.freq;
     }
+
+
+if ((call->get_freq() == message.freq) && (call->get_talkgroup() > 1000) && (call->get_talkgroup() < 4000) && (call->get_talkgroup() != message.talkgroup)) {
+          BOOST_LOG_TRIVIAL(error) << "[" << sys->get_short_name() << "] Deleting active call: \tTG: " << call->get_talkgroup() << "\tFreq: " << FormatFreq(call->get_freq()) << "\tElapsed: " << call->elapsed() << "s \tSince update: " << call->since_last_update() << "s";
+            Recorder * recorder = call->get_recorder();
+            call->end_call();
+            //stats.send_call_end(call);
+            it = calls.erase(it);
+            delete call;
+}
+
 
     if ((call->get_talkgroup() == message.talkgroup) && (call->get_sys_num() == message.sys_num)) {
       call_found = true;
@@ -1185,7 +1208,7 @@ int main(int argc, char **argv)
   signal(SIGINT, exit_interupt);
   logging::core::get()->set_filter
   (
-    logging::trivial::severity >= logging::trivial::info
+    logging::trivial::severity >= logging::trivial::trace
 
   );
 
@@ -1193,7 +1216,7 @@ int main(int argc, char **argv)
   boost::log::core::get()->add_global_attribute("Scope",
                                                 boost::log::attributes::named_scope());
   boost::log::core::get()->set_filter(
-    boost::log::trivial::severity >= boost::log::trivial::info
+    boost::log::trivial::severity >= boost::log::trivial::trace
     );
 
   add_logs(
@@ -1247,7 +1270,10 @@ int main(int argc, char **argv)
   if (config.log_file) {
     logging::add_file_log(
       keywords::file_name = "logs/%m-%d-%Y_%H%M_%2N.log",
-      keywords::format = "[%TimeStamp%]: %Message%",
+//      keywords::format = "[%TimeStamp%] (%severity_level%)   %Message%",
+
+        keywords::format = ( expr::stream << "[" << expr::format_date_time< boost::posix_time::ptime >("TimeStamp", "%Y-%m-%d %H:%M:%S.%f") << "] (" << logging::trivial::severity << ")   " << expr::smessage ),
+
       keywords::rotation_size = 10 * 1024 * 1024,
       keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0),
       keywords::auto_flush = true);

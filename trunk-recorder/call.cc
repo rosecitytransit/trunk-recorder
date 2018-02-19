@@ -17,8 +17,7 @@ void Call::create_filename() {
 
   boost::filesystem::create_directories(path_stream.str());
   int nchars;
-  nchars = snprintf(filename,   255,        "%s/%02d%02d%02d-%ld.wav",  path_stream.str().c_str(), ltm->tm_hour, ltm->tm_min, ltm->tm_sec, talkgroup);
-
+  nchars = snprintf(filename,   255,        "%s/%02d%02d%02d-%ld-%s.wav",  path_stream.str().c_str(), ltm->tm_hour, ltm->tm_min, ltm->tm_sec, talkgroup, sys->short_name.c_str());
   if (nchars >= 255) {
     BOOST_LOG_TRIVIAL(error) << "Call: Path longer than 160 charecters";
   }
@@ -136,7 +135,7 @@ void Call::end_call() {
 
           if ((src_list[i].source < 8000) && (src_list[i].source > 1000)) {
             const int MAX_BUFFER = 10;
-            std::string cmd="./getblock.php ";
+            std::string cmd="php getblock.php ";
             cmd += src_list[i].source;
             char buffer[MAX_BUFFER];
             FILE *stream = popen(cmd.c_str(), "r");
@@ -154,6 +153,8 @@ void Call::end_call() {
           myfile << ",";
         }
       }
+
+      myfile << ";" << sys->get_short_name();
 
       for (int i = 0; i < freq_count; i++) {
         myfile << ";" << (freq_list[i].freq/1000000) << "," << freq_list[i].total_len << "," << freq_list[i].error_count << "," << freq_list[i].spike_count;

@@ -125,7 +125,7 @@ std::vector<TrunkMessage>P25Parser::decode_mbt_data( unsigned long opcode, boost
             message.tdma_slot = 0;
           }
 
-          os << "mbt00\tChan Grant\tChannel ID: " << std::setw(5) << ch1 << "\tFreq: " << f1 / 1000000.0 << "\tga " << std::setw(7) << ga  << "\tTDMA " << get_tdma_slot(ch1) <<"\tsa " << sa << "\tEncrypt " << encrypted << "\tBandwidth: " << get_bandwidth(ch1);
+          os << "mbt00\tChan Grant\tChannel ID: " << ch1 << "\tFreq: " << f1 / 1000000.0 << "\tga " << ga  << "\tTDMA " << get_tdma_slot(ch1) <<"\tsa " << sa << "\tEncrypt " << encrypted << "\tBandwidth: " << get_bandwidth(ch1);
           message.meta = os.str();
           BOOST_LOG_TRIVIAL(trace) << os.str();
       } else if (opcode == 0x3a) {  // rfss status
@@ -194,7 +194,7 @@ else {
                 message.tdma_slot = 0;
               }
 
-          BOOST_LOG_TRIVIAL(trace) << "mbt04\tUnit to Unit Chan Grant\tChannel ID: " << std::setw(5) << ch << "\tFreq: " << f / 1000000.0 << "\tTarget ID: " << std::setw(7) << ta  << "\tTDMA " << get_tdma_slot(ch) <<
+          BOOST_LOG_TRIVIAL(trace) << "mbt04\tUnit to Unit Chan Grant\tChannel ID: " << ch << "\tFreq: " << f / 1000000.0 << "\tTarget ID: " << ta  << "\tTDMA " << get_tdma_slot(ch) <<
           "\tSource ID: " << sa;
     }else {
        BOOST_LOG_TRIVIAL(trace) << "mbt other: " << opcode;
@@ -228,7 +228,7 @@ message.freq = 0;
 unsigned long opcode = bitset_shift_mask(tsbk, 88, 0x3f); // x3f
 
 
-BOOST_LOG_TRIVIAL(trace) << "TSBK: opcode: $" << std::hex << opcode ;
+//BOOST_LOG_TRIVIAL(trace) << "TSBK: opcode: $" << std::hex << opcode ;
 if (opcode == 0x00) { // group voice chan grant
   unsigned long mfrid = bitset_shift_mask(tsbk, 80, 0xff);
   // unsigned long opts  = bitset_shift_mask(tsbk,72,0xff);
@@ -263,7 +263,7 @@ if (opcode == 0x00) { // group voice chan grant
       message.phase2_tdma = false;
       message.tdma_slot = 0;
     }
-    os << "tsbk00\tChan Grant\tChannel ID: " << std::setw(5) << ch << "\tFreq: " << f1 / 1000000.0 << "\tga " << std::setw(7) << ga  << "\tTDMA " << get_tdma_slot(ch) <<
+    os << "tsbk00\tChan Grant\tChannel ID: " << ch << "\tFreq: " << f1 / 1000000.0 << "\tga " << ga  << "\tTDMA " << get_tdma_slot(ch) <<
     "\tsa " << sa << "\tEncrypt " << encrypted << "\tBandwidth: " << get_bandwidth(ch);
     message.meta = os.str();
     //BOOST_LOG_TRIVIAL(trace) << os;
@@ -294,7 +294,7 @@ if (opcode == 0x00) { // group voice chan grant
       message.tdma_slot = 0;
     }
 
-    os << "tbsk02\tMoto Patch Grant\tChannel ID: " << std::setw(5) << ch << "\tFreq: " <<  FormatFreq(f) << "\tsg " << std::setw(7) << sg  << "\tTDMA " << get_tdma_slot(ch) <<  "\tsa " << sa;
+    os << "tbsk02\tMoto Patch Grant\tChannel ID: " << ch << "\tFreq: " <<  FormatFreq(f) << "\tsg " << sg  << "\tTDMA " << get_tdma_slot(ch) <<  "\tsa " << sa;
    message.meta = os.str();
   }
   else {
@@ -341,12 +341,12 @@ if (opcode == 0x00) { // group voice chan grant
         message.tdma_slot = 0;
       }
 
-      os << "tsbk02\tGrant Update\tChannel ID: " << std::setw(5) << ch2 << "\tFreq: " << FormatFreq(f2) << "\tga " << std::setw(7) << ga2 << "\tTDMA " << get_tdma_slot(ch2);
+      os << "tsbk02\tGrant Update\tChannel ID: " << ch2 << "\tFreq: " << FormatFreq(f2) << "\tga " << ga2 << "\tTDMA " << get_tdma_slot(ch2);
 
       message.meta = os.str();
       //BOOST_LOG_TRIVIAL(trace) << os;
     }
-    os << "tsbk02\tGrant Update\tChannel ID: " << std::setw(5) << ch1 << "\tFreq: " << f1 / 1000000.0 << "\tga " << std::setw(7) << ga1 << "\tTDMA " << get_tdma_slot(ch1);
+    os << "tsbk02\tGrant Update\tChannel ID: " << ch1 << "\tFreq: " << f1 / 1000000.0 << "\tga " << ga1 << "\tTDMA " << get_tdma_slot(ch1);
     message.meta = os.str();
     //BOOST_LOG_TRIVIAL(trace) << os;
   }
@@ -390,12 +390,12 @@ if (opcode == 0x00) { // group voice chan grant
         message.phase2_tdma = false;
         message.tdma_slot = 0;
       }
-      os << "MOT_GRG_CN_GRANT_UPDT(0x03): \tChannel ID: " << std::setw(5) << ch2 << "\tFreq: " << FormatFreq(f2) << "\tsg " << std::setw(7) << sg2 << "\tTDMA " << get_tdma_slot(
+      os << "MOT_GRG_CN_GRANT_UPDT(0x03): \tChannel ID: " << ch2 << "\tFreq: " << FormatFreq(f2) << "\tsg " << sg2 << "\tTDMA " << get_tdma_slot(
         ch2);
       message.meta = os.str();
       //BOOST_LOG_TRIVIAL(trace) << os;
     }
-    os << "MOT_GRG_CN_GRANT_UPDT(0x03): \tChannel ID: " << std::setw(5) << ch1 << "\tFreq: " << FormatFreq(f1) << "\tsg " << std::setw(7) << sg1 << "\tTDMA " <<
+    os << "MOT_GRG_CN_GRANT_UPDT(0x03): \tChannel ID: " << ch1 << "\tFreq: " << FormatFreq(f1) << "\tsg " << sg1 << "\tTDMA " <<
     get_tdma_slot(ch1);
     message.meta = os.str();
     //BOOST_LOG_TRIVIAL(trace) << os;
@@ -419,7 +419,7 @@ if (opcode == 0x00) { // group voice chan grant
       message.tdma_slot = 0;
     }
 
-      os << "tsbk03\tExplicit Grant Update\tChannel ID: " << std::setw(5) << ch1 << "\tFreq: " << f1 / 1000000.0 << "\tga " << std::setw(7) << ga1 << "\tTDMA " <<
+      os << "tsbk03\tExplicit Grant Update\tChannel ID: " << ch1 << "\tFreq: " << f1 / 1000000.0 << "\tga " << ga1 << "\tTDMA " <<
     get_tdma_slot(ch1);
     message.meta = os.str();
     //BOOST_LOG_TRIVIAL(trace) << os;
@@ -439,8 +439,13 @@ if (opcode == 0x00) { // group voice chan grant
 
       message.message_type = GRANT;
       message.freq         = f;
-      message.talkgroup    = ta;
-      message.source       = sa;
+if ((sa < 1000) || (sa > 40000) || ((ta > 2000) && (ta < 10000))) {
+          BOOST_LOG_TRIVIAL(error) << "SWITCHING on Update: " << ta << "/" << sa;
+          message.talkgroup    = sa;
+          message.source       = ta; }
+else {
+          message.talkgroup    = ta;
+          message.source       = sa; }
       message.emergency    = emergency;
       message.encrypted    = encrypted;
       if (get_tdma_slot(ch) >= 0) {
@@ -452,10 +457,10 @@ if (opcode == 0x00) { // group voice chan grant
       }
 
 
-      BOOST_LOG_TRIVIAL(trace) << "tsbk04\tUnit to Unit Chan Grant\tChannel ID: " << std::setw(5) << ch << "\tFreq: " << FormatFreq(f) << "\tTarget ID: " << std::setw(7) << ta  << "\tTDMA " << get_tdma_slot(ch) <<
+      BOOST_LOG_TRIVIAL(trace) << "tsbk04\tUnit to Unit Chan Grant\tChannel ID: " << ch << "\tFreq: " << FormatFreq(f) << "\tTarget ID: " << ta  << "\tTDMA " << get_tdma_slot(ch) <<
       "\tSource ID: " << sa;
-    } else if (opcode == 0x05) { // Unit To Unit Answer Request
-      BOOST_LOG_TRIVIAL(trace) << "tsbk05";
+    } else if (opcode == 0x05) {
+      BOOST_LOG_TRIVIAL(trace) << "tsbk05: Unit To Unit Answer Request";
     } else if (opcode == 0x06) { //  Unit to Unit Voice Channel Grant Update (UU_V_CH_GRANT_UPDT)
       //unsigned long mfrid = bitset_shift_mask(tsbk, 80, 0xff);
       // unsigned long opts  = bitset_shift_mask(tsbk,72,0xff);
@@ -479,8 +484,6 @@ if ((sa < 1000) || (sa > 40000) || ((ta > 2000) && (ta < 10000))) {
 else {
           message.talkgroup    = ta;
           message.source       = sa; }
-//      message.talkgroup    = ta;
-//      message.source       = sa;
       if (get_tdma_slot(ch) >= 0) {
         message.phase2_tdma = true;
         message.tdma_slot = get_tdma_slot(ch);
@@ -490,30 +493,30 @@ else {
           }
         message.emergency    = emergency;
         message.encrypted    = encrypted;
-        BOOST_LOG_TRIVIAL(trace) << "tsbk06\tUnit to Unit Chan Update\tChannel ID: " << std::setw(5) << ch << "\tFreq: " << f / 1000000.0 << "\tTarget ID: " << std::setw(7) << ta  << "\tTDMA " << get_tdma_slot(ch) <<
+        BOOST_LOG_TRIVIAL(trace) << "tsbk06\tUnit to Unit Chan Update\tChannel ID: " << ch << "\tFreq: " << f / 1000000.0 << "\tTarget ID: " << ta  << "\tTDMA " << get_tdma_slot(ch) <<
         "\tSource ID: " << sa;
-    } else if (opcode == 0x08) { // Telephone Interconnect Voice Channel Grant
-      BOOST_LOG_TRIVIAL(trace) << "tsbk08";
-    } else if (opcode == 0x09) { // Telephone Interconnect Voice Channel Grant Update
-      BOOST_LOG_TRIVIAL(trace) << "tsbk09";
-    } else if (opcode == 0x0a) { // Telephone Interconnect Answer Request
-      BOOST_LOG_TRIVIAL(trace) << "tsbk0a";
-    } else if (opcode == 0x14) { // SNDCP Data Channel Grant
-      BOOST_LOG_TRIVIAL(trace) << "tsbk14";
-    } else if (opcode == 0x15) { // SNDCP Data Page Request
-      BOOST_LOG_TRIVIAL(trace) << "tsbk15";
-    } else if (opcode == 0x16) { // SNDCP Data Channel Announcement -Explicit
-      BOOST_LOG_TRIVIAL(trace) << "tsbk16";
-    } else if (opcode == 0x18) { // Status Update
-      BOOST_LOG_TRIVIAL(trace) << "tsbk18";
-    } else if (opcode == 0x1a) { // Status Query
-      BOOST_LOG_TRIVIAL(trace) << "tsbk1a";
-    } else if (opcode == 0x1c) { // Messag Update
-      BOOST_LOG_TRIVIAL(trace) << "tsbk1c";
-    } else if (opcode == 0x1d) { // Radio Unit Monitor Command
-      BOOST_LOG_TRIVIAL(trace) << "tsbk1d";
-    } else if (opcode == 0x1f) { // Call Alert
-      BOOST_LOG_TRIVIAL(trace) << "tsbk1f";
+    } else if (opcode == 0x08) {
+      BOOST_LOG_TRIVIAL(trace) << "tsbk08: Telephone Interconnect Voice Channel Grant";
+    } else if (opcode == 0x09) {
+      BOOST_LOG_TRIVIAL(trace) << "tsbk09: Telephone Interconnect Voice Channel Grant Update";
+    } else if (opcode == 0x0a) {
+      BOOST_LOG_TRIVIAL(trace) << "tsbk0a: Telephone Interconnect Answer Request";
+    } else if (opcode == 0x14) {
+      BOOST_LOG_TRIVIAL(trace) << "tsbk14: SNDCP Data Channel Grant";
+    } else if (opcode == 0x15) {
+      BOOST_LOG_TRIVIAL(trace) << "tsbk15: SNDCP Data Page Request";
+    } else if (opcode == 0x16) {
+      BOOST_LOG_TRIVIAL(trace) << "tsbk16: SNDCP Data Channel Announcement -Explicit";
+    } else if (opcode == 0x18) {
+      BOOST_LOG_TRIVIAL(trace) << "tsbk18: Status Update";
+    } else if (opcode == 0x1a) {
+      BOOST_LOG_TRIVIAL(trace) << "tsbk1a: Status Query";
+    } else if (opcode == 0x1c) {
+      BOOST_LOG_TRIVIAL(trace) << "tsbk1c: Messag Update";
+    } else if (opcode == 0x1d) {
+      BOOST_LOG_TRIVIAL(trace) << "tsbk1d: Radio Unit Monitor Command";
+    } else if (opcode == 0x1f) {
+      BOOST_LOG_TRIVIAL(trace) << "tsbk1f: Call Alert";
     } else if (opcode == 0x20) { // Acknowledge response
       // unsigned long mfrid  = bitset_shift_mask(tsbk,80,0xff);
       unsigned long ga = bitset_shift_mask(tsbk, 40, 0xffff);
@@ -523,13 +526,13 @@ else {
       message.talkgroup = ga;
       message.source    = sa;
 
-      BOOST_LOG_TRIVIAL(trace) << "tsbk20\tAcknowledge Response\tga " << std::dec << std::setw(7) << ga  << "\tsa " << sa << "\tReserved: " << op;
-    } else if (opcode == 0x21) { // Extended Function Command
-      BOOST_LOG_TRIVIAL(trace) << "tsbk21";
-    } else if (opcode == 0x24) { // Extended Function Command
-      BOOST_LOG_TRIVIAL(trace) << "tsbk24" <<"Extended Function Command";
-    } else if (opcode == 0x27) { // Deny Response
-      BOOST_LOG_TRIVIAL(trace) << "tsbk27 deny";
+      BOOST_LOG_TRIVIAL(trace) << "tsbk20\tAcknowledge Response\tga " << std::dec << ga  << "\tsa " << sa << "\tReserved: " << op;
+    } else if (opcode == 0x21) {
+      BOOST_LOG_TRIVIAL(trace) << "tsbk21: Extended Function Command";
+    } else if (opcode == 0x24) {
+      BOOST_LOG_TRIVIAL(trace) << "tsbk24: Extended Function Command";
+    } else if (opcode == 0x27) {
+      BOOST_LOG_TRIVIAL(trace) << "tsbk27: Deny Response";
     } else if (opcode == 0x28) { // Unit Group Affiliation Response
       // unsigned long mfrid  = bitset_shift_mask(tsbk,80,0xff);
       // unsigned long opts  = bitset_shift_mask(tsbk,72,0xff);
@@ -541,7 +544,7 @@ else {
       message.source       = ta;
       message.talkgroup    = ga;
 
-      BOOST_LOG_TRIVIAL(trace) << "tsbk2f\tUnit Group Affiliation\tSource ID: " << std::setw(7) << ta << "\tGroup Address: " << std::dec << ga << "\tAnouncement Goup: " << aga;
+      BOOST_LOG_TRIVIAL(trace) << "tsbk2f\tUnit Group Affiliation\tSource ID: " << std::dec << ta << "\tGroup Address: " << std::dec << ga << "\tAnouncement Goup: " << aga;
     } else if (opcode == 0x29) { // Secondary Control Channel Broadcast - Explicit
       unsigned long rfid = bitset_shift_mask(tsbk, 72, 0xff);
       unsigned long stid = bitset_shift_mask(tsbk, 64, 0xff);
@@ -568,10 +571,10 @@ else {
 
 
      BOOST_LOG_TRIVIAL(trace) << "tsbk29 secondary cc: rfid " << std::dec << rfid << " stid " << stid << " ch1 " << ch1 << "(" << channel_id_to_string(ch1) << ") ch2 " << ch2 << "(" << channel_id_to_string(ch2) << ") ";
-    } else if (opcode == 0x2a) { // Group Affiliation Query
-      BOOST_LOG_TRIVIAL(trace) << "tsbk2a";
-    } else if (opcode == 0x2b) { // Location Registration Response
-      BOOST_LOG_TRIVIAL(trace) << "tsbk2b";
+    } else if (opcode == 0x2a) {
+      BOOST_LOG_TRIVIAL(trace) << "tsbk2a: Group Affiliation Query";
+    } else if (opcode == 0x2b) {
+      BOOST_LOG_TRIVIAL(trace) << "tsbk2b: Location Registration Response";
     } else if (opcode == 0x2c) { // Unit Registration Response
       // unsigned long mfrid  = bitset_shift_mask(tsbk,80,0xff);
       // unsigned long opts  = bitset_shift_mask(tsbk,72,0xff);
@@ -581,7 +584,7 @@ else {
       message.message_type = REGISTRATION;
       message.source       = si;
 
-      BOOST_LOG_TRIVIAL(trace) << "tsbk2c\tUnit Registration Response\tsa " << std::setw(7) << sa << " Source ID: " << si;
+      BOOST_LOG_TRIVIAL(trace) << "tsbk2c\tUnit Registration Response\tsa " << std::dec << sa << " Source ID: " << std::dec << si;
     } else if (opcode == 0x2d) { //
       BOOST_LOG_TRIVIAL(trace) << "tsbk2d";
     } else if (opcode == 0x2e) { //
@@ -596,7 +599,7 @@ else {
       message.source       = si;
 
 
-      BOOST_LOG_TRIVIAL(trace) << "tsbk2f\tUnit Deregistration ACK\tSource ID: " << std::setw(7) << si << std::endl;
+      BOOST_LOG_TRIVIAL(trace) << "tsbk2f\tUnit Deregistration ACK\tSource ID: " << std::dec << si << std::endl;
     } else if (opcode == 0x30) { //
       BOOST_LOG_TRIVIAL(trace) << "tsbk30";
     } else if (opcode == 0x31) { //
@@ -678,7 +681,7 @@ else {
     } else if (opcode == 0x37) { //
       BOOST_LOG_TRIVIAL(trace) << "tsbk37";
     } else if (opcode == 0x38) { //
-      BOOST_LOG_TRIVIAL(trace) << "tsbk38";
+//      BOOST_LOG_TRIVIAL(trace) << "tsbk38";
     } else if (opcode == 0x39) { // secondary cc
       unsigned long rfid = bitset_shift_mask(tsbk, 72, 0xff);
       unsigned long stid = bitset_shift_mask(tsbk, 64, 0xff);
@@ -724,13 +727,13 @@ else {
         message.sys_id    = syid;
         message.freq         = f1;
       }
-      BOOST_LOG_TRIVIAL(trace) << "tsbk3b net stat: wacn " << std::dec << wacn << " syid " << syid << " ch1 " << ch1 << "(" << channel_id_to_string(ch1) << ") ";
+//      BOOST_LOG_TRIVIAL(trace) << "tsbk3b net stat: wacn " << std::dec << wacn << " syid " << syid << " ch1 " << ch1 << "(" << channel_id_to_string(ch1) << ") ";
     } else if (opcode == 0x3c) { // adjacent status
       unsigned long rfid = bitset_shift_mask(tsbk, 48, 0xff);
       unsigned long stid = bitset_shift_mask(tsbk, 40, 0xff);
       unsigned long ch1  = bitset_shift_mask(tsbk, 24, 0xffff);
       unsigned long f1   = channel_id_to_frequency(ch1);
-      BOOST_LOG_TRIVIAL(trace) << "tsbk3c\tAdjacent Status\t rfid " << std::dec << rfid << " stid " << stid << " ch1 " << ch1 << "(" << channel_id_to_string(ch1) << ") ";
+//      BOOST_LOG_TRIVIAL(trace) << "tsbk3c\tAdjacent Status\t rfid " << std::dec << rfid << " stid " << stid << " ch1 " << ch1 << "(" << channel_id_to_string(ch1) << ") ";
 
       if (f1) {
         it = channels.find((ch1 >> 12) & 0xf);
@@ -741,7 +744,7 @@ else {
           //			self.adjacent[f1] = 'rfid: %d stid:%d uplink:%f
           // tbl:%d' % (rfid, stid, (f1 + self.freq_table[table]['offset']) /
           // 1000000.0, table)
-          BOOST_LOG_TRIVIAL(trace) << "\ttsbk3c Chan " << temp_chan.frequency << "  " << temp_chan.step;
+//          BOOST_LOG_TRIVIAL(trace) << "\ttsbk3c Chan " << temp_chan.frequency << "  " << temp_chan.step;
         }
       }
     } else if (opcode == 0x3d)  { // iden_up
@@ -767,7 +770,7 @@ else {
         bw * .125
       };
       add_channel(iden, temp_chan);
-      BOOST_LOG_TRIVIAL(trace) << "tsbk3d iden id " << std::dec << iden << " toff " << toff * 0.25 << " spac " << spac * 0.125 << " freq " << freq * 0.000005;
+//      BOOST_LOG_TRIVIAL(trace) << "tsbk3d iden id " << std::dec << iden << " toff " << toff * 0.25 << " spac " << spac * 0.125 << " freq " << freq * 0.000005;
     } else {
       BOOST_LOG_TRIVIAL(trace) << "tsbk other " << std::hex << opcode ;
       return messages;
@@ -842,8 +845,8 @@ std::vector<TrunkMessage>P25Parser::parse_message(gr::message::sptr msg) {
   }
   s = s.substr(2);
 
-  BOOST_LOG_TRIVIAL(trace)  << std::dec << "nac " << nac << " type " << type <<  " size " <<
-  msg->to_string().length() << " mesg len: " << msg->length() << std::endl;
+//  BOOST_LOG_TRIVIAL(trace)  << "nac " << nac << " type " << type <<  " size " <<
+//  msg->to_string().length() << " mesg len: " << msg->length() << std::endl;
   // //" at %f state %d len %d" %(nac, type, time.time(), self.state, len(s))
   if ((type == 7) || (type == 12)) // and nac not in self.trunked_systems:
   {
