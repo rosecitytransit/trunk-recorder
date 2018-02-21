@@ -378,7 +378,7 @@ void stop_inactive_recorders() {
   for (vector<Call *>::iterator it = calls.begin(); it != calls.end();) {
     Call *call = *it;
 
-    if ((call->get_state() == stopping) && call->has_stopped() && (((call->stopping_elapsed() > 2) && (call->get_talkgroup() > 1000)) || (call->stopping_elapsed() > 15))) {
+    if ((call->get_state() == stopping) && call->has_stopped() && (((call->stopping_elapsed() > 2) && (call->get_talkgroup() > 1000) && (call->get_talkgroup() < 40000)) || (call->stopping_elapsed() > 15))) {
       call->close_call();
       delete call;
       it = calls.erase(it);
@@ -470,6 +470,8 @@ void assign_recorder(TrunkMessage message) {
   bool call_found = false;
   char shell_command[200];
 
+unit_affiliations[message.source] = message.talkgroup;
+
   // go through all the talkgroups
   for (vector<Call *>::iterator it = calls.begin(); it != calls.end();) {
     Call *call = *it;
@@ -556,7 +558,15 @@ void current_system_id(int sysid) {
   }
 }
 
-void unit_registration(long unit) {}
+void unit_registration(long unit) {
+  unit_affiliations[unit] = 0;
+  if ((unit > 1000) && (unit < 8000)) {
+    char   shell_command[200];
+    sprintf(shell_command, "php unitreg.php %li on &", unit);
+    system(shell_command);
+    int rc = system(shell_command);
+  }
+}
 
 void unit_deregistration(long unit) {
   std::map<long, long>::iterator it;
@@ -566,10 +576,26 @@ void unit_deregistration(long unit) {
   if (it != unit_affiliations.end()) {
     unit_affiliations.erase(it);
   }
+
+  if ((unit > 1000) && (unit < 8000)) {
+    char   shell_command[200];
+    sprintf(shell_command, "php unitreg.php %li off &", unit);
+    system(shell_command);
+    int rc = system(shell_command);
+  }
+
 }
 
 void group_affiliation(long unit, long talkgroup) {
   unit_affiliations[unit] = talkgroup;
+
+  if ((unit > 1000) && (unit < 8000)) {
+    char   shell_command[200];
+    sprintf(shell_command, "php unitreg.php %li %li &", unit, talkgroup);
+    system(shell_command);
+    int rc = system(shell_command);
+  }
+
 }
 
 void update_recorder(TrunkMessage message) {
@@ -625,29 +651,24 @@ void unit_check() {
   tm    *ltm       = localtime(&starttime);
   char   unit_filename[160];
 
-  //std::stringstream path_stream;
+  std::stringstream path_stream;
 
-  //path_stream << boost::filesystem::current_path().string() <<  "/" << 1900 +  ltm->tm_year << "/" << 1 + ltm->tm_mon << "/" << ltm->tm_mday;
+  path_stream << config.capture_dir; //<<  "/" << 1900 +  ltm->tm_year << "/" << 1 + ltm->tm_mon << "/" << ltm->tm_mday;
 
   //boost::filesystem::create_directories(path_stream.str());
 
+  sprintf(unit_filename, "%s/unitlog.txt", path_stream.str().c_str());
 
-//  for (it = unit_affiliations.begin(); it != unit_affiliations.end(); ++it) {
-//    talkgroup_totals[it->second]++;
-//  }
+  ofstream myfile(unit_filename);
 
-  //sprintf(unit_filename, "%s/%ld-unit_check.json", path_stream.str().c_str(), starttime);
-
-  ofstream myfile("./units.log");
-
-  if (myfile.is_open())
-  {
+  if (myfile.is_open()) {
     for (it = unit_affiliations.begin(); it != unit_affiliations.end(); ++it) {
-      myfile << unit_affiliations[it->first] << "\n";
+      myfile << it->first << ":" << it->second << "\n";
     }
-    //sprintf(shell_command, "./unit_check.sh %s > /dev/null 2>&1 &", unit_filename);
-    int rc = system("./unit_check.sh");
     myfile.close();
+    sprintf(shell_command, "php unitlog.php &");
+    system(shell_command);
+    int rc = system(shell_command);
   }
 }
 
@@ -669,7 +690,7 @@ void handle_message(std::vector<TrunkMessage>messages, System *sys) {
       break;
 
     case REGISTRATION:
-group_affiliation(message.source, 0);
+unit_registration(message.source);
       break;
 
     case DEREGISTRATION:
@@ -757,6 +778,7 @@ void monitor_messages() {
       msgs_decoded_per_second        = messagesDecodedSinceLastReport / timeDiff;
       messagesDecodedSinceLastReport = 0;
       lastMsgCountTime               = currentTime;
+unit_check();
 
 //      if (msgs_decoded_per_second < 10) {
         BOOST_LOG_TRIVIAL(error) << "\tControl Channel Message Decode Rate: " <<  msgs_decoded_per_second << "/sec";

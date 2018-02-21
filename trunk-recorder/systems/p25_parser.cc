@@ -292,7 +292,7 @@ std::vector<TrunkMessage>P25Parser::decode_tsbk(boost::dynamic_bitset<>& tsbk) {
           unsigned long sa = bitset_shift_mask(tsbk, 16, 0xffffff);
           unsigned long ta = bitset_shift_mask(tsbk, 40, 0xffffff);
 
-if ((sa < 1000) || ((ta > 2000) && (ta < 10000))) {
+if ((ta > 2000) && (ta < 10000)) { //(sa < 1000) || 40000-50000
           BOOST_LOG_TRIVIAL(error) << "SWITCHING on Grant: " << ta << "/" << sa;
           message.talkgroup    = sa;
           message.source       = ta; }
@@ -323,7 +323,7 @@ else {
           unsigned long sa = bitset_shift_mask(tsbk, 16, 0xffffff);
           unsigned long ta = bitset_shift_mask(tsbk, 40, 0xffffff);
 
-if ((sa < 1000) || (sa > 40000) || ((ta > 2000) && (ta < 10000))) {
+if ((ta > 2000) && (ta < 10000)) { //(sa < 1000) || ((sa > 40000) && (sa < 50000)) ||
           BOOST_LOG_TRIVIAL(error) << "SWITCHING on Update: " << ta << "/" << sa;
           message.talkgroup    = sa;
           message.source       = ta; }
