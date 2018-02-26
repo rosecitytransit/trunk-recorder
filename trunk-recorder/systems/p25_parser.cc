@@ -173,7 +173,7 @@ std::vector<TrunkMessage>P25Parser::decode_mbt_data( unsigned long opcode, boost
           unsigned long ta = bitset_shift_mask(mbt_data, 24, 0xffffff);
 
 if ((sa < 1000) || ((ta > 2000) && (ta < 10000))) {
-          BOOST_LOG_TRIVIAL(error) << "SWITCHING on Grant: " << ta << "/" << sa;
+          BOOST_LOG_TRIVIAL(error) << "SWITCHING on Extended Grant: " << ta << "/" << sa;
           message.talkgroup    = sa;
           message.source       = ta; }
 else {
@@ -440,7 +440,7 @@ if (opcode == 0x00) { // group voice chan grant
       message.message_type = GRANT;
       message.freq         = f;
 if ((sa < 1000) || (sa > 40000) || ((ta > 2000) && (ta < 10000))) {
-          BOOST_LOG_TRIVIAL(error) << "SWITCHING on Update: " << ta << "/" << sa;
+          BOOST_LOG_TRIVIAL(error) << "SWITCHING on Grant: " << ta << "/" << sa;
           message.talkgroup    = sa;
           message.source       = ta; }
 else {

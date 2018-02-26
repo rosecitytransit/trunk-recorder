@@ -613,10 +613,10 @@ void stop_inactive_recorders() {
       }
       ++it;
     } else {
-      if (((call->since_last_update() > config.call_timeout) && (call->get_talkgroup() > 1000) && (call->get_talkgroup() < 4000)) || ((call->since_last_update() > 60) && (call->get_state() != recording))) {
+      if (((call->since_last_update() > config.call_timeout) && (call->get_talkgroup() > 1000) && (call->get_talkgroup() < 40000)) || ((call->since_last_update() > 60) && (call->get_state() != recording))) {
         if (call->get_state() == recording) {
           ended_recording = true;
-          BOOST_LOG_TRIVIAL(error) << "Ending active call: TG: " << std::dec <<  call->get_talkgroup() << " secs since last: " << call->since_last_update();
+//          BOOST_LOG_TRIVIAL(error) << "Ending active call: TG: " << std::dec <<  call->get_talkgroup() << " secs since last: " << call->since_last_update();
         }
         Recorder * recorder = call->get_recorder();
         call->end_call();
@@ -759,6 +759,8 @@ void handle_call(TrunkMessage message, System *sys) {
   bool call_retune       = false;
   bool recording_started = false;
 
+unit_affiliations[message.source] = message.talkgroup;
+
   for (vector<Call *>::iterator it = calls.begin(); it != calls.end();) {
     Call *call = *it;
 
@@ -768,7 +770,7 @@ void handle_call(TrunkMessage message, System *sys) {
     }
 
 
-if ((call->get_freq() == message.freq) && (call->get_talkgroup() > 1000) && (call->get_talkgroup() < 4000) && (call->get_talkgroup() != message.talkgroup)) {
+if ((call->get_freq() == message.freq) && (call->get_talkgroup() < 1000) && (call->get_talkgroup() > 40000) && (call->get_talkgroup() != message.talkgroup)) {
           BOOST_LOG_TRIVIAL(error) << "[" << sys->get_short_name() << "] Deleting active call: \tTG: " << call->get_talkgroup() << "\tFreq: " << FormatFreq(call->get_freq()) << "\tElapsed: " << call->elapsed() << "s \tSince update: " << call->since_last_update() << "s";
             Recorder * recorder = call->get_recorder();
             call->end_call();
@@ -850,12 +852,14 @@ void unit_check() {
   ofstream myfile(unit_filename);
 
   if (myfile.is_open()) {
+    myfile << "{'";
     for (it = unit_affiliations.begin(); it != unit_affiliations.end(); ++it) {
-      myfile << it->first << ":" << it->second << "\n";
+      myfile << "\"" << it->first << "\":" << it->second << ",\n";
     }
     //sprintf(shell_command, "./unit_check.sh %s > /dev/null 2>&1 &", unit_filename);
     //system(shell_command);
     //int rc = system(shell_command);
+    myfile << "'}";
     myfile.close();
   }
 }

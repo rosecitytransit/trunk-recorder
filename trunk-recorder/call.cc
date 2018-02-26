@@ -60,7 +60,7 @@ Call::Call(long t, double f, System *s, Config c) {
   tdma_slot       = 0;
   encrypted       = false;
   emergency       = false;
-source = 0;
+//source = 0;
   set_freq(f);
   this->create_filename();
   this->update_talkgroup_display();
@@ -86,7 +86,7 @@ Call::Call(TrunkMessage message, System *s, Config c) {
   tdma_slot       = message.tdma_slot;
   encrypted       = message.encrypted;
   emergency       = message.emergency;
-source = message.source;
+//source = message.source;
   set_freq(message.freq);
   add_source(message.source);
   this->create_filename();
@@ -128,8 +128,7 @@ void Call::end_call() {
         myfile << this->get_filetime() << "," << (this->stop_time - this->start_time) << "," << this->talkgroup << "," << this->emergency << ";";
         //myfile << "\"source\": \"" << this->get_recorder()->get_source()->get_device() << "\",\n";
 
-        myfile << this->source << ";";
-
+        //myfile << this->source << ";";
         for (int i = 0; i < src_count; i++) {
           myfile << src_list[i].source;
 
