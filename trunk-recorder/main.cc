@@ -662,13 +662,15 @@ void unit_check() {
   ofstream myfile(unit_filename);
 
   if (myfile.is_open()) {
+    myfile << "{'";
     for (it = unit_affiliations.begin(); it != unit_affiliations.end(); ++it) {
-      myfile << it->first << ":" << it->second << "\n";
+      myfile << "\"" << it->first << "\":" << it->second << ",\n";
     }
+    //sprintf(shell_command, "./unit_check.sh %s > /dev/null 2>&1 &", unit_filename);
+    //system(shell_command);
+    //int rc = system(shell_command);
+    myfile << "'}";
     myfile.close();
-    sprintf(shell_command, "php unitlog.php &");
-    system(shell_command);
-    int rc = system(shell_command);
   }
 }
 

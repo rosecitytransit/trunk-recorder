@@ -462,6 +462,13 @@ else {
     message.talkgroup = ga;
     message.source    = sa;
 
+  if ((sa > 1000) && (sa < 8000)) {
+    char   shell_command[200];
+    sprintf(shell_command, "php unitreg.php %li ackresp &", sa);
+    system(shell_command);
+    int rc = system(shell_command);
+  }
+
     BOOST_LOG_TRIVIAL(trace) << "tsbk20\tAcknowledge Response\tga " << std::setw(7) << ga  << "\tsa " << sa << "\tReserved: " << op;
   } else if (opcode == 0x2c) { // Unit Registration Response
     // unsigned long mfrid  = bitset_shift_mask(tsbk,80,0xff);
