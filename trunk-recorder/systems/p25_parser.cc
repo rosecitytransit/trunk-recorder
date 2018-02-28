@@ -439,7 +439,7 @@ if (opcode == 0x00) { // group voice chan grant
 
       message.message_type = GRANT;
       message.freq         = f;
-if ((sa < 1000) || (sa > 40000) || ((ta > 2000) && (ta < 10000))) {
+if ((ta > 2000) && (ta < 10000)) {
           BOOST_LOG_TRIVIAL(error) << "SWITCHING on Grant: " << ta << "/" << sa;
           message.talkgroup    = sa;
           message.source       = ta; }
@@ -477,7 +477,7 @@ else {
 
       message.message_type = UPDATE;
       message.freq         = f;
-if ((sa < 1000) || (sa > 40000) || ((ta > 2000) && (ta < 10000))) {
+if ((ta > 2000) && (ta < 10000)) {
           BOOST_LOG_TRIVIAL(error) << "SWITCHING on Update: " << ta << "/" << sa;
           message.talkgroup    = sa;
           message.source       = ta; }

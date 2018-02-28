@@ -63,6 +63,7 @@ char *get_filetime();
 								void set_error(Rx_Status rx_status);
 								void set_freq(double f);
 								long get_talkgroup();
+long get_source();
 								long get_source_count();
 								Call_Source *get_source_list();
 								Call_Freq *get_freq_list();

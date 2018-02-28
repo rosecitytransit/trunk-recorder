@@ -582,7 +582,7 @@ bool start_recorder(Call *call, TrunkMessage message, System *sys) {
 }
 
 void stop_inactive_recorders() {
-  bool ended_recording = false;
+//  bool ended_recording = false;
 
   for (vector<Call *>::iterator it = calls.begin(); it != calls.end();) {
     Call *call = *it;
@@ -615,7 +615,7 @@ void stop_inactive_recorders() {
     } else {
       if (((call->since_last_update() > config.call_timeout) && (call->get_talkgroup() > 1000) && (call->get_talkgroup() < 40000)) || ((call->since_last_update() > 60) && (call->get_state() != recording))) {
         if (call->get_state() == recording) {
-          ended_recording = true;
+          //ended_recording = true;
 //          BOOST_LOG_TRIVIAL(error) << "Ending active call: TG: " << std::dec <<  call->get_talkgroup() << " secs since last: " << call->since_last_update();
         }
         Recorder * recorder = call->get_recorder();
@@ -633,9 +633,9 @@ void stop_inactive_recorders() {
 
   }
 
-  if (ended_recording) {
+//  if (ended_recording) {
     //stats.send_calls_active(calls);
-  }
+//  }
   /*     for (vector<Source *>::iterator it = sources.begin(); it !=
      sources.end();
            it++) {
@@ -724,13 +724,15 @@ void unit_registration(long unit) {
 }
 
 void unit_deregistration(long unit) {
-  std::map<long, long>::iterator it;
+//  std::map<long, long>::iterator it;
 
-  it = unit_affiliations.find(unit);
+//  it = unit_affiliations.find(unit);
 
-  if (it != unit_affiliations.end()) {
-    unit_affiliations.erase(it);
-  }
+//  if (it != unit_affiliations.end()) {
+//    unit_affiliations.erase(it);
+//  }
+
+  unit_affiliations[unit] = -1;
 
   if ((unit > 1000) && (unit < 8000)) {
     char   shell_command[200];
@@ -770,7 +772,7 @@ unit_affiliations[message.source] = message.talkgroup;
     }
 
 
-if ((call->get_freq() == message.freq) && (call->get_talkgroup() < 1000) && (call->get_talkgroup() > 40000) && (call->get_talkgroup() != message.talkgroup)) {
+if ((call->get_freq() == message.freq) && (call->get_talkgroup() < 1000) && (call->get_talkgroup() > 40000) && (call->get_talkgroup() != message.talkgroup) && (call->get_source() != message.source)) {
           BOOST_LOG_TRIVIAL(error) << "[" << sys->get_short_name() << "] Deleting active call: \tTG: " << call->get_talkgroup() << "\tFreq: " << FormatFreq(call->get_freq()) << "\tElapsed: " << call->elapsed() << "s \tSince update: " << call->since_last_update() << "s";
             Recorder * recorder = call->get_recorder();
             call->end_call();
@@ -843,7 +845,7 @@ void unit_check() {
 
   std::stringstream path_stream;
 
-  path_stream << boost::filesystem::current_path().string(); //<<  "/" << 1900 +  ltm->tm_year << "/" << 1 + ltm->tm_mon << "/" << ltm->tm_mday;
+  path_stream << config.capture_dir; //<<  "/" << 1900 +  ltm->tm_year << "/" << 1 + ltm->tm_mon << "/" << ltm->tm_mday;
 
   //boost::filesystem::create_directories(path_stream.str());
 
