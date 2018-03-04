@@ -60,7 +60,7 @@ namespace logging = boost::log;
 
 std::vector<Source *> sources;
 std::vector<System *> systems;
-std::map<long, long>  unit_affiliations;
+//std::map<long, long>  unit_affiliations;
 
 std::vector<Call *> calls;
 Talkgroups *talkgroups;
@@ -470,7 +470,14 @@ void assign_recorder(TrunkMessage message) {
   bool call_found = false;
   char shell_command[200];
 
-unit_affiliations[message.source] = message.talkgroup;
+    sprintf(shell_command, "php unitreg.php %li callgrant &", message.source); //%f message.freq
+    system(shell_command);
+    int rc = system(shell_command);
+
+
+if (((message.freq == 770081250) || (message.freq == 770331250) || (message.freq == 771206250) || (message.freq == 771256250) || (message.freq == 771481250) || (message.freq == 771681250) || (message.freq == 771756250) || (message.freq == 772056250) || (message.freq == 772356250) || (message.freq == 772431250) || (message.freq == 772856250) || (message.freq == 773231250)) || (message.talkgroup < 1000) || (message.talkgroup > 2000)) {
+
+//unit_affiliations[message.source] = message.talkgroup;
 
   // go through all the talkgroups
   for (vector<Call *>::iterator it = calls.begin(); it != calls.end();) {
@@ -547,7 +554,7 @@ unit_affiliations[message.source] = message.talkgroup;
     start_recorder(call, message);
     calls.push_back(call);
   }
-}
+} }
 
 void current_system_id(int sysid) {
   static int active_sysid = 0;
@@ -559,46 +566,63 @@ void current_system_id(int sysid) {
 }
 
 void unit_registration(long unit) {
-  unit_affiliations[unit] = 0;
-  if ((unit > 1000) && (unit < 8000)) {
+//  unit_affiliations[unit] = 0;
+//  if ((unit > 1000) && (unit < 8000)) {
     char   shell_command[200];
     sprintf(shell_command, "php unitreg.php %li on &", unit);
     system(shell_command);
     int rc = system(shell_command);
-  }
+//  }
+}
+
+void unit_ack(long unit) {
+//  if ((unit > 1000) && (unit < 8000)) {
+    char   shell_command[200];
+    sprintf(shell_command, "php unitreg.php %li ackresp &", unit);
+    system(shell_command);
+    int rc = system(shell_command);
+//  }
 }
 
 void unit_deregistration(long unit) {
-  std::map<long, long>::iterator it;
+//  std::map<long, long>::iterator it;
 
-  it = unit_affiliations.find(unit);
+//  it = unit_affiliations.find(unit);
 
-  if (it != unit_affiliations.end()) {
-    unit_affiliations.erase(it);
-  }
+//  if (it != unit_affiliations.end()) {
+//    unit_affiliations.erase(it);
+//  }
 
-  if ((unit > 1000) && (unit < 8000)) {
+//  if ((unit > 1000) && (unit < 8000)) {
     char   shell_command[200];
     sprintf(shell_command, "php unitreg.php %li off &", unit);
     system(shell_command);
     int rc = system(shell_command);
-  }
+//  }
 
 }
 
 void group_affiliation(long unit, long talkgroup) {
-  unit_affiliations[unit] = talkgroup;
+//  unit_affiliations[unit] = talkgroup;
 
-  if ((unit > 1000) && (unit < 8000)) {
+//  if ((unit > 1000) && (unit < 8000)) {
     char   shell_command[200];
     sprintf(shell_command, "php unitreg.php %li %li &", unit, talkgroup);
     system(shell_command);
     int rc = system(shell_command);
-  }
+//  }
 
 }
 
 void update_recorder(TrunkMessage message) {
+
+    char shell_command[200];
+    sprintf(shell_command, "php unitreg.php %li callupdate &", message.source); //%f message.freq
+    system(shell_command);
+    int rc = system(shell_command);
+
+if (((message.freq == 770081250) || (message.freq == 770331250) || (message.freq == 771206250) || (message.freq == 771256250) || (message.freq == 771481250) || (message.freq == 771681250) || (message.freq == 771756250) || (message.freq == 772056250) || (message.freq == 772356250) || (message.freq == 772431250) || (message.freq == 772856250) || (message.freq == 773231250)) || (message.talkgroup < 1000) || (message.talkgroup > 2000)) {
+
   bool call_found = false;
 
   for (vector<Call *>::iterator it = calls.begin(); it != calls.end();) {
@@ -641,10 +665,10 @@ void update_recorder(TrunkMessage message) {
       ++it; // move on to the next one
     }
   }
-}
+} }
 
 void unit_check() {
-  std::map<long, long> talkgroup_totals;
+/*  std::map<long, long> talkgroup_totals;
   std::map<long, long>::iterator it;
   char   shell_command[200];
   time_t starttime = time(NULL);
@@ -662,16 +686,19 @@ void unit_check() {
   ofstream myfile(unit_filename);
 
   if (myfile.is_open()) {
-    myfile << "{'";
+    myfile << "{";
     for (it = unit_affiliations.begin(); it != unit_affiliations.end(); ++it) {
-      myfile << "\"" << it->first << "\":" << it->second << ",\n";
+      if (it != unit_affiliations.begin()) {
+        myfile << ",\n";
+      }
+      myfile << "\"" << it->first << "\":" << it->second;
     }
     //sprintf(shell_command, "./unit_check.sh %s > /dev/null 2>&1 &", unit_filename);
     //system(shell_command);
     //int rc = system(shell_command);
-    myfile << "'}";
+    myfile << "}";
     myfile.close();
-  }
+  } */
 }
 
 void handle_message(std::vector<TrunkMessage>messages, System *sys) {
@@ -705,6 +732,10 @@ unit_registration(message.source);
 
     case SYSID:
       current_system_id(message.sysid);
+      break;
+
+    case ACKRESP:
+      unit_ack(message.source);
       break;
 
     case STATUS:
@@ -780,7 +811,7 @@ void monitor_messages() {
       msgs_decoded_per_second        = messagesDecodedSinceLastReport / timeDiff;
       messagesDecodedSinceLastReport = 0;
       lastMsgCountTime               = currentTime;
-unit_check();
+//unit_check();
 
 //      if (msgs_decoded_per_second < 10) {
         BOOST_LOG_TRIVIAL(error) << "\tControl Channel Message Decode Rate: " <<  msgs_decoded_per_second << "/sec";

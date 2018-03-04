@@ -9,11 +9,21 @@ void Call::create_filename() {
 
   boost::filesystem::create_directories(path_stream.str());
 if (source) {
-  sprintf(filename, "%s/%02d%02d%02d-%ld-%ld.wav",
-  path_stream.str().c_str(), ltm->tm_hour, ltm->tm_min, ltm->tm_sec, talkgroup, source);
+  if ((freq != 770081250) && (freq != 770331250) && (freq != 771206250) && (freq != 771256250) && (freq != 771481250) && (freq != 771681250) && (freq != 771756250) && (freq != 772056250) && (freq != 772356250) && (freq != 772431250) && (freq != 772856250) && (freq != 773231250)) {
+      sprintf(filename, "%s/%02d%02d%02d-%ld-%ld-ms.wav",
+      path_stream.str().c_str(), ltm->tm_hour, ltm->tm_min, ltm->tm_sec, talkgroup, source);
+  } else {
+      sprintf(filename, "%s/%02d%02d%02d-%ld-%ld.wav",
+      path_stream.str().c_str(), ltm->tm_hour, ltm->tm_min, ltm->tm_sec, talkgroup, source);
+  }
 } else {
-  sprintf(filename, "%s/%02d%02d%02d-%ld.wav",						//sprintf(filename,        "%s/%ld-%ld_%g.wav",
-  path_stream.str().c_str(), ltm->tm_hour, ltm->tm_min, ltm->tm_sec, talkgroup);	//path_stream.str().c_str(), talkgroup, start_time, freq);
+  if ((freq != 770081250) && (freq != 770331250) && (freq != 771206250) && (freq != 771256250) && (freq != 771481250) && (freq != 771681250) && (freq != 771756250) && (freq != 772056250) && (freq != 772356250) && (freq != 772431250) && (freq != 772856250) && (freq != 773231250)) {
+    sprintf(filename, "%s/%02d%02d%02d-%ld-ms.wav",						//sprintf(filename,        "%s/%ld-%ld_%g.wav",
+    path_stream.str().c_str(), ltm->tm_hour, ltm->tm_min, ltm->tm_sec, talkgroup);	//path_stream.str().c_str(), talkgroup, start_time, freq);
+  } else {
+    sprintf(filename, "%s/%02d%02d%02d-%ld.wav",						//sprintf(filename,        "%s/%ld-%ld_%g.wav",
+    path_stream.str().c_str(), ltm->tm_hour, ltm->tm_min, ltm->tm_sec, talkgroup);	//path_stream.str().c_str(), talkgroup, start_time, freq);
+  }
 }
   // sprintf(filename, "%s/%ld-%ld.wav",
   // path_stream.str().c_str(),talkgroup,start_time);

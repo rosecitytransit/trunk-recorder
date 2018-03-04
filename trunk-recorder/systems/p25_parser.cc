@@ -388,7 +388,7 @@ else {
       bw * .125
     };
     add_channel(iden, temp_chan);
-    BOOST_LOG_TRIVIAL(trace) << "tsbk3d iden id " << std::dec << iden << " toff " << toff * 0.25 << " spac " << spac * 0.125 << " freq " << freq * 0.000005;
+    //BOOST_LOG_TRIVIAL(trace) << "tsbk3d iden id " << std::dec << iden << " toff " << toff * 0.25 << " spac " << spac * 0.125 << " freq " << freq * 0.000005;
   } else if (opcode == 0x3a)  { // rfss status
     unsigned long syid = bitset_shift_mask(tsbk, 56, 0xfff);
     unsigned long rfid = bitset_shift_mask(tsbk, 48, 0xff);
@@ -433,13 +433,13 @@ else {
          self.ns_wacn = wacn
          self.ns_chan = f1*/
     }
-    BOOST_LOG_TRIVIAL(trace) << "tsbk3b net stat: wacn " << std::dec << wacn << " syid " << syid << " ch1 " << ch1 << "(" << channel_id_to_string(ch1) << ") ";
+//    BOOST_LOG_TRIVIAL(trace) << "tsbk3b net stat: wacn " << std::dec << wacn << " syid " << syid << " ch1 " << ch1 << "(" << channel_id_to_string(ch1) << ") ";
   } else if (opcode == 0x3c) { // adjacent status
     unsigned long rfid = bitset_shift_mask(tsbk, 48, 0xff);
     unsigned long stid = bitset_shift_mask(tsbk, 40, 0xff);
     unsigned long ch1  = bitset_shift_mask(tsbk, 24, 0xffff);
     unsigned long f1   = channel_id_to_frequency(ch1);
-    BOOST_LOG_TRIVIAL(trace) << "tsbk3c\tAdjacent Status\t rfid " << std::dec << rfid << " stid " << stid << " ch1 " << ch1 << "(" << channel_id_to_string(ch1) << ") ";
+//    BOOST_LOG_TRIVIAL(trace) << "tsbk3c\tAdjacent Status\t rfid " << std::dec << rfid << " stid " << stid << " ch1 " << ch1 << "(" << channel_id_to_string(ch1) << ") ";
 
     if (f1) {
       it = channels.find((ch1 >> 12) & 0xf);
@@ -450,7 +450,7 @@ else {
         //			self.adjacent[f1] = 'rfid: %d stid:%d uplink:%f
         // tbl:%d' % (rfid, stid, (f1 + self.freq_table[table]['offset']) /
         // 1000000.0, table)
-        BOOST_LOG_TRIVIAL(trace) << "\ttsbk3c Chan " << temp_chan.frequency << "  " << temp_chan.step;
+        //BOOST_LOG_TRIVIAL(trace) << "\ttsbk3c Chan " << temp_chan.frequency << "  " << temp_chan.step;
       }
     }
   } else if (opcode == 0x20) { // Acknowledge response
@@ -462,12 +462,8 @@ else {
     message.talkgroup = ga;
     message.source    = sa;
 
-  if ((sa > 1000) && (sa < 8000)) {
-    char   shell_command[200];
-    sprintf(shell_command, "php unitreg.php %li ackresp &", sa);
-    system(shell_command);
-    int rc = system(shell_command);
-  }
+
+    message.message_type = ACKRESP;
 
     BOOST_LOG_TRIVIAL(trace) << "tsbk20\tAcknowledge Response\tga " << std::setw(7) << ga  << "\tsa " << sa << "\tReserved: " << op;
   } else if (opcode == 0x2c) { // Unit Registration Response
