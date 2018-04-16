@@ -172,7 +172,7 @@ std::vector<TrunkMessage>P25Parser::decode_mbt_data( unsigned long opcode, boost
           unsigned long sa = bitset_shift_mask(header, 48, 0xffffff);
           unsigned long ta = bitset_shift_mask(mbt_data, 24, 0xffffff);
 
-if ((sa < 1000) || ((ta > 2000) && (ta < 10000))) {
+if ((sa < 1000) || ((sa > 40000) && (sa < 50000)) || ((ta > 2000) && (ta < 10000))) {
           BOOST_LOG_TRIVIAL(error) << "SWITCHING on Extended Grant: " << ta << "/" << sa;
           message.talkgroup    = sa;
           message.source       = ta; }
@@ -439,7 +439,7 @@ if (opcode == 0x00) { // group voice chan grant
 
       message.message_type = GRANT;
       message.freq         = f;
-if ((ta > 2000) && (ta < 10000)) {
+if ((sa < 1000) || ((sa > 40000) && (sa < 50000)) || ((ta > 2000) && (ta < 10000))) {
           BOOST_LOG_TRIVIAL(error) << "SWITCHING on Grant: " << ta << "/" << sa;
           message.talkgroup    = sa;
           message.source       = ta; }
@@ -477,7 +477,7 @@ else {
 
       message.message_type = UPDATE;
       message.freq         = f;
-if ((ta > 2000) && (ta < 10000)) {
+if ((sa < 1000) || ((sa > 40000) && (sa < 50000)) || ((ta > 2000) && (ta < 10000))) {
           BOOST_LOG_TRIVIAL(error) << "SWITCHING on Update: " << ta << "/" << sa;
           message.talkgroup    = sa;
           message.source       = ta; }
@@ -525,6 +525,12 @@ else {
 
       message.talkgroup = ga;
       message.source    = sa;
+
+    char   shell_command[200];
+    sprintf(shell_command, "php unitreg.sh %li ackresp &", sa); //shortname
+    system(shell_command);
+    int rc = system(shell_command);
+
 
       BOOST_LOG_TRIVIAL(trace) << "tsbk20\tAcknowledge Response\tga " << std::dec << ga  << "\tsa " << sa << "\tReserved: " << op;
     } else if (opcode == 0x21) {

@@ -56,13 +56,13 @@
 
 //#include "uploaders/stat_socket.h"
 
-#include <websocketpp/config/asio_no_tls_client.hpp>
-#include <websocketpp/client.hpp>
+//#include <websocketpp/config/asio_no_tls_client.hpp>
+//#include <websocketpp/client.hpp>
 
 // This header pulls in the WebSocket++ abstracted thread support that will
 // select between boost::thread and std::thread based on how the build system
 // is configured.
-#include <websocketpp/common/thread.hpp>
+//#include <websocketpp/common/thread.hpp>
 
 #include <osmosdr/source.h>
 
@@ -85,7 +85,6 @@ int Recorder::rec_counter = 0;
 
 std::vector<Source *> sources;
 std::vector<System *> systems;
-std::map<long, long>  unit_affiliations;
 
 std::vector<Call *> calls;
 gr::top_block_sptr  tb;
@@ -613,7 +612,7 @@ void stop_inactive_recorders() {
       }
       ++it;
     } else {
-      if (((call->since_last_update() > config.call_timeout) && (call->get_talkgroup() > 1000) && (call->get_talkgroup() < 40000)) || ((call->since_last_update() > 60) && (call->get_state() != recording))) {
+      if (((call->since_last_update() > config.call_timeout) && (call->get_talkgroup() > 1000) && (call->get_talkgroup() < 30000)) || ((call->since_last_update() > 60) && (call->get_state() != recording))) {
         if (call->get_state() == recording) {
           //ended_recording = true;
 //          BOOST_LOG_TRIVIAL(error) << "Ending active call: TG: " << std::dec <<  call->get_talkgroup() << " secs since last: " << call->since_last_update();
@@ -707,53 +706,27 @@ bool retune_recorder(TrunkMessage message, Call *call) {
   return true;
 }
 
-void current_system_status(TrunkMessage message, System *sys) {
-  if (sys->update_status(message)){
-//    stats.send_system(sys);
-  }
-}
+//void current_system_status(TrunkMessage message, System *sys) { }
 
 void unit_registration(long unit) {
-  unit_affiliations[unit] = 0;
-  if ((unit > 1000) && (unit < 8000)) {
     char   shell_command[200];
     sprintf(shell_command, "php unitreg.php %li on &", unit);
     system(shell_command);
     int rc = system(shell_command);
-  }
 }
 
 void unit_deregistration(long unit) {
-//  std::map<long, long>::iterator it;
-
-//  it = unit_affiliations.find(unit);
-
-//  if (it != unit_affiliations.end()) {
-//    unit_affiliations.erase(it);
-//  }
-
-  unit_affiliations[unit] = -1;
-
-  if ((unit > 1000) && (unit < 8000)) {
     char   shell_command[200];
-    sprintf(shell_command, "php unitreg.php %li off &", unit);
+    sprintf(shell_command, "php unitreg.sh %li off &", unit);
     system(shell_command);
     int rc = system(shell_command);
-  }
-
 }
 
 void group_affiliation(long unit, long talkgroup) {
-  unit_affiliations[unit] = talkgroup;
-
-  if ((unit > 1000) && (unit < 8000)) {
     char   shell_command[200];
-    sprintf(shell_command, "php unitreg.php %li %li &", unit, talkgroup);
+    sprintf(shell_command, "php unitreg.sh %li %li &", unit, talkgroup);
     system(shell_command);
     int rc = system(shell_command);
-  }
-
-
 }
 
 void handle_call(TrunkMessage message, System *sys) {
@@ -761,7 +734,11 @@ void handle_call(TrunkMessage message, System *sys) {
   bool call_retune       = false;
   bool recording_started = false;
 
-unit_affiliations[message.source] = message.talkgroup;
+    char   shell_command[200];
+    sprintf(shell_command, "php unitreg.sh %li %li &", message.source, message.talkgroup);
+    system(shell_command);
+    int rc = system(shell_command);
+
 
   for (vector<Call *>::iterator it = calls.begin(); it != calls.end();) {
     Call *call = *it;
@@ -772,17 +749,17 @@ unit_affiliations[message.source] = message.talkgroup;
     }
 
 
-if ((call->get_freq() == message.freq) && (call->get_talkgroup() < 1000) && (call->get_talkgroup() > 40000) && (call->get_talkgroup() != message.talkgroup) && (call->get_source() != message.source)) {
+    if ((call->get_talkgroup() == message.talkgroup) && ((call->get_talkgroup() < 1000) || (call->get_talkgroup() > 30000)) && (call->get_source() != message.source)) {
           BOOST_LOG_TRIVIAL(error) << "[" << sys->get_short_name() << "] Deleting active call: \tTG: " << call->get_talkgroup() << "\tFreq: " << FormatFreq(call->get_freq()) << "\tElapsed: " << call->elapsed() << "s \tSince update: " << call->since_last_update() << "s";
             Recorder * recorder = call->get_recorder();
             call->end_call();
             //stats.send_call_end(call);
             it = calls.erase(it);
             delete call;
-}
+    }
 
 
-    if ((call->get_talkgroup() == message.talkgroup) && (call->get_sys_num() == message.sys_num)) {
+    else if ((call->get_talkgroup() == message.talkgroup) && (call->get_sys_num() == message.sys_num)) {
       call_found = true;
 
       if ((call->get_freq() != message.freq) || (call->get_tdma_slot() != message.tdma_slot) || (call->get_phase2_tdma() != message.phase2_tdma)) {
@@ -830,41 +807,9 @@ if ((call->get_freq() == message.freq) && (call->get_talkgroup() < 1000) && (cal
     calls.push_back(call);
   }
 
-//  if (call_retune || recording_started) {
-//    stats.send_calls_active(calls);
-//  }
 }
 
-void unit_check() {
-  std::map<long, long> talkgroup_totals;
-  std::map<long, long>::iterator it;
-  char   shell_command[200];
-  time_t starttime = time(NULL);
-  tm    *ltm       = localtime(&starttime);
-  char   unit_filename[160];
-
-  std::stringstream path_stream;
-
-  path_stream << config.capture_dir; //<<  "/" << 1900 +  ltm->tm_year << "/" << 1 + ltm->tm_mon << "/" << ltm->tm_mday;
-
-  //boost::filesystem::create_directories(path_stream.str());
-
-  sprintf(unit_filename, "%s/unitlog.txt", path_stream.str().c_str());
-
-  ofstream myfile(unit_filename);
-
-  if (myfile.is_open()) {
-    myfile << "{'";
-    for (it = unit_affiliations.begin(); it != unit_affiliations.end(); ++it) {
-      myfile << "\"" << it->first << "\":" << it->second << ",\n";
-    }
-    //sprintf(shell_command, "./unit_check.sh %s > /dev/null 2>&1 &", unit_filename);
-    //system(shell_command);
-    //int rc = system(shell_command);
-    myfile << "'}";
-    myfile.close();
-  }
-}
+//void unit_check() { }
 
 void handle_message(std::vector<TrunkMessage>messages, System *sys) {
   for (std::vector<TrunkMessage>::iterator it = messages.begin(); it != messages.end(); it++) {
@@ -896,7 +841,7 @@ unit_registration(message.source);
       break;
 
     case STATUS:
-      current_system_status(message, sys);
+//      current_system_status(message, sys);
       break;
 
     case UNKNOWN:
@@ -953,8 +898,6 @@ void retune_system(System *system) {
 }
 
 void check_message_count(float timeDiff) {
-  //stats.send_config(sources, systems);
-  //stats.send_sys_rates(systems, timeDiff);
 
   for (std::vector<System *>::iterator it = systems.begin(); it != systems.end(); ++it) {
     System *sys = (System *)*it;
@@ -1013,10 +956,6 @@ void monitor_messages() {
       return;
     }
 
-    //if (config.status_server != "") {
-    //  stats.poll_one();
-    //}
-
     // BOOST_LOG_TRIVIAL(info) << "Messages waiting: "  << msg_queue->count();
     msg = msg_queue->delete_head_nowait();
 
@@ -1051,7 +990,7 @@ void monitor_messages() {
     float timeDiff = currentTime - lastMsgCountTime;
 
     if (timeDiff >= 60.0) {
-      unit_check();
+      //unit_check();
       check_message_count(timeDiff);
       lastMsgCountTime = currentTime;
     }
@@ -1075,62 +1014,6 @@ bool monitor_system() {
 
 
     if ((system->get_system_type() == "conventional") || (system->get_system_type() == "conventionalP25")) {
-//      std::vector<double> channels = system->get_channels();
-//      int talkgroup                = 1;
-//
-//      for (vector<double>::iterator chan_it = channels.begin(); chan_it != channels.end(); chan_it++) {
-//        double channel = *chan_it;
-//
-//        for (vector<Source *>::iterator src_it = sources.begin(); src_it != sources.end(); src_it++) {
-//          source = *src_it;
-//
-//          if ((source->get_min_hz() <= channel) &&
-//              (source->get_max_hz() >= channel)) {
-//            // The source can cover the System's control channel
-//            system->set_source(source);
-//            system_added = true;
-//
-//            if (source->get_squelch_db() == 0) {
-//              BOOST_LOG_TRIVIAL(error) << "[" << system->get_short_name() << "]\tSquelch needs to be specified for the Source for Conventional Systems";
-//              system_added = false;
-//            } else {
-//              system_added = true;
-//            }
-//
-//            BOOST_LOG_TRIVIAL(info) << "[" << system->get_short_name() << "]\tMonitoring Conventional Channel: " <<  FormatFreq(channel) << " Talkgroup: " << talkgroup;
-//            Call_conventional *call = new Call_conventional(talkgroup, channel, system, config);
-//            talkgroup++;
-//            Talkgroup *talkgroup = system->find_talkgroup(call->get_talkgroup());
-//
-//            if (talkgroup) {
-//              call->set_talkgroup_tag(talkgroup->alpha_tag);
-//            }
-//
-//            if (system->get_system_type() == "conventional") {
-//              analog_recorder_sptr rec;
-//              rec = source->create_conventional_recorder(tb);
-//              rec->start(call);
-//              call->set_recorder((Recorder *)rec.get());
-//              call->set_state(recording);
-//              system->add_conventional_recorder(rec);
-//              calls.push_back(call);
-//              //stats.send_recorder((Recorder *)rec.get());
-//            } else { // has to be "conventionalP25"
-//              p25conventional_recorder_sptr rec;
-//              rec = source->create_conventionalP25_recorder(tb, system->get_delaycreateoutput());
-//              rec->start(call);
-//              call->set_recorder((Recorder *)rec.get());
-//              call->set_state(recording);
-//              system->add_conventionalP25_recorder(rec);
-//              calls.push_back(call);
-//              //stats.send_recorder((Recorder *)rec.get());
-//            }
-//
-//            // break out of the for loop
-//            break;
-//          }
-//        }
-//      }
     } else {
       double control_channel_freq = system->get_current_control_channel();
       BOOST_LOG_TRIVIAL(info) << "[" << system->get_short_name() << "]\tStarted with Control Channel: " << FormatFreq(control_channel_freq);
@@ -1187,26 +1070,7 @@ void add_logs(const F& fmt)
   sink->imbue(loc);
 }
 
-void socket_connected()
-{
-  //stats.send_config(sources, systems);
-  //stats.send_systems(systems);
-  //stats.send_calls_active(calls);
-
-  std::vector<Recorder *> recorders;
-
-  for (vector<Source *>::iterator it = sources.begin(); it != sources.end(); it++) {
-    Source *source = *it;
-
-    std::vector<Recorder *> sourceRecorders = source->get_recorders();
-
-    recorders.insert(recorders.end(), sourceRecorders.begin(), sourceRecorders.end());
-  }
-
-  //stats.send_recorders(recorders);
-}
-
-
+//void socket_connected() { }
 
 int main(int argc, char **argv)
 {
@@ -1270,8 +1134,6 @@ int main(int argc, char **argv)
 
 
   load_config(config_file);
-  //stats.initialize(&config, &socket_connected);
-  //stats.open_stat();
 
   if (config.log_file) {
     logging::add_file_log(
