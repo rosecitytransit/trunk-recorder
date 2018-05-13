@@ -16,20 +16,13 @@ void Call::create_filename() {
   path_stream << this->config.capture_dir << "/" << 1900 + ltm->tm_year << "/" <<  1 + ltm->tm_mon << "/" << ltm->tm_mday;
 
   boost::filesystem::create_directories(path_stream.str());
-  int nchars;
-  nchars = snprintf(filename,   255,        "%s/%02d%02d%02d-%ld-%s.wav",  path_stream.str().c_str(), ltm->tm_hour, ltm->tm_min, ltm->tm_sec, talkgroup, sys->short_name.c_str());
-  if (nchars >= 255) {
-    BOOST_LOG_TRIVIAL(error) << "Call: Path longer than 160 charecters";
-  }
-  nchars = snprintf(status_filename,  255,  "%s/calllog.txt",  path_stream.str().c_str());
 
-  if (nchars >= 255) {
-    BOOST_LOG_TRIVIAL(error) << "Call: Path longer than 160 charecters";
-  }
-  nchars = snprintf(converted_filename, 255, "%s/%ld-%ld.m4a",     path_stream.str().c_str(), talkgroup, start_time);
-
-  if (nchars >= 255) {
-    BOOST_LOG_TRIVIAL(error) << "Call: Path longer than 255 charecters";
+  if ((curr_freq != 770081250) && (curr_freq != 770331250) && (curr_freq != 771206250) && (curr_freq != 771256250) && (curr_freq != 771481250) && (curr_freq != 771681250) && (curr_freq != 771756250) && (curr_freq != 772056250) && (curr_freq != 772356250) && (curr_freq != 772431250) && (curr_freq != 772856250) && (curr_freq != 773231250)) {
+    sprintf(filename, "%s/%02d%02d%02d-%ld-ms.wav",						//sprintf(filename,        "%s/%ld-%ld_%g.wav",
+    path_stream.str().c_str(), ltm->tm_hour, ltm->tm_min, ltm->tm_sec, talkgroup);	//path_stream.str().c_str(), talkgroup, start_time, freq);
+  } else {
+    sprintf(filename, "%s/%02d%02d%02d-%ld-cc.wav",						//sprintf(filename,        "%s/%ld-%ld_%g.wav",
+    path_stream.str().c_str(), ltm->tm_hour, ltm->tm_min, ltm->tm_sec, talkgroup);	//path_stream.str().c_str(), talkgroup, start_time, freq);
   }
 
 sprintf(filetime, "%02d%02d%02d", ltm->tm_hour, ltm->tm_min, ltm->tm_sec);

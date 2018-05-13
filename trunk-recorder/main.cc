@@ -759,7 +759,7 @@ void handle_call(TrunkMessage message, System *sys) {
     }
 
 
-    else if ((call->get_talkgroup() == message.talkgroup) && (call->get_sys_num() == message.sys_num)) {
+    else if ((call->get_talkgroup() == message.talkgroup) && (call->get_sys_num() == message.sys_num) && ((message.freq == 770081250) || (message.freq == 770331250) || (message.freq == 771206250) || (message.freq == 771256250) || (message.freq == 771481250) || (message.freq == 771681250) || (message.freq == 771756250) || (message.freq == 772056250) || (message.freq == 772356250) || (message.freq == 772431250) || (message.freq == 772856250) || (message.freq == 773231250) || (message.talkgroup < 1000) || (message.talkgroup > 2000))) {
       call_found = true;
 
       if ((call->get_freq() != message.freq) || (call->get_tdma_slot() != message.tdma_slot) || (call->get_phase2_tdma() != message.phase2_tdma)) {
@@ -801,7 +801,7 @@ void handle_call(TrunkMessage message, System *sys) {
     }
   }
 
-  if (!call_found) {
+  if (!call_found && ((message.freq == 770081250) || (message.freq == 770331250) || (message.freq == 771206250) || (message.freq == 771256250) || (message.freq == 771481250) || (message.freq == 771681250) || (message.freq == 771756250) || (message.freq == 772056250) || (message.freq == 772356250) || (message.freq == 772431250) || (message.freq == 772856250) || (message.freq == 773231250) || (message.talkgroup < 1000) || (message.talkgroup > 2000))) {
     Call *call = new Call(message, sys, config);
     recording_started = start_recorder(call, message, sys);
     calls.push_back(call);
