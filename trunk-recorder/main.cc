@@ -710,21 +710,21 @@ bool retune_recorder(TrunkMessage message, Call *call) {
 
 void unit_registration(long unit) {
     char   shell_command[200];
-    sprintf(shell_command, "php unitreg.php %li on &", unit);
+    sprintf(shell_command, "./unitreg.sh %li on &", unit);
     system(shell_command);
     int rc = system(shell_command);
 }
 
 void unit_deregistration(long unit) {
     char   shell_command[200];
-    sprintf(shell_command, "php unitreg.sh %li off &", unit);
+    sprintf(shell_command, "./unitreg.sh %li off &", unit);
     system(shell_command);
     int rc = system(shell_command);
 }
 
 void group_affiliation(long unit, long talkgroup) {
     char   shell_command[200];
-    sprintf(shell_command, "php unitreg.sh %li %li &", unit, talkgroup);
+    sprintf(shell_command, "./unitreg.sh %li %li &", unit, talkgroup);
     system(shell_command);
     int rc = system(shell_command);
 }
@@ -735,7 +735,7 @@ void handle_call(TrunkMessage message, System *sys) {
   bool recording_started = false;
 
     char   shell_command[200];
-    sprintf(shell_command, "php unitreg.sh %li %li &", message.source, message.talkgroup);
+    sprintf(shell_command, "./unitreg.sh %li %li &", message.source, message.talkgroup);
     system(shell_command);
     int rc = system(shell_command);
 

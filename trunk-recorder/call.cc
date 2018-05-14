@@ -17,6 +17,8 @@ void Call::create_filename() {
 
   boost::filesystem::create_directories(path_stream.str());
 
+  snprintf(status_filename,  255,  "%s/calllog.txt",  path_stream.str().c_str());
+
   if ((curr_freq != 770081250) && (curr_freq != 770331250) && (curr_freq != 771206250) && (curr_freq != 771256250) && (curr_freq != 771481250) && (curr_freq != 771681250) && (curr_freq != 771756250) && (curr_freq != 772056250) && (curr_freq != 772356250) && (curr_freq != 772431250) && (curr_freq != 772856250) && (curr_freq != 773231250)) {
     sprintf(filename, "%s/%02d%02d%02d-%ld-ms.wav",						//sprintf(filename,        "%s/%ld-%ld_%g.wav",
     path_stream.str().c_str(), ltm->tm_hour, ltm->tm_min, ltm->tm_sec, talkgroup);	//path_stream.str().c_str(), talkgroup, start_time, freq);
@@ -146,7 +148,12 @@ void Call::end_call() {
         }
       }
 
-      myfile << ";" << sys->get_short_name();
+      //myfile << ";" << sys->get_short_name();
+      if ((curr_freq != 770081250) && (curr_freq != 770331250) && (curr_freq != 771206250) && (curr_freq != 771256250) && (curr_freq != 771481250) && (curr_freq != 771681250) && (curr_freq != 771756250) && (curr_freq != 772056250) && (curr_freq != 772356250) && (curr_freq != 772431250) && (curr_freq != 772856250) && (curr_freq != 773231250)) {
+        myfile << ";ms";
+      } else {
+        myfile << ";cc";
+      }
 
       for (int i = 0; i < freq_count; i++) {
         myfile << ";" << (freq_list[i].freq/1000000) << "," << freq_list[i].total_len << "," << freq_list[i].error_count << "," << freq_list[i].spike_count;

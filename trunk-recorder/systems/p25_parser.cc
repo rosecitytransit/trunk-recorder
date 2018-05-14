@@ -527,7 +527,7 @@ else {
       message.source    = sa;
 
     char   shell_command[200];
-    sprintf(shell_command, "php unitreg.sh %li ackresp &", sa); //shortname
+    sprintf(shell_command, "./unitreg.sh %li ackresp-%li-%li &", sa, ga, op); //shortname
     system(shell_command);
     int rc = system(shell_command);
 

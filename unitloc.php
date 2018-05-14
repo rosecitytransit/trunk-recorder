@@ -18,19 +18,9 @@ $tglist = array(17000=>'AdminAnnc', 17005=>'AdHoc1', 17010=>'AdHoc2', 17015=>'Ad
 			if (isset($tglist[$argv[2]])) $talkgroup = $tglist[$argv[2]]; else $talkgroup = $argv[2];
 
 			//if ( @file_exists("unitreg.txt")) {
-			$fp = fopen("/var/www/html/radio/unitloc-".date("mdy").".txt",'a+'); //switch to "a"
-			$output = $argv[1]." ".$veh['routeNumber']." ".$veh['direction']." ".$talkgroup." ".$veh['latitude']." ".$veh['longitude']." ".date("H:i:s", $starttime)." ".((int)substr($veh['time'],0,-3) - $starttime);  //site param?
-
-			$pos = -1; $line = ''; $c = '';
-			do {						//eliminate and unique files daily/in map script
-				$line = $c . $line;
-				fseek($fp, $pos--, SEEK_END);
-				$c = fgetc($fp);
-			} while (($c !== false) && ($c != "\n"));
-
-			if ($line !== $output)
-				fwrite ($fp, "
-".$output);
+			$fp = fopen("/var/www/html/radio/unitloc-".date("mdy").".txt",'a');
+			fwrite ($fp, "
+".$argv[1]." ".$veh['routeNumber']." ".$veh['direction']." ".$talkgroup." ".$veh['latitude']." ".$veh['longitude']." ".date("H:i:s", $starttime)." ".((int)substr($veh['time'],0,-3) - $starttime));  //site param?
 			fclose($fp);
 			//}
 		} else {
