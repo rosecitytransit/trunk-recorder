@@ -378,7 +378,7 @@ void stop_inactive_recorders() {
   for (vector<Call *>::iterator it = calls.begin(); it != calls.end();) {
     Call *call = *it;
 
-    if ((call->get_state() == stopping) && call->has_stopped() && (((call->stopping_elapsed() > 2) && (call->get_talkgroup() > 1000) && (call->get_talkgroup() < 40000)) || (call->stopping_elapsed() > 15))) {
+    if ((call->get_state() == stopping) && call->has_stopped() && (((call->stopping_elapsed() > 2) && (call->get_talkgroup() > 1000) && (call->get_talkgroup() < 30000)) || (call->stopping_elapsed() > 15))) {
       call->close_call();
       delete call;
       it = calls.erase(it);
@@ -470,12 +470,12 @@ void assign_recorder(TrunkMessage message) {
   bool call_found = false;
   char shell_command[200];
 
-    sprintf(shell_command, "php unitreg.php %li callgrant &", message.source); //%f message.freq
+    sprintf(shell_command, "php unitreg.php %li %li &", message.source, message.talkgroup);
     system(shell_command);
     int rc = system(shell_command);
 
 
-if (((message.freq == 770081250) || (message.freq == 770331250) || (message.freq == 771206250) || (message.freq == 771256250) || (message.freq == 771481250) || (message.freq == 771681250) || (message.freq == 771756250) || (message.freq == 772056250) || (message.freq == 772356250) || (message.freq == 772431250) || (message.freq == 772856250) || (message.freq == 773231250)) || (message.talkgroup < 1000) || (message.talkgroup > 2000)) {
+if ((message.freq == 770081250) || (message.freq == 770331250) || (message.freq == 771206250) || (message.freq == 771256250) || (message.freq == 771481250) || (message.freq == 771681250) || (message.freq == 771756250) || (message.freq == 772056250) || (message.freq == 772356250) || (message.freq == 772431250) || (message.freq == 772856250) || (message.freq == 773231250) || (message.talkgroup < 1000) || (message.talkgroup > 2000)) {
 
 //unit_affiliations[message.source] = message.talkgroup;
 
@@ -568,7 +568,7 @@ void current_system_id(int sysid) {
 void unit_registration(long unit) {
 //  unit_affiliations[unit] = 0;
 //  if ((unit > 1000) && (unit < 8000)) {
-    char   shell_command[200];
+   char   shell_command[200];
     sprintf(shell_command, "php unitreg.php %li on &", unit);
     system(shell_command);
     int rc = system(shell_command);
@@ -617,11 +617,11 @@ void group_affiliation(long unit, long talkgroup) {
 void update_recorder(TrunkMessage message) {
 
     char shell_command[200];
-    sprintf(shell_command, "php unitreg.php %li callupdate &", message.source); //%f message.freq
+    sprintf(shell_command, "php unitreg.php %li %li &", message.source, message.talkgroup); //%f message.freq
     system(shell_command);
     int rc = system(shell_command);
 
-if (((message.freq == 770081250) || (message.freq == 770331250) || (message.freq == 771206250) || (message.freq == 771256250) || (message.freq == 771481250) || (message.freq == 771681250) || (message.freq == 771756250) || (message.freq == 772056250) || (message.freq == 772356250) || (message.freq == 772431250) || (message.freq == 772856250) || (message.freq == 773231250)) || (message.talkgroup < 1000) || (message.talkgroup > 2000)) {
+if ((message.freq == 770081250) || (message.freq == 770331250) || (message.freq == 771206250) || (message.freq == 771256250) || (message.freq == 771481250) || (message.freq == 771681250) || (message.freq == 771756250) || (message.freq == 772056250) || (message.freq == 772356250) || (message.freq == 772431250) || (message.freq == 772856250) || (message.freq == 773231250) || (message.talkgroup < 1000) || (message.talkgroup > 2000)) {
 
   bool call_found = false;
 

@@ -1,26 +1,26 @@
 { "sources": [
-{"center": 770650000.0,
-"rate": 1800000.0,
+{"center": 770962500.0,
+"rate": 2400000.0,
 "ppm": 0,
-"gain": 40,
+"gain": 42,
 "digitalRecorders": 6,
 "driver": "osmosdr",
-"device": "rtl=00000001"},
-{"center": 772450000.0,
-"rate": 1800000.0,
+"device": "rtl=00000002"},
+{"center": 772793750.0,
+"rate": 900001.0,
 "ppm": 0,
-"gain": 40,
+"gain": 42,
 "digitalRecorders": 4,
 "driver": "osmosdr",
-"device": "rtl=00000002"}
+"device": "rtl=00000001"}
 ],
-"systems": [
-	{ "control_channels": [772056250],
+"systems": [ {
+	"control_channels": [773231250],
 	"type": "p25",
 	"captureDir": "/var/www/html/radio/",
 	"talkgroupsFile": "ChanList.csv"
 	},
-	{ "control_channels": [769856250],
+	{ "control_channels": [770343750],
 	"type": "p25",
 	"captureDir": "/var/www/html/radio/",
 	"talkgroupsFile": "ChanList.csv"

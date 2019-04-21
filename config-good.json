@@ -19,11 +19,6 @@
 	"type": "p25",
 	"captureDir": "/var/www/html/radio/",
 	"talkgroupsFile": "ChanList.csv"
-	},
-	{ "control_channels": [769856250],
-	"type": "p25",
-	"captureDir": "/var/www/html/radio/",
-	"talkgroupsFile": "ChanList.csv"
 	} ],
 "captureDir": "/var/www/html/radio/"
 }

@@ -292,7 +292,7 @@ std::vector<TrunkMessage>P25Parser::decode_tsbk(boost::dynamic_bitset<>& tsbk) {
           unsigned long sa = bitset_shift_mask(tsbk, 16, 0xffffff);
           unsigned long ta = bitset_shift_mask(tsbk, 40, 0xffffff);
 
-if ((ta > 2000) && (ta < 10000)) { //(sa < 1000) || 40000-50000
+if ((sa < 1000) || ((sa > 40000) && (sa < 50000)) || ((ta > 2000) && (ta < 10000))) {
           BOOST_LOG_TRIVIAL(error) << "SWITCHING on Grant: " << ta << "/" << sa;
           message.talkgroup    = sa;
           message.source       = ta; }
@@ -323,7 +323,7 @@ else {
           unsigned long sa = bitset_shift_mask(tsbk, 16, 0xffffff);
           unsigned long ta = bitset_shift_mask(tsbk, 40, 0xffffff);
 
-if ((ta > 2000) && (ta < 10000)) { //(sa < 1000) || ((sa > 40000) && (sa < 50000)) ||
+if ((sa < 1000) || ((sa > 40000) && (sa < 50000)) || ((ta > 2000) && (ta < 10000))) {
           BOOST_LOG_TRIVIAL(error) << "SWITCHING on Update: " << ta << "/" << sa;
           message.talkgroup    = sa;
           message.source       = ta; }
@@ -543,7 +543,7 @@ std::vector<TrunkMessage>P25Parser::parse_message(gr::message::sptr msg) {
     messages.push_back(message);
     return messages;
   } else if (type == -1) { //	# timeout
-    BOOST_LOG_TRIVIAL(trace) << "process_data_unit timeout";
+    BOOST_LOG_TRIVIAL(error) << "process_data_unit timeout";
 
     // self.update_state('timeout', curr_time)
     messages.push_back(message);

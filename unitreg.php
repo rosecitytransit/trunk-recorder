@@ -1,16 +1,19 @@
-<?php error_reporting(0);
+<?php //error_reporting(0);
 $starttime=time();
 //$garage = false;
 
-//$fp = fopen('/var/www/html/radio/radios','r+');
-$radiofile = file_get_contents('/var/www/html/radio/radios');
-//while (!feof($fp))
-//	$radiofile .= fread($fp, 4000);
+/* $fp = fopen('/var/www/html/radio/radios','r+');
+$radiofile = ""; //= file_get_contents('/var/www/html/radio/radios');
+while (!feof($fp))
+	$radiofile .= fread($fp, 4000);
 $radiolist = unserialize($radiofile);
-$radiolist[$argv[1]] = $argv[2]. " ".$starttime;
-file_put_contents('/var/www/html/radio/radios',serialize($radiolist));
-//fwrite($fp, serialize($radiolist));
-//fclose($fp);
+if ($argv[2] != "ackresp")
+	$radiolist[$argv[1]] = $argv[2]. " ".$starttime;
+elseif (strlen($argv[1]) == 4)
+	$radiolist[$argv[1]] = "update ".$starttime;
+//file_put_contents('/var/www/html/radio/radios',serialize($radiolist));
+fwrite($fp, serialize($radiolist));
+fclose($fp); */
 
 
 if (($argv[1] > 2000) && ($argv[1] < 8000)) {
