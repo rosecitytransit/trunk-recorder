@@ -3,7 +3,6 @@
 #include "config.h"
 #include <gnuradio/basic_block.h>
 #include <gnuradio/top_block.h>
-#include <gnuradio/uhd/usrp_source.h>
 #include <iostream>
 #include <numeric>
 #include <osmosdr/source.h>
@@ -117,10 +116,6 @@ public:
   Recorder *get_sigmf_recorder();
   inline osmosdr::source::sptr cast_to_osmo_sptr(gr::basic_block_sptr p) {
     return boost::dynamic_pointer_cast<osmosdr::source, gr::basic_block>(p);
-  }
-
-  inline gr::uhd::usrp_source::sptr cast_to_usrp_sptr(gr::basic_block_sptr p) {
-    return boost::dynamic_pointer_cast<gr::uhd::usrp_source, gr::basic_block>(p);
   }
 
   std::vector<Recorder *> get_recorders();
