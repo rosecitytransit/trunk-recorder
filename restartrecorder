@@ -1,0 +1,8 @@
+#!/bin/sh
+pkill -2 -x recorder
+#sleep 20
+cd /home/hiby/trunk-recorder/
+mv recorder1.log /home/hiby/logs/recorder1-`date +%F-%H%M%S`.log
+mv recorder2.log /home/hiby/logs/recorder2-`date +%F-%H%M%S`.log
+#echo "trunk-recorder not running"
+nohup ./recorder > recorder1.log 2>recorder2.log &
