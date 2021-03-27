@@ -1409,6 +1409,8 @@ int main(int argc, char **argv) {
 
   );
 
+  boost::log::register_simple_formatter_factory< boost::log::trivial::severity_level, char >("Severity");
+
   boost::log::add_common_attributes();
   boost::log::core::get()->add_global_attribute("Scope",
                                                 boost::log::attributes::named_scope());
