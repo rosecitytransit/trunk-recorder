@@ -660,9 +660,15 @@ bool start_recorder(Call *call, TrunkMessage message, System *sys) {
       //int total_recorders = get_total_recorders();
 
       if (recorder) {
+<<<<<<< HEAD
         /* if (message.meta.length()) {
           BOOST_LOG_TRIVIAL(debug) << message.meta;
         } */
+=======
+        if (message.meta.length()) {
+          BOOST_LOG_TRIVIAL(debug) << message.meta;
+        }
+>>>>>>> adding message.source = call->talkgroup checking
 
         recorder->start(call);
         call->set_recorder(recorder);
@@ -927,7 +933,11 @@ void handle_call(TrunkMessage message, System *sys) {
     Call *call = *it;
 
     if ((call->get_talkgroup() == message.source) && (call->get_sys_num() == message.sys_num)) {
+<<<<<<< HEAD
       BOOST_LOG_TRIVIAL(error) << "WARNING: Old call found w/this message.source. Old TG: " << call->get_talkgroup_display() << "/" << call->get_talkgroup() << "New TG: " << message.talkgroup << " New src: " << message.source;
+=======
+      BOOST_LOG_TRIVIAL(error) << "WARNING: Old call found w/this message.source. Old TG: " << call->get_talkgroup_display() << "/" call->get_talkgroup() << "New TG: " << message.talkgroup << " New src: " << message.source;
+>>>>>>> adding message.source = call->talkgroup checking
     }
 
     if ((call->get_talkgroup() == message.talkgroup) && (call->get_sys_num() == message.sys_num)) {
