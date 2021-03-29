@@ -50,6 +50,7 @@ public:
   void start(Call *call);
   void reset_rx_status();
   Rx_Status get_rx_status();
+  bool get_call_terminated();
   void stop();
   int tdma_slot;
   bool delay_open;

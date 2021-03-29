@@ -491,6 +491,10 @@ void Call::update(TrunkMessage message) {
 }
 
 int Call::since_last_update() {
+  if (get_recorder()->get_call_terminated() == false) {
+    last_update = time(NULL);
+    BOOST_LOG_TRIVIAL(debug) << "Call not terminated: TG " << get_talkgroup_display() << " freq " << get_freq() << " elapsed " << elapsed();
+  }
   return time(NULL) - last_update;
 }
 
