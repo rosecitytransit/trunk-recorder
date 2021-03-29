@@ -83,6 +83,7 @@ public:
     Rx_Status rx_status = {0, 0, 0};
     return rx_status;
   }
+  virtual bool get_call_terminated() { return false; };
   virtual bool is_active() { return false; };
   virtual bool is_analog() { return false; };
   virtual bool is_idle() { return true; };
