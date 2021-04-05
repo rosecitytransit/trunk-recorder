@@ -355,6 +355,14 @@ Rx_Status p25_recorder::get_rx_status() {
   }
 }
 
+bool p25_recorder::get_call_terminated() {
+  if (qpsk_mod) {
+    return qpsk_p25_decode->get_call_terminated();
+  } else {
+    return fsk4_p25_decode->get_call_terminated();
+  }
+}
+
 /* This is called by wav_sink_delayed_open to get a new filename when samples start to come in */
 
 char *p25_recorder::get_filename() {

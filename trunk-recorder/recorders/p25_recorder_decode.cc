@@ -49,6 +49,11 @@ void p25_recorder_decode::reset_rx_status() {
 Rx_Status p25_recorder_decode::get_rx_status() {
   return op25_frame_assembler->get_rx_status();
 }
+
+bool p25_recorder_decode::get_call_terminated() {
+  return op25_frame_assembler->get_call_terminated();
+}
+
 void p25_recorder_decode::initialize(  int silence_frames) {
   //OP25 Slicer
   const float l[] = {-2.0, 0.0, 2.0, 4.0};
@@ -68,7 +73,7 @@ void p25_recorder_decode::initialize(  int silence_frames) {
   bool do_output = 1;
   bool do_msgq = 0;
   bool do_audio_output = 1;
-  bool do_tdma = 0;
+  bool do_tdma = 1;
   bool do_crypt = 0;
 
   op25_frame_assembler = gr::op25_repeater::p25_frame_assembler::make(0, silence_frames, wireshark_host, udp_port, verbosity, do_imbe, do_output, do_msgq, rx_queue, do_audio_output, do_tdma, do_crypt);

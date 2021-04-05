@@ -95,6 +95,7 @@ public:
   bool is_idle();
   State get_state();
   Rx_Status get_rx_status();
+  bool get_call_terminated();
   char *get_filename();
   int lastupdate();
   long elapsed();

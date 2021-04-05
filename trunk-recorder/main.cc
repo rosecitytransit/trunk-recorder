@@ -59,7 +59,6 @@
 #include <gnuradio/message.h>
 #include <gnuradio/msg_queue.h>
 #include <gnuradio/top_block.h>
-#include <gnuradio/uhd/usrp_source.h>
 
 using namespace std;
 namespace logging = boost::log;
@@ -406,10 +405,6 @@ bool load_config(string config_file) {
 
       std::string driver = node.second.get<std::string>("driver", "");
 
-      if ((driver != "osmosdr") && (driver != "usrp")) {
-        BOOST_LOG_TRIVIAL(error) << "Driver specified in config.json not recognized, needs to be osmosdr or usrp";
-      }
-
       std::string device = node.second.get<std::string>("device", "");
       BOOST_LOG_TRIVIAL(info) << "Driver: " << node.second.get<std::string>("driver", "");
       BOOST_LOG_TRIVIAL(info) << "Center: " << FormatFreq(node.second.get<double>("center", 0));
@@ -426,7 +421,7 @@ bool load_config(string config_file) {
       BOOST_LOG_TRIVIAL(info) << "MIX Gain: " << node.second.get<double>("mixGain", 0);
       BOOST_LOG_TRIVIAL(info) << "VGA1 Gain: " << node.second.get<double>("vga1Gain", 0);
       BOOST_LOG_TRIVIAL(info) << "VGA2 Gain: " << node.second.get<double>("vga2Gain", 0);
-      BOOST_LOG_TRIVIAL(info) << "Idle Silence: " << node.second.get<bool>("idleSilence", 0);
+      BOOST_LOG_TRIVIAL(info) << "Idle Silence: " << node.second.get<int>("silenceFrames", 0);
       BOOST_LOG_TRIVIAL(info) << "Digital Recorders: " << node.second.get<int>("digitalRecorders", 0);
       BOOST_LOG_TRIVIAL(info) << "Debug Recorder: " << node.second.get<bool>("debugRecorder", 0);
       BOOST_LOG_TRIVIAL(info) << "SigMF Recorders: " << node.second.get<int>("sigmfRecorders", 0);
@@ -800,6 +795,10 @@ void print_status() {
     Call *call = *it;
     Recorder *recorder = call->get_recorder();
     BOOST_LOG_TRIVIAL(info) << "TG: " << call->get_talkgroup_display() << " Freq: " << FormatFreq(call->get_freq()) << " Elapsed: " << call->elapsed() << " State: " << FormatState(call->get_state());
+
+    if (call->elapsed() > 300) {
+      BOOST_LOG_TRIVIAL(error) << "Long-running call: TG " << call->get_talkgroup() << " Elapsed " << call->elapsed() << " State: " << FormatState(call->get_state());
+    }	
 
     if (recorder) {
       BOOST_LOG_TRIVIAL(info) << "\t[ " << recorder->get_num() << " ] State: " << FormatState(recorder->get_state());

@@ -293,7 +293,7 @@ if (d_first_work) {
 
   
   int nwritten = dowork(noutput_items, input_items, output_items);
-
+  BOOST_LOG_TRIVIAL(error) << "wav wrote: " << nwritten << " to: " << current_filename << std::endl;
   d_stop_time = time(NULL);
 
   return nwritten;

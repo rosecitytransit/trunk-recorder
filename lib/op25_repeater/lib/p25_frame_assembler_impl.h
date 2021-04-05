@@ -57,6 +57,7 @@ namespace op25_repeater {
   long total_produced;
   gr::msg_queue::sptr d_msg_queue;
   int d_input_rate;
+  bool terminate_call;
 
   pmt::pmt_t d_tag_key;
   pmt::pmt_t d_tag_src;
@@ -71,6 +72,7 @@ namespace op25_repeater {
   void set_phase2_tdma(bool p);
   void reset_rx_status();
   Rx_Status get_rx_status();
+  bool get_call_terminated();
   typedef std::vector<bool>bit_vector;
   std::deque<int16_t> output_queue;
 
