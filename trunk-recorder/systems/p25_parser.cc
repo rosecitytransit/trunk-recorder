@@ -151,14 +151,14 @@ std::vector<TrunkMessage> P25Parser::decode_mbt_data(unsigned long opcode, boost
       message.sys_id = syid;
       message.freq = f1;
     }
-    BOOST_LOG_TRIVIAL(debug) << "mbt3b net stat: wacn " << std::dec << wacn << " syid " << syid << " ch1 " << ch1 << "(" << channel_id_to_string(ch1, sys_num) << ") ";
+    BOOST_LOG_TRIVIAL(trace) << "mbt3b net stat: wacn " << std::dec << wacn << " syid " << syid << " ch1 " << ch1 << "(" << channel_id_to_string(ch1, sys_num) << ") ";
   } else if (opcode == 0x3c) { // adjacent status
     unsigned long syid = bitset_shift_mask(header, 48, 0xfff);
     unsigned long rfid = bitset_shift_mask(header, 24, 0xff);
     unsigned long stid = bitset_shift_mask(header, 16, 0xff);
     unsigned long ch1 = bitset_shift_mask(mbt_data, 80, 0xffff);
     unsigned long ch2 = bitset_shift_mask(mbt_data, 64, 0xffff);
-    BOOST_LOG_TRIVIAL(debug) << "mbt3c adjacent status "
+    BOOST_LOG_TRIVIAL(trace) << "mbt3c adjacent status "
                              << "syid " << syid << " rfid " << rfid << " stid " << stid << " ch1 " << ch1 << " ch2 " << ch2;
   } else if (opcode == 0x04) { //  Unit to Unit Voice Service Channel Grant -Extended (UU_V_CH_GRANT)
     //unsigned long mfrid = bitset_shift_mask(header, 80, 0xff);
