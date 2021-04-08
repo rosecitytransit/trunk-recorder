@@ -934,10 +934,14 @@ void handle_call(TrunkMessage message, System *sys) {
 
     if ((call->get_talkgroup() == message.source) && (call->get_sys_num() == message.sys_num)) {
 <<<<<<< HEAD
+<<<<<<< HEAD
       BOOST_LOG_TRIVIAL(error) << "WARNING: Old call found w/this message.source. Old TG: " << call->get_talkgroup_display() << "/" << call->get_talkgroup() << "New TG: " << message.talkgroup << " New src: " << message.source;
 =======
       BOOST_LOG_TRIVIAL(error) << "WARNING: Old call found w/this message.source. Old TG: " << call->get_talkgroup_display() << "/" call->get_talkgroup() << "New TG: " << message.talkgroup << " New src: " << message.source;
 >>>>>>> adding message.source = call->talkgroup checking
+=======
+      BOOST_LOG_TRIVIAL(error) << "WARNING: Old call found w/this message.source. Old TG: " << call->get_talkgroup_display() << "/" << call->get_talkgroup() << "New TG: " << message.talkgroup << " New src: " << message.source;
+>>>>>>> changing meta message severity
     }
 
     if ((call->get_talkgroup() == message.talkgroup) && (call->get_sys_num() == message.sys_num)) {
