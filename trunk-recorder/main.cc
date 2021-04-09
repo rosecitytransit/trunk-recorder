@@ -1027,7 +1027,8 @@ void handle_message(std::vector<TrunkMessage> messages, System *sys) {
     switch (message.message_type) {
     case GRANT:
     case UPDATE:
-      handle_call(message, sys);
+      if (message.talkgroup != 0)
+        handle_call(message, sys);
       break;
 
     case CONTROL_CHANNEL:

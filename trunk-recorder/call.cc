@@ -456,11 +456,12 @@ void Call::update(TrunkMessage message) {
 }
 
 int Call::since_last_update() {
-  if (get_recorder()->get_call_terminated() == false) {
-    last_update = time(NULL);
-    BOOST_LOG_TRIVIAL(debug) << "Call not terminated: TG " << get_talkgroup_display() << " freq " << get_freq() << " elapsed " << elapsed();
-  }
-  return time(NULL) - last_update;
+  if (get_recorder() && get_recorder()->get_call_terminated() == true) {
+    last_update = time(0);
+    BOOST_LOG_TRIVIAL(debug) << "Call terminated: TG " << get_talkgroup_display() << " freq " << get_freq() << " elapsed " << elapsed();
+    return 10;
+  } else {
+  return time(NULL) - last_update; }
 }
 
 long Call::elapsed() {
