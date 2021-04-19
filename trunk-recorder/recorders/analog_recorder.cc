@@ -160,9 +160,9 @@ analog_recorder::analog_recorder(Source *src)
 
   wav_sink = gr::blocks::nonstop_wavfile_sink_impl::make(1, wave_sample_rate, 16, true); //  Configurable
 
-  BOOST_LOG_TRIVIAL(info) << "Creating decoder sink..." << std::endl;
+  BOOST_LOG_TRIVIAL(info) << "Creating decoder sink...";
   decoder_sink = gr::blocks::decoder_wrapper_impl::make(wave_sample_rate, src->get_num(), std::bind(&analog_recorder::decoder_callback_handler, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-  BOOST_LOG_TRIVIAL(info) << "Decoder sink created!" << std::endl;
+  BOOST_LOG_TRIVIAL(info) << "Decoder sink created!";
 
   // Try and get rid of the FSK wobble
   high_f_taps = gr::filter::firdes::high_pass(1, wave_sample_rate, 300, 50, gr::filter::firdes::WIN_HANN); // Configurable
