@@ -1030,7 +1030,11 @@ void handle_message(std::vector<TrunkMessage> messages, System *sys) {
     switch (message.message_type) {
     case GRANT:
     case UPDATE:
-      handle_call(message, sys);
+      if ((message.talkgroup != 0) && (message.freq != 0)) {
+        handle_call(message, sys);
+      } else {
+        BOOST_LOG_TRIVIAL(trace) << "Skipping call: Freq " << message.freq << " TG " << message.talkgroup << " Src " << message.source;
+      }
       break;
 
     case CONTROL_CHANNEL:
