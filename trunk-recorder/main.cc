@@ -1027,8 +1027,11 @@ void handle_message(std::vector<TrunkMessage> messages, System *sys) {
     switch (message.message_type) {
     case GRANT:
     case UPDATE:
-      if (message.talkgroup != 0)
+      if ((message.talkgroup != 0) && (message.freq != 0)) {
         handle_call(message, sys);
+      } else {
+        BOOST_LOG_TRIVIAL(trace) << "Skipping call: Freq " << message.freq << " TG " << message.talkgroup << " Src " << message.source;
+      }
       break;
 
     case CONTROL_CHANNEL:
@@ -1414,8 +1417,6 @@ int main(int argc, char **argv) {
 
   );
   
-  boost::log::register_simple_formatter_factory< boost::log::trivial::severity_level, char >("Severity");
-
   boost::log::register_simple_formatter_factory< boost::log::trivial::severity_level, char >("Severity");
 
   boost::log::add_common_attributes();
