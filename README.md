@@ -129,7 +129,7 @@ Here are the different arguments:
    - **broadcastifySystemId** - *(Optional)* System ID for Broadcastify Calls (this is an integer, and different from the RadioReference system ID)
    - **audioArchive** - should the recorded audio files be kept after successfully uploading them. The options are *true* and *false* (without quotes). The default is *true*.
    - **callLog** - should a json file with the call details be kept after successful uploads. The options are *true* and *false* (without quotes). The default is *true*.
-   - **dailyLog** - should daily log files with call details be created. The options are *true* and *false* (without quotes). The default is *false*.
+   - **dailyLog** - should daily log files with call details be created. The options are *true* and *false* (without quotes). The default is *false*. \
    Format is `start time,call length,recording length,talkgroup,emergency,source[;source],frequency;samples;errors;spikes[,frequency;samples;errors;spikes]`
    - **minDuration** - the minimum call (transmission) duration in seconds (decimals allowed), calls below this number will have recordings deleted and will not be uploaded. The default is *0* (no minimum duration).
    - **bandplan** - [SmartNet only] this is the SmartNet bandplan that will be used. The options are *800_standard*, *800_reband*, *800_splinter*, and *400_custom*. *800_standard* is the default.
