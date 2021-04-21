@@ -188,7 +188,7 @@ p25_frame_assembler_impl::general_work(int                        noutput_items,
     }
   }
   if (p1fdma.get_call_terminated()) {
-    BOOST_LOG_TRIVIAL(info) << "Call Terminated, NO amount produced: SRC: " << p1fdma.get_curr_src_id();
+    BOOST_LOG_TRIVIAL(trace) << "Call Terminated, NO amount produced: SRC: " << p1fdma.get_curr_src_id();
     terminate_call = true;
   }
   
@@ -201,7 +201,7 @@ p25_frame_assembler_impl::general_work(int                        noutput_items,
 
 
     if (amt_produce > (int)output_queue.size()) {
-      BOOST_LOG_TRIVIAL(info) << "Amt Prod: " << amt_produce << " output_queue: " << output_queue.size() << " noutput_items: " <<  noutput_items;
+      BOOST_LOG_TRIVIAL(trace) << "Amt Prod: " << amt_produce << " output_queue: " << output_queue.size() << " noutput_items: " <<  noutput_items;
       amt_produce = output_queue.size();
     }
 
@@ -220,12 +220,12 @@ p25_frame_assembler_impl::general_work(int                        noutput_items,
       }
       output_queue.erase(output_queue.begin(), output_queue.begin() + amt_produce);
 
-      
+      /*
          if (amt_produce < noutput_items) {
          std::fill(out + amt_produce, out + noutput_items, 0);
          amt_produce = noutput_items;
-         }
-      BOOST_LOG_TRIVIAL(error) << "setting silence_frame_count " << silence_frame_count << " to d_silence_frames: " << d_silence_frames << std::endl;
+         }*/
+      BOOST_LOG_TRIVIAL(trace) << "setting silence_frame_count " << silence_frame_count << " to d_silence_frames: " << d_silence_frames << std::endl;
       silence_frame_count = d_silence_frames;
     } else {
 
@@ -233,11 +233,11 @@ p25_frame_assembler_impl::general_work(int                        noutput_items,
         add_item_tag(0, nitems_written(0), pmt::intern("terminate"), pmt::from_long(1), d_tag_src);
         std::fill(out, out + 1, 0);
         amt_produce = 1;
-        BOOST_LOG_TRIVIAL(info) << "Call Terminated, NO amount produced: " << amt_produce << " SRC: " << p1fdma.get_curr_src_id() << " n written: " << nitems_written(0) << " silence_frame_count " << silence_frame_count;
+        BOOST_LOG_TRIVIAL(trace) << "Call Terminated, NO amount produced: " << amt_produce << " SRC: " << p1fdma.get_curr_src_id() << " n written: " << nitems_written(0) << " silence_frame_count " << silence_frame_count;
       }
       if (silence_frame_count > 0) {
         if (p1fdma.get_call_terminated()) {
-          BOOST_LOG_TRIVIAL(info) << "Call Terminated, amount produced: " << amt_produce << " SRC: " << p1fdma.get_curr_src_id() << " silence_frame_count " << silence_frame_count;
+          BOOST_LOG_TRIVIAL(trace) << "Call Terminated, amount produced: " << amt_produce << " SRC: " << p1fdma.get_curr_src_id() << " silence_frame_count " << silence_frame_count;
         }
       std::fill(out, out + noutput_items, 0);
       amt_produce = noutput_items;
