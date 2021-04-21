@@ -175,11 +175,11 @@ void Call::end_call() {
 
         for (int i = 0; i < src_list.size(); i++) {
           myfile2 << src_list[i].source;
-          if (i < (src_list.size()-1)) {
+          if (i < (src_list.size()-2)) {
             myfile2 << ";";
           }
         }
-        myfile2 << this->get_recorder()->get_source()->get_device() << ",";
+        //myfile2 << this->get_recorder()->get_source()->get_device() << ",";
 
         for (int i = 0; i < freq_count; i++) {
           myfile2 << "," << (freq_list[i].freq/1000000) << ";" << freq_list[i].total_len << ";" << freq_list[i].error_count << ";" << freq_list[i].spike_count;

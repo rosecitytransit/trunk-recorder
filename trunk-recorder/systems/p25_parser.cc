@@ -640,7 +640,7 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
   } else if (opcode == 0x37) { //
     BOOST_LOG_TRIVIAL(debug) << "tsbk37";
   } else if (opcode == 0x38) { //
-    BOOST_LOG_TRIVIAL(debug) << "tsbk38";
+    BOOST_LOG_TRIVIAL(trace) << "tsbk38";
   } else if (opcode == 0x39) { // secondary cc
     unsigned long rfid = bitset_shift_mask(tsbk, 72, 0xff);
     unsigned long stid = bitset_shift_mask(tsbk, 64, 0xff);
