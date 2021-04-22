@@ -539,7 +539,9 @@ bool load_config(string config_file) {
     config.log_file = pt.get<bool>("logFile", false);
     BOOST_LOG_TRIVIAL(info) << "Log to File: " << config.log_file;
     config.control_message_warn_rate = pt.get<int>("controlWarnRate", 10);
-    BOOST_LOG_TRIVIAL(info) << "Control channel warning rate: " << config.control_message_warn_rate;
+    BOOST_LOG_TRIVIAL(info) << "Control channel decoding warnings (< messages/second): " << config.control_message_warn_rate;
+    config.control_message_warn_updates = pt.get<float>("controlWarnUpdate", 3.0);
+    BOOST_LOG_TRIVIAL(info) << "Control channel decoding updates (seconds): " << config.control_message_warn_updates;
     config.control_retune_limit = pt.get<int>("controlRetuneLimit", 0);
     BOOST_LOG_TRIVIAL(info) << "Control channel retune limit: " << config.control_retune_limit;
 
@@ -1272,7 +1274,7 @@ void monitor_messages() {
 
     float timeDiff = currentTime - lastMsgCountTime;
 
-    if (timeDiff >= 3.0) {
+    if (timeDiff >= config.control_message_warn_updates) {
       check_message_count(timeDiff);
       lastMsgCountTime = currentTime;
     }
