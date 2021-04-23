@@ -180,7 +180,7 @@ void Call::end_call() {
     if (sys->get_daily_log()) {
       std::ofstream myfile2(dailylog_filename, std::ofstream::app);
       if (myfile2.is_open()) {
-        myfile2 << "\n" << this->start_time << "," << (this->stop_time - this->start_time) << "," << final_length << "," << this->talkgroup << "," << this->emergency << "," << this->priority << "," << this->duplex << "," this->mode << ",";
+        myfile2 << "\n" << this->start_time << "," << (this->stop_time - this->start_time) << "," << final_length << "," << this->talkgroup << "," << this->emergency << "," << this->priority << "," << this->duplex << "," << this->mode << ",";
 
         for (std::size_t i = 0; i < src_list.size(); i++) {
           myfile2 << src_list[i].source;
