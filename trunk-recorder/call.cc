@@ -77,6 +77,9 @@ Call::Call(long t, double f, System *s, Config c) {
   tdma_slot = 0;
   encrypted = false;
   emergency = false;
+  duplex = false;
+  mode = false;
+  priority = 0;
   set_freq(f);
   this->create_filename();
   this->update_talkgroup_display();
@@ -102,6 +105,9 @@ Call::Call(TrunkMessage message, System *s, Config c) {
   tdma_slot = message.tdma_slot;
   encrypted = message.encrypted;
   emergency = message.emergency;
+  duplex = message.duplex;
+  mode = message.mode;
+  priority = message.priority;
   set_freq(message.freq);
   add_source(message.source);
   this->create_filename();
@@ -144,6 +150,9 @@ void Call::end_call() {
       myfile << "\"start_time\": " << this->start_time << ",\n";
       myfile << "\"stop_time\": " << this->stop_time << ",\n";
       myfile << "\"emergency\": " << this->emergency << ",\n";
+      myfile << "\"duplex\": " << this->duplex << ",\n";
+      myfile << "\"mode\": " << this->mode << ",\n";
+      myfile << "\"priority\": " << this->priority << ",\n";
       //myfile << "\"source\": \"" << this->get_recorder()->get_source()->get_device() << "\",\n";
       myfile << "\"talkgroup\": " << this->talkgroup << ",\n";
       myfile << "\"srcList\": [ ";
@@ -171,7 +180,7 @@ void Call::end_call() {
     if (sys->get_daily_log()) {
       std::ofstream myfile2(dailylog_filename, std::ofstream::app);
       if (myfile2.is_open()) {
-        myfile2 << "\n" << this->start_time << "," << (this->stop_time - this->start_time) << "," << final_length << "," << this->talkgroup << "," << this->emergency << ";";
+        myfile2 << "\n" << this->start_time << "," << (this->stop_time - this->start_time) << "," << final_length << "," << this->talkgroup << "," << this->emergency << "," << this->priority << "," << this->duplex << "," this->mode << ",";
 
         for (std::size_t i = 0; i < src_list.size(); i++) {
           myfile2 << src_list[i].source;

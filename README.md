@@ -130,7 +130,9 @@ Here are the different arguments:
    - **audioArchive** - should the recorded audio files be kept after successfully uploading them. The options are *true* and *false* (without quotes). The default is *true*.
    - **callLog** - should a json file with the call details be kept after successful uploads. The options are *true* and *false* (without quotes). The default is *true*.
    - **dailyLog** - should daily log files with call details be created. The options are *true* and *false* (without quotes). The default is *false*. \
-   Format is `start time,call length,recording length,talkgroup,emergency,source[;source],frequency;samples;errors;spikes[,frequency;samples;errors;spikes]`
+   Format is `start time,call length,recording length,talkgroup,emergency,priority,duplex,mode,` \
+   `source[;source],frequency;samples;errors;spikes[,frequency;samples;errors;spikes]`. \
+   Priority, duplex and (circuit/packet) mode vaild for P25 only.
    - **minDuration** - the minimum call (transmission) duration in seconds (decimals allowed), calls below this number will have recordings deleted and will not be uploaded. The default is *0* (no minimum duration).
    - **bandplan** - [SmartNet only] this is the SmartNet bandplan that will be used. The options are *800_standard*, *800_reband*, *800_splinter*, and *400_custom*. *800_standard* is the default.
    - **bandplanBase** - [SmartNet, 400_custom only] this is for the *400_custom* bandplan only. This is the base frequency, specified in Hz.
@@ -150,6 +152,7 @@ Here are the different arguments:
  - **logFile** - save the console output to a file. The options are *true* or *false*, without quotes. The default is *false*.
  - **frequencyFormat** - the display format for frequencies to display in the console and log file. The options are *exp*, *mhz* & *hz*. The default is *exp*.
  - **controlWarnRate** - Log the control channel decode rate when it falls bellow this threshold. The default is *10*. The value of *-1* will always log the decode rate.
+ - **controlWarnUpdate** - How often (in seconds) the control channel decode rate should be logged when controlWarnRate is met. The default is *3*.
  - **statusAsString** - Show status as strings instead of numeric values The options are *true* or *false*, without quotes. The default is *true*.
  - **statusServer** - The URL for a WebSocket connect. Trunk Recorder will send JSON formatted update message to this address. HTTPS is currently not supported, but will be in the future. OpenMHz does not support this currently. [JSON format of messages](STATUS-JSON.md)
  - **broadcastSignals** - *(Optional)* Broadcast decoded signals to the status server. The default is *false*.
