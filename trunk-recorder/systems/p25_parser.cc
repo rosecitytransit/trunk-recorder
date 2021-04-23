@@ -221,6 +221,9 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
   message.sys_num = sys_num;
   message.talkgroup = 0;
   message.emergency = false;
+  message.duplex = false;
+  message.mode = false;
+  message.priority = 0;
   message.phase2_tdma = false;
   message.tdma_slot = 0;
   message.freq = 0;
