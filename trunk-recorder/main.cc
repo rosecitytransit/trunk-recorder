@@ -312,6 +312,8 @@ bool load_config(string config_file) {
       BOOST_LOG_TRIVIAL(info) << "Unit Script: " << system->get_unit_script();
       system->set_call_log(node.second.get<bool>("callLog", true));
       BOOST_LOG_TRIVIAL(info) << "Call Log: " << system->get_call_log();
+      system->set_daily_log(node.second.get<bool>("dailyLog", false));
+      BOOST_LOG_TRIVIAL(info) << "Daily Log: " << system->get_daily_log();
       system->set_audio_archive(node.second.get<bool>("audioArchive", true));
       BOOST_LOG_TRIVIAL(info) << "Audio Archive: " << system->get_audio_archive();
       system->set_talkgroups_file(node.second.get<std::string>("talkgroupsFile", ""));
@@ -536,7 +538,9 @@ bool load_config(string config_file) {
     config.log_file = pt.get<bool>("logFile", false);
     BOOST_LOG_TRIVIAL(info) << "Log to File: " << config.log_file;
     config.control_message_warn_rate = pt.get<int>("controlWarnRate", 10);
-    BOOST_LOG_TRIVIAL(info) << "Control channel warning rate: " << config.control_message_warn_rate;
+    BOOST_LOG_TRIVIAL(info) << "Control channel decoding warnings (< messages/second): " << config.control_message_warn_rate;
+    config.control_message_warn_updates = pt.get<float>("controlWarnUpdate", 3.0);
+    BOOST_LOG_TRIVIAL(info) << "Control channel decoding updates (seconds): " << config.control_message_warn_updates;
     config.control_retune_limit = pt.get<int>("controlRetuneLimit", 0);
     BOOST_LOG_TRIVIAL(info) << "Control channel retune limit: " << config.control_retune_limit;
 
@@ -656,9 +660,9 @@ bool start_recorder(Call *call, TrunkMessage message, System *sys) {
       //int total_recorders = get_total_recorders();
 
       if (recorder) {
-        if (message.meta.length()) {
+        /* if (message.meta.length()) {
           BOOST_LOG_TRIVIAL(debug) << message.meta;
-        }
+        } */
 
         recorder->start(call);
         call->set_recorder(recorder);
@@ -1202,7 +1206,20 @@ void monitor_messages() {
   while (1) {
 
     if (exit_flag) { // my action when signal set it 1
-      printf("\n Signal caught!\n");
+      BOOST_LOG_TRIVIAL(info) << "Signal caught! Closing calls...";
+      for (vector<Call *>::iterator it = calls.begin(); it != calls.end();) {
+        Call *call = *it;
+        Recorder *recorder = call->get_recorder();
+        call->end_call();
+        stats.send_call_end(call);
+        if (recorder != NULL) {
+          stats.send_recorder(recorder);
+        }
+        it = calls.erase(it);
+        delete call;
+      }
+      stats.send_calls_active(calls);
+      BOOST_LOG_TRIVIAL(info) << "Exiting...";
       return;
     }
 
@@ -1256,7 +1273,7 @@ void monitor_messages() {
 
     float timeDiff = currentTime - lastMsgCountTime;
 
-    if (timeDiff >= 3.0) {
+    if (timeDiff >= config.control_message_warn_updates) {
       check_message_count(timeDiff);
       lastMsgCountTime = currentTime;
     }

@@ -135,9 +135,13 @@ protected:
   bool sigmf_recording;
   bool encrypted;
   bool emergency;
+  bool mode;
+  bool duplex;
+  long priority;
   char filename[255];
   char converted_filename[255];
   char status_filename[255];
+  char dailylog_filename[255];
   char debug_filename[255];
   char sigmf_filename[255];
   char path[255];
