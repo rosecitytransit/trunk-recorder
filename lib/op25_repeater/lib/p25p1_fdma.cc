@@ -383,10 +383,10 @@ p25p1_fdma::process_TTDU()
 {
 	process_duid(framer->duid, framer->nac, NULL, 0);
 
-	if ((d_do_imbe || d_do_audio_output) && (framer->duid == 0x3 || framer->duid == 0xf)) {  // voice termination
+	/* if ((d_do_imbe || d_do_audio_output) && (framer->duid == 0x3 || framer->duid == 0xf)) {  // voice termination
 		op25audio.send_audio_flag(op25_audio::DRAIN);
 		terminate_call = true;
-	}
+	} */
 }
 
 void
@@ -793,7 +793,10 @@ p25p1_fdma::rx_sym (const uint8_t *syms, int nsyms)
 				}
 			}
 		}
-  	}  // end of complete frame
+	} else { // end of complete frame
+		op25audio.send_audio_flag(op25_audio::DRAIN);
+		terminate_call = true;
+	}
   }
   if (d_do_msgq && !d_msg_queue->full_p()) {
     // check for timeout
