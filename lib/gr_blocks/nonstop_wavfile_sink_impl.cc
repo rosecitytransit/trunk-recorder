@@ -267,7 +267,7 @@ int nonstop_wavfile_sink_impl::dowork(int noutput_items,  gr_vector_const_void_s
   //long curr_src_id = 0;
 
   for (unsigned int i = 0; i < tags.size(); i++) {
-    if (pmt::eq(this_key, tags[i].key) && d_current_call->get_system_type() == "conventionalP25") {
+    if (pmt::eq(this_key, tags[i].key)) {
       long src_id  = pmt::to_long(tags[i].value);
       pos = d_sample_count + (tags[i].offset - nitems_read(0));
       // double   sec = (double)pos  / (double)d_sample_rate;

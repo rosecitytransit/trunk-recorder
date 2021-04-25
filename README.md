@@ -131,7 +131,7 @@ Here are the different arguments:
    - **callLog** - should a json file with the call details be kept after successful uploads. The options are *true* and *false* (without quotes). The default is *true*.
    - **dailyLog** - should daily log files with call details be created. The options are *true* and *false* (without quotes). The default is *false*. \
    Format is `start time,call length,recording length,talkgroup,emergency,priority,duplex,mode,` \
-   `source[;source],frequency;samples;errors;spikes[,frequency;samples;errors;spikes]`. \
+   `source[|source],frequency|samples|errors|spikes[,frequency|samples|errors|spikes]`. \
    Priority, duplex and (circuit/packet) mode vaild for P25 only.
    - **minDuration** - the minimum call (transmission) duration in seconds (decimals allowed), calls below this number will have recordings deleted and will not be uploaded. The default is *0* (no minimum duration).
    - **bandplan** - [SmartNet only] this is the SmartNet bandplan that will be used. The options are *800_standard*, *800_reband*, *800_splinter*, and *400_custom*. *800_standard* is the default.

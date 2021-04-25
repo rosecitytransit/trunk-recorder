@@ -180,18 +180,21 @@ void Call::end_call() {
     if (sys->get_daily_log()) {
       std::ofstream myfile2(dailylog_filename, std::ofstream::app);
       if (myfile2.is_open()) {
-        myfile2 << "\n" << this->start_time << "," << (this->stop_time - this->start_time) << "," << final_length << "," << this->talkgroup << "," << this->emergency << "," << this->priority << "," << this->duplex << "," << this->mode << ",";
+        myfile2 << "\n" << this->start_time << "," << (this->stop_time - this->start_time) << "," << (int)(final_length + 0.5) << "," << this->talkgroup << "," << this->emergency << "," << this->priority << "," << this->duplex << "," << this->mode << ",";
 
         for (std::size_t i = 0; i < src_list.size(); i++) {
           myfile2 << src_list[i].source;
           if (i < (src_list.size()-1)) {
-            myfile2 << ";";
+            myfile2 << "|";
           }
         }
         //myfile2 << this->get_recorder()->get_source()->get_device() << ",";
 
+        if (this->curr_freq != freq_list[0].freq)
+          BOOST_LOG_TRIVIAL(error) << "Warning: curr_freq (used in file name) " << this->curr_freq << " != " << freq_list[0].freq << ", 1st freq in daily log.";
+
         for (int i = 0; i < freq_count; i++) {
-          myfile2 << "," << (freq_list[i].freq/1000000) << ";" << freq_list[i].total_len << ";" << freq_list[i].error_count << ";" << freq_list[i].spike_count;
+          myfile2 << "," << (int)freq_list[i].freq << "|" << freq_list[i].total_len << "|" << freq_list[i].error_count << "|" << freq_list[i].spike_count;
           //would like to include phase2 slot here
         }
         myfile2.close();
@@ -493,7 +496,7 @@ void Call::update(TrunkMessage message) {
 int Call::since_last_update() {
  if (get_recorder() && (get_recorder()->get_call_terminated() == false)) {
     last_update = time(NULL);
-    BOOST_LOG_TRIVIAL(debug) << "Call not terminated: TG " << get_talkgroup_display() << " freq " << get_freq() << " elapsed " << elapsed();
+    BOOST_LOG_TRIVIAL(trace) << "Call not terminated: TG " << get_talkgroup_display() << " freq " << get_freq() << " elapsed " << elapsed();
   }
   return time(NULL) - last_update;
 }
