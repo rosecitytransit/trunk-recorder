@@ -190,9 +190,6 @@ void Call::end_call() {
         }
         //myfile2 << this->get_recorder()->get_source()->get_device() << ",";
 
-        if (this->curr_freq != freq_list[0].freq)
-          BOOST_LOG_TRIVIAL(error) << "Warning: curr_freq (used in file name) " << this->curr_freq << " != " << freq_list[0].freq << ", 1st freq in daily log.";
-
         for (int i = 0; i < freq_count; i++) {
           myfile2 << "," << (int)freq_list[i].freq << "|" << freq_list[i].total_len << "|" << freq_list[i].error_count << "|" << freq_list[i].spike_count;
           //would like to include phase2 slot here

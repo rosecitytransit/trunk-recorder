@@ -734,6 +734,7 @@ p25p1_fdma::rx_sym (const uint8_t *syms, int nsyms)
 {
   struct timeval currtime;
   curr_src_id = 0;
+  bool callstarted = false;
 
   for (int i1 = 0; i1 < nsyms; i1++){
   	if(framer->rx_sym(syms[i1])) {   // complete frame was detected
@@ -743,6 +744,8 @@ p25p1_fdma::rx_sym (const uint8_t *syms, int nsyms)
 		if (framer->nac == 0) {  // discard frame if NAC is invalid
 			return;
 		}
+		if (framer->duid != 0x07)
+		  callstarted = true;
 		terminate_call = false;
 		// extract additional signalling information and voice codewords
 		switch(framer->duid) {
@@ -793,9 +796,11 @@ p25p1_fdma::rx_sym (const uint8_t *syms, int nsyms)
 				}
 			}
 		}
-	} else { // end of complete frame
-		op25audio.send_audio_flag(op25_audio::DRAIN);
+	} else if (callstarted == true) { // end of complete frame
+		//fprintf(stderr, "terminating call!!!\n");
 		terminate_call = true;
+		//op25audio.send_audio_flag(op25_audio::DRAIN);
+		callstarted = false;
 	}
   }
   if (d_do_msgq && !d_msg_queue->full_p()) {
