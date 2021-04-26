@@ -1,4 +1,6 @@
-<?php //from http://topnew.net/chart
+<?php
+//modified from: Topnew CMS Chart v5.5.5 - Released on 2016.05.05
+// The MIT License (MIT) Copyright (c) 1998-2015, Topnew Geo, http://topnew.net/chart
 header('Content-type: image/svg+xml');
 header('Vary: Accept-Encoding');
 $logfiles = "";
