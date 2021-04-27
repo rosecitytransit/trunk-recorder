@@ -212,6 +212,7 @@ p25p1_fdma::p25p1_fdma(int sys_num, const op25_audio& udp, int debug, bool do_im
   rx_status.error_count = 0;
   rx_status.total_len = 0;
   rx_status.spike_count = 0;
+  rx_status.last_update = time(NULL);
   for (int i=0; i<20; i++)
     error_history[i] = -1;
 }
@@ -689,6 +690,7 @@ p25p1_fdma::process_voice(const bit_vector& A)
       }
       rx_status.error_count += imbe_error;
       rx_status.total_len += 144;
+      //rx_status.last_update = time(NULL);
 			// output one 32-byte msg per 0.020 sec.
 			// also, 32*9 = 288 byte pkts (for use via UDP)
 			sprintf(s, "%03x %03x %03x %03x %03x %03x %03x %03x\n", u[0], u[1], u[2], u[3], u[4], u[5], u[6], u[7]);
@@ -734,18 +736,16 @@ p25p1_fdma::rx_sym (const uint8_t *syms, int nsyms)
 {
   struct timeval currtime;
   curr_src_id = 0;
-  bool callstarted = false;
 
   for (int i1 = 0; i1 < nsyms; i1++){
   	if(framer->rx_sym(syms[i1])) {   // complete frame was detected
 
     rx_status.error_count += framer->bch_errors;
     rx_status.total_len += 64;
+    rx_status.last_update = time(NULL);
 		if (framer->nac == 0) {  // discard frame if NAC is invalid
 			return;
 		}
-		if (framer->duid != 0x07)
-		  callstarted = true;
 		terminate_call = false;
 		// extract additional signalling information and voice codewords
 		switch(framer->duid) {
@@ -796,12 +796,7 @@ p25p1_fdma::rx_sym (const uint8_t *syms, int nsyms)
 				}
 			}
 		}
-	} else if (callstarted == true) { // end of complete frame
-		//fprintf(stderr, "terminating call!!!\n");
-		terminate_call = true;
-		//op25audio.send_audio_flag(op25_audio::DRAIN);
-		callstarted = false;
-	}
+	}  // end of complete frame
   }
   if (d_do_msgq && !d_msg_queue->full_p()) {
     // check for timeout

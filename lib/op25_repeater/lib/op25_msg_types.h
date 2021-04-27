@@ -30,7 +30,7 @@ static const int16_t PROTOCOL_DMR = 1;
 // P25 Messages
 //   message types < 0 are special
 //   message types >= 0 are based on DUID (0 thru 15)
-static const int16_t M_P25_TIMEOUT   = 2;
+static const int16_t M_P25_TIMEOUT   = -1;
 static const int16_t M_P25_UI_REQ    = -2;
 static const int16_t M_P25_JSON_DATA = -3;
 
