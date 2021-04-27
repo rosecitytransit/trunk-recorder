@@ -21,8 +21,12 @@ void Call::create_filename() {
   boost::filesystem::create_directories(path_string);
 
   int nchars;
-  nchars = snprintf(filename, 255, "%s/%ld-%ld_%.0f.wav", path_string.c_str(), talkgroup, start_time, curr_freq);
 
+  if (sys->get_short_name().length() == 2) {
+    nchars = snprintf(filename, 255, "%s/%02d%02d%02d-%ld.wav", path_string.c_str(), ltm->tm_hour, ltm->tm_min, ltm->tm_sec, talkgroup);
+  } else {
+  nchars = snprintf(filename, 255, "%s/%ld-%ld_%.0f.wav", path_string.c_str(), talkgroup, start_time, curr_freq);
+  }
   if (nchars >= 255) {
     BOOST_LOG_TRIVIAL(error) << "Call: Path longer than 255 charecters";
   }
@@ -144,7 +148,7 @@ void Call::end_call() {
     std::ofstream myfile(status_filename);
 
 
-    if (myfile.is_open()) {
+    if (myfile.is_open() && (sys->get_short_name().length() > 3)) {
       myfile << "{\n";
       myfile << "\"freq\": " << this->curr_freq << ",\n";
       myfile << "\"start_time\": " << this->start_time << ",\n";
@@ -184,6 +188,14 @@ void Call::end_call() {
 
         for (std::size_t i = 0; i < src_list.size(); i++) {
           myfile2 << src_list[i].source;
+          if ((src_list[i].source > 2000) && (src_list[i].source < 8000)) {
+            char command[25];
+            snprintf(command, 24, "php getblock.php %ld", src_list[i].source);
+            //redi::ipstream pipe("php getblock.php %ld", src_list[i].source);
+            FILE* pipe = popen(command, "r");
+            myfile2 << pipe;
+            pclose(pipe);
+          }
           if (i < (src_list.size()-1)) {
             myfile2 << "|";
           }
@@ -491,11 +503,18 @@ void Call::update(TrunkMessage message) {
 }
 
 int Call::since_last_update() {
- if (get_recorder() && (get_recorder()->get_call_terminated() == false)) {
+/* if (get_recorder() && (get_recorder()->get_call_terminated() == false)) {
     last_update = time(NULL);
     BOOST_LOG_TRIVIAL(trace) << "Call not terminated: TG " << get_talkgroup_display() << " freq " << get_freq() << " elapsed " << elapsed();
+  } */
+  if (get_recorder()) {
+    Rx_Status temp = recorder->get_rx_status();
+    BOOST_LOG_TRIVIAL(trace) << "temp.last_update: " << temp.last_update << " diff: " << time(NULL) - temp.last_update;
+    return time(NULL) - temp.last_update;
+    //last_update = temp.last_update;
+  } else {
+    return time(NULL) - last_update;
   }
-  return time(NULL) - last_update;
 }
 
 long Call::elapsed() {
