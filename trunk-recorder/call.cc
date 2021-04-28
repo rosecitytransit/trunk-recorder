@@ -145,10 +145,11 @@ void Call::end_call() {
       freq_list[freq_count - 1].error_count = rx_status.error_count;
     }
 
+    if (sys->get_short_name().length() > 3) {
     std::ofstream myfile(status_filename);
 
 
-    if (myfile.is_open() && (sys->get_short_name().length() > 3)) {
+    if (myfile.is_open()) {
       myfile << "{\n";
       myfile << "\"freq\": " << this->curr_freq << ",\n";
       myfile << "\"start_time\": " << this->start_time << ",\n";
@@ -179,7 +180,7 @@ void Call::end_call() {
       myfile << "]\n";
       myfile << "}\n";
       myfile.close();
-    }
+    } }
 
     if (sys->get_daily_log()) {
       std::ofstream myfile2(dailylog_filename, std::ofstream::app);
@@ -190,10 +191,12 @@ void Call::end_call() {
           myfile2 << src_list[i].source;
           if ((src_list[i].source > 2000) && (src_list[i].source < 8000)) {
             char command[25];
+            char buffer[5];
             snprintf(command, 24, "php getblock.php %ld", src_list[i].source);
             //redi::ipstream pipe("php getblock.php %ld", src_list[i].source);
             FILE* pipe = popen(command, "r");
-            myfile2 << pipe;
+            int fgets(buffer, 5, pipe);
+	        myfile2 << buffer;
             pclose(pipe);
           }
           if (i < (src_list.size()-1)) {
