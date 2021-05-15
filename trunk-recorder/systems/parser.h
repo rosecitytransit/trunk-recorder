@@ -13,6 +13,7 @@ enum MessageType {
   AFFILIATION = 6,
   SYSID = 7,
   ACKRESP = 8,
+  LOCREG = 9,
   UNKNOWN = 99
 };
 

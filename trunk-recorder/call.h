@@ -118,6 +118,7 @@ public:
 protected:
   State state;
   long talkgroup;
+  long msgsource;
   double curr_freq;
   System *sys;
   std::string short_name;

@@ -595,7 +595,16 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
   } else if (opcode == 0x2a) { // Group Affiliation Query
     BOOST_LOG_TRIVIAL(debug) << "tsbk2a Group Affiliation Query";
   } else if (opcode == 0x2b) { // Location Registration Response
-    BOOST_LOG_TRIVIAL(debug) << "tsbk2b Location Registration Response";
+      // unsigned long mfrid  = bitset_shift_mask(tsbk,80,0xff);
+    unsigned long ga = bitset_shift_mask(tsbk, 56, 0xffff);
+    unsigned long rv = bitset_shift_mask(tsbk, 72, 0x03);
+    unsigned long sa = bitset_shift_mask(tsbk, 16, 0xffffff);
+
+    message.message_type = LOCREG;
+    message.talkgroup = ga;
+    message.source = sa;
+
+    BOOST_LOG_TRIVIAL(debug) << "tsbk2b\tLocation Registration Response\tga " << std::dec << ga  << "\tsa " << sa << "\tValue: " << rv;
   } else if (opcode == 0x2c) { // Unit Registration Response
     // unsigned long mfrid  = bitset_shift_mask(tsbk,80,0xff);
     // unsigned long opts  = bitset_shift_mask(tsbk,72,0xff);
@@ -824,7 +833,7 @@ std::vector<TrunkMessage> P25Parser::parse_message(gr::message::sptr msg) {
     messages.push_back(message);
     return messages;
   } else if (type == -1) { //	# timeout
-    BOOST_LOG_TRIVIAL(debug) << "process_data_unit timeout";
+    //BOOST_LOG_TRIVIAL(debug) << "process_data_unit timeout";
 
     // self.update_state('timeout', curr_time)
     messages.push_back(message);

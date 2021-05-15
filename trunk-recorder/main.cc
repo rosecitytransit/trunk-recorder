@@ -894,6 +894,14 @@ void unit_ack(string unit_script, string shortName, long unit) {
   }
 }
 
+void unit_locreg(string unit_script, string shortName, long unit, long talkgroup) {
+  if ((unit_script.length() != 0) && (unit != 0)) {
+    char   shell_command[200];
+    sprintf(shell_command, "%s %s %li locreg %li &", unit_script.c_str(), shortName.c_str(), unit, talkgroup);
+    int rc = system(shell_command);
+  }
+}
+
 void group_affiliation(string unit_script, string shortName, long unit, long talkgroup) {
   unit_affiliations[unit] = talkgroup;
 
@@ -930,7 +938,7 @@ void handle_call(TrunkMessage message, System *sys) {
       BOOST_LOG_TRIVIAL(error) << "WARNING: Old call found w/this message.source. Old TG: " << call->get_talkgroup_display() << "/" << call->get_talkgroup() << "New TG: " << message.talkgroup << " New src: " << message.source;
     }
 
-    if ((call->get_talkgroup() == message.talkgroup) && (call->get_sys_num() == message.sys_num)) {
+    if ((call->get_talkgroup() == message.talkgroup) && (call->get_sys_num() == message.sys_num) && (call->get_freq() == message.freq)) {
       call_found = true;
 
       // Check to make sure the Freq and TDMA info match up with what is being currenty recorded
@@ -1063,6 +1071,10 @@ void handle_message(std::vector<TrunkMessage> messages, System *sys) {
 
     case ACKRESP:
       unit_ack(sys->get_unit_script(), sys->get_short_name(), message.source);
+      break;
+
+    case LOCREG:
+      unit_locreg(sys->get_unit_script(), sys->get_short_name(), message.source, message.talkgroup);
       break;
 
     case UNKNOWN:
@@ -1256,6 +1268,10 @@ void monitor_messages() {
                   lastUnitCheckTime = currentTime;
               }
        */
+
+      if (msg->type() == -1) {
+        BOOST_LOG_TRIVIAL(error) << "[" << sys->get_short_name() << "]\t process_data_unit timeout";
+      }
 
       msg.reset();
     } else {
@@ -1488,7 +1504,7 @@ int main(int argc, char **argv) {
     logging::add_file_log(
         keywords::file_name = "logs/%m-%d-%Y_%H%M_%2N.log",
         keywords::format = "[%TimeStamp%] (%Severity%)   %Message%",
-        keywords::rotation_size = 10 * 1024 * 1024,
+        keywords::rotation_size = 100 * 1024 * 1024,
         keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0),
         keywords::auto_flush = true);
   }

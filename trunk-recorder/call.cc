@@ -97,6 +97,7 @@ Call::Call(TrunkMessage message, System *s, Config c) {
   curr_src_id = 0;
   curr_freq = 0;
   talkgroup = message.talkgroup;
+  msgsource = message.source;
   sys = s;
   start_time = time(NULL);
   stop_time = time(NULL);
@@ -140,10 +141,13 @@ void Call::end_call() {
 
     if (freq_count > 0) {
       Rx_Status rx_status = recorder->get_rx_status();
+      if (rx_status.last_update > 0)
+        stop_time = rx_status.last_update;
       freq_list[freq_count - 1].total_len = rx_status.total_len;
       freq_list[freq_count - 1].spike_count = rx_status.spike_count;
       freq_list[freq_count - 1].error_count = rx_status.error_count;
     }
+
 
     if (sys->get_short_name().length() > 3) {
     std::ofstream myfile(status_filename);
@@ -180,6 +184,8 @@ void Call::end_call() {
       myfile << "]\n";
       myfile << "}\n";
       myfile.close();
+    } else {
+      BOOST_LOG_TRIVIAL(error) << "Can't open JSON file for call info. TG: " << this->talkgroup << " start_time: " << this->start_time << " Freq: " << this->curr_freq;
     } }
 
     if (sys->get_daily_log()) {
@@ -187,22 +193,22 @@ void Call::end_call() {
       if (myfile2.is_open()) {
         myfile2 << "\n" << this->start_time << "," << (this->stop_time - this->start_time) << "," << (int)(final_length + 0.5) << "," << this->talkgroup << "," << this->emergency << "," << this->priority << "," << this->duplex << "," << this->mode << ",";
 
+        myfile2 << this->msgsource;
         for (std::size_t i = 0; i < src_list.size(); i++) {
-          myfile2 << src_list[i].source;
+          myfile2 << "|" << src_list[i].source;
           if ((src_list[i].source > 2000) && (src_list[i].source < 8000)) {
             char command[25];
-            char buffer[5];
+            char buffer[10];
             snprintf(command, 24, "php getblock.php %ld", src_list[i].source);
             //redi::ipstream pipe("php getblock.php %ld", src_list[i].source);
             FILE* pipe = popen(command, "r");
-            int fgets(buffer, 5, pipe);
+              fgets(buffer, 10, pipe);
 	        myfile2 << buffer;
             pclose(pipe);
           }
-          if (i < (src_list.size()-1)) {
-            myfile2 << "|";
-          }
         }
+        if ((sys->get_short_name() != "cc") && (sys->get_short_name() != "osrppdxc"))
+           myfile2 << "|" << sys->get_short_name();
         //myfile2 << this->get_recorder()->get_source()->get_device() << ",";
 
         for (int i = 0; i < freq_count; i++) {
@@ -210,6 +216,8 @@ void Call::end_call() {
           //would like to include phase2 slot here
         }
         myfile2.close();
+      } else {
+        BOOST_LOG_TRIVIAL(error) << "Can't open daily log file for call: " << this->start_time << "," << (this->stop_time - this->start_time) << "," << (int)(final_length + 0.5) << "," << this->talkgroup << "," << this->emergency << "," << this->priority << "," << this->duplex << "," << this->mode  << "," << sys->get_short_name() << "," << (int)freq_list[0].freq << "|" << freq_list[0].total_len << "|" << freq_list[0].error_count << "|" << freq_list[0].spike_count  ;
       }
     }
 
@@ -510,12 +518,13 @@ int Call::since_last_update() {
     last_update = time(NULL);
     BOOST_LOG_TRIVIAL(trace) << "Call not terminated: TG " << get_talkgroup_display() << " freq " << get_freq() << " elapsed " << elapsed();
   } */
-  if (get_recorder()) {
-    Rx_Status temp = recorder->get_rx_status();
-    BOOST_LOG_TRIVIAL(trace) << "temp.last_update: " << temp.last_update << " diff: " << time(NULL) - temp.last_update;
-    return time(NULL) - temp.last_update;
+  long last_rx;
+  if (get_recorder() && (last_rx = recorder->get_rx_status().last_update)) {
+    BOOST_LOG_TRIVIAL(trace) << "temp.last_update: " << last_rx << " diff: " << time(NULL) - last_rx;
+    return time(NULL) - last_rx;
     //last_update = temp.last_update;
   } else {
+    BOOST_LOG_TRIVIAL(trace) << "last_update: " << last_update << " diff: " << time(NULL) - last_update;
     return time(NULL) - last_update;
   }
 }
