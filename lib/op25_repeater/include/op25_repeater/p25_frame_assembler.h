@@ -55,7 +55,6 @@ namespace gr {
       virtual void set_slotid(int slotid) {}
       virtual void set_phase2_tdma(bool p) {}
       virtual void reset_rx_status() {}
-      virtual bool get_call_terminated() {}
       virtual Rx_Status get_rx_status() {Rx_Status rx_status; return rx_status; }
     };
 

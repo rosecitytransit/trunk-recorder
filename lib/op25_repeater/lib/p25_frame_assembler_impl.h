@@ -72,7 +72,6 @@ namespace op25_repeater {
   void set_phase2_tdma(bool p);
   void reset_rx_status();
   Rx_Status get_rx_status();
-  bool get_call_terminated();
   typedef std::vector<bool>bit_vector;
   std::deque<int16_t> output_queue;
 

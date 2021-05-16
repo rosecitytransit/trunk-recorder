@@ -126,6 +126,7 @@ Call::~Call() {
 void Call::restart_call() {
 }
 
+
 void Call::end_call() {
   std::stringstream shell_command;
   std::string shell_command_string;
@@ -139,6 +140,9 @@ void Call::end_call() {
 
     final_length = recorder->get_current_length();
 
+
+    
+
     if (freq_count > 0) {
       Rx_Status rx_status = recorder->get_rx_status();
       if (rx_status.last_update > 0)
@@ -148,10 +152,8 @@ void Call::end_call() {
       freq_list[freq_count - 1].error_count = rx_status.error_count;
     }
 
-
     if (sys->get_short_name().length() > 3) {
     std::ofstream myfile(status_filename);
-
 
     if (myfile.is_open()) {
       myfile << "{\n";
@@ -514,10 +516,6 @@ void Call::update(TrunkMessage message) {
 }
 
 int Call::since_last_update() {
-/* if (get_recorder() && (get_recorder()->get_call_terminated() == false)) {
-    last_update = time(NULL);
-    BOOST_LOG_TRIVIAL(trace) << "Call not terminated: TG " << get_talkgroup_display() << " freq " << get_freq() << " elapsed " << elapsed();
-  } */
   long last_rx;
   if (get_recorder() && (last_rx = recorder->get_rx_status().last_update)) {
     BOOST_LOG_TRIVIAL(trace) << "temp.last_update: " << last_rx << " diff: " << time(NULL) - last_rx;

@@ -168,7 +168,8 @@ int
 p25_frame_assembler_impl::general_work(int                        noutput_items,
                                        gr_vector_int            & ninput_items,
                                        gr_vector_const_void_star& input_items,
-                                           gr_vector_void_star &output_items) {
+                                       gr_vector_void_star      & output_items)
+{
   terminate_call = false;
   const uint8_t *in = (const uint8_t *)input_items[0];
 

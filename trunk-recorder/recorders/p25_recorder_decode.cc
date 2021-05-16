@@ -49,11 +49,6 @@ void p25_recorder_decode::reset_rx_status() {
 Rx_Status p25_recorder_decode::get_rx_status() {
   return op25_frame_assembler->get_rx_status();
 }
-
-bool p25_recorder_decode::get_call_terminated() {
-  return op25_frame_assembler->get_call_terminated();
-}
-
 void p25_recorder_decode::initialize(  int silence_frames) {
   //OP25 Slicer
   const float l[] = {-2.0, 0.0, 2.0, 4.0};
