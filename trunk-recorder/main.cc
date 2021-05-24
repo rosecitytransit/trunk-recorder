@@ -1177,7 +1177,7 @@ void retune_system(System *system) {
   }
 }
 
-void check_message_count(float timeDiff) {
+void check_message_count(float timeDiff, bool warn) {
   stats.send_config(sources, systems);
   stats.send_sys_rates(systems, timeDiff);
 
@@ -1209,12 +1209,8 @@ void check_message_count(float timeDiff) {
         sys->retune_attempts = 0;
       }
 
-      currentTime = time(NULL);
-
-      float timeDiff = currentTime - lastMsgWarnTime;
-      if ((msgs_decoded_per_second < config.control_message_warn_rate || config.control_message_warn_rate == -1) && (timeDiff >= config.control_message_warn_updates)) {
+      if ((msgs_decoded_per_second < config.control_message_warn_rate || config.control_message_warn_rate == -1) && (warn == true)) {
         BOOST_LOG_TRIVIAL(error) << "[" << sys->get_short_name() << "]\t Control Channel Message Decode Rate: " << msgs_decoded_per_second << "/sec, count:  " << sys->message_count;
-        lastMsgWarnTime = currentTime;
       }
     }
     sys->message_count = 0;
@@ -1306,9 +1302,15 @@ void monitor_messages() {
     currentTime = time(NULL);
 
     float timeDiff = currentTime - lastMsgCountTime;
+    float timeDiff2 = currentTime - lastMsgWarnTime;
+    bool warn = false;
 
     if (timeDiff >= 3.0) {
-      check_message_count(timeDiff);
+      if (timeDiff2 >= config.control_message_warn_updates) {
+        lastMsgWarnTime = currentTime;
+        warn = true;
+      }
+      check_message_count(timeDiff, warn);
       lastMsgCountTime = currentTime;
     }
 
