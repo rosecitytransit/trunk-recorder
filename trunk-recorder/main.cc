@@ -902,6 +902,15 @@ void unit_locreg(string unit_script, string shortName, long unit, long talkgroup
   }
 }
 
+
+void unit_datagrant(string unit_script, string shortName, long unit) {
+  if ((unit_script.length() != 0) && (unit != 0)) {
+    char   shell_command[200];
+    sprintf(shell_command, "%s %s %li data &", unit_script.c_str(), shortName.c_str(), unit);
+    int rc = system(shell_command);
+  }
+}
+
 void group_affiliation(string unit_script, string shortName, long unit, long talkgroup) {
   unit_affiliations[unit] = talkgroup;
 
@@ -1075,6 +1084,10 @@ void handle_message(std::vector<TrunkMessage> messages, System *sys) {
 
     case LOCREG:
       unit_locreg(sys->get_unit_script(), sys->get_short_name(), message.source, message.talkgroup);
+      break;
+
+    case DATA_GRANT:
+      unit_datagrant(sys->get_unit_script(), sys->get_short_name(), message.source);
       break;
 
     case UNKNOWN:

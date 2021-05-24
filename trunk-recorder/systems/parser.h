@@ -14,6 +14,7 @@ enum MessageType {
   SYSID = 7,
   ACKRESP = 8,
   LOCREG = 9,
+  DATA_GRANT = 10,
   UNKNOWN = 99
 };
 

@@ -540,7 +540,6 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
     message.encrypted = encrypted;
     message.duplex = duplex;
     message.mode = mode;
-    message.priority = priority;
     message.source = sa;
     message.freq = fT;
 
