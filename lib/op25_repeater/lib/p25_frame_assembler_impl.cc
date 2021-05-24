@@ -156,10 +156,6 @@ Rx_Status p25_frame_assembler_impl::get_rx_status() {
   return p1fdma.get_rx_status();
 }
 
-bool p25_frame_assembler_impl::get_call_terminated() {
-  return p1fdma.get_call_terminated();
-}
-
 void p25_frame_assembler_impl::clear() {
   p1fdma.clear();
 }
