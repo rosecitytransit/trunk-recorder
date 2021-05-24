@@ -1196,8 +1196,12 @@ void check_message_count(float timeDiff) {
         sys->retune_attempts = 0;
       }
 
-      if (msgs_decoded_per_second < config.control_message_warn_rate || config.control_message_warn_rate == -1) {
+      currentTime = time(NULL);
+
+      float timeDiff = currentTime - lastMsgWarnTime;
+      if ((msgs_decoded_per_second < config.control_message_warn_rate || config.control_message_warn_rate == -1) && (timeDiff >= config.control_message_warn_updates)) {
         BOOST_LOG_TRIVIAL(error) << "[" << sys->get_short_name() << "]\t Control Channel Message Decode Rate: " << msgs_decoded_per_second << "/sec, count:  " << sys->message_count;
+        lastMsgWarnTime = currentTime;
       }
     }
     sys->message_count = 0;
@@ -1211,6 +1215,7 @@ void monitor_messages() {
 
   time_t lastStatusTime = time(NULL);
   time_t lastMsgCountTime = time(NULL);
+  time_t lastMsgWarnTime = time(NULL);
   time_t lastTalkgroupPurge = time(NULL);
   time_t currentTime = time(NULL);
   std::vector<TrunkMessage> trunk_messages;
@@ -1289,7 +1294,7 @@ void monitor_messages() {
 
     float timeDiff = currentTime - lastMsgCountTime;
 
-    if (timeDiff >= config.control_message_warn_updates) {
+    if (timeDiff >= 3.0) {
       check_message_count(timeDiff);
       lastMsgCountTime = currentTime;
     }
