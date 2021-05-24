@@ -239,12 +239,12 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
   BOOST_LOG_TRIVIAL(trace) << "TSBK: opcode: $" << std::hex << opcode;
   if (opcode == 0x00) { // group voice chan grant
     unsigned long mfrid = bitset_shift_mask(tsbk, 80, 0xff);
-    // unsigned long opts  = bitset_shift_mask(tsbk,72,0xff);
+    // unsigned long opts  = bitset_shift_mask(tsbk, 72, 0xff);
     bool emergency = (bool)bitset_shift_mask(tsbk, 72, 0x80);
     bool encrypted = (bool)bitset_shift_mask(tsbk, 72, 0x40);
-    bool duplex = (bool) bitset_shift_mask(tsbk,72,0x20);
-    bool mode = (bool) bitset_shift_mask(tsbk,72,0x10);
-    unsigned long priority = bitset_shift_mask(tsbk,72,0x07);
+    bool duplex = (bool) bitset_shift_mask(tsbk, 72, 0x20);
+    bool mode = (bool) bitset_shift_mask(tsbk, 72, 0x10);
+    unsigned long priority = bitset_shift_mask(tsbk, 72, 0x07);
     unsigned long ch = bitset_shift_mask(tsbk, 56, 0xffff);
     unsigned long ga = bitset_shift_mask(tsbk, 40, 0xffff);
     unsigned long sa = bitset_shift_mask(tsbk, 16, 0xffffff);
@@ -282,9 +282,9 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
     unsigned long mfrid = bitset_shift_mask(tsbk, 80, 0xff);
     bool emergency = (bool)bitset_shift_mask(tsbk, 72, 0x80);
     bool encrypted = (bool)bitset_shift_mask(tsbk, 72, 0x40);
-    bool duplex = (bool) bitset_shift_mask(tsbk,72,0x20);
-    bool mode = (bool) bitset_shift_mask(tsbk,72,0x10);
-    unsigned long priority = bitset_shift_mask(tsbk,72,0x07);
+    bool duplex = (bool) bitset_shift_mask(tsbk, 72, 0x20);
+    bool mode = (bool) bitset_shift_mask(tsbk, 72, 0x10);
+    unsigned long priority = bitset_shift_mask(tsbk, 72, 0x07);
 
     if (mfrid == 0x90) {
       unsigned long ch = bitset_shift_mask(tsbk, 56, 0xffff);
@@ -372,9 +372,9 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
     unsigned long mfrid = bitset_shift_mask(tsbk, 80, 0xff);
     bool emergency = (bool)bitset_shift_mask(tsbk, 72, 0x80);
     bool encrypted = (bool)bitset_shift_mask(tsbk, 72, 0x40);
-    bool duplex = (bool) bitset_shift_mask(tsbk,72,0x20);
-    bool mode = (bool) bitset_shift_mask(tsbk,72,0x10);
-    unsigned long priority = bitset_shift_mask(tsbk,72,0x07);
+    bool duplex = (bool) bitset_shift_mask(tsbk, 72, 0x20);
+    bool mode = (bool) bitset_shift_mask(tsbk, 72, 0x10);
+    unsigned long priority = bitset_shift_mask(tsbk, 72, 0x07);
 
     if (mfrid == 0x90) { // MOT_GRG_CN_GRANT_UPDT
       unsigned long ch1 = bitset_shift_mask(tsbk, 64, 0xffff);
@@ -444,12 +444,12 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
     }
   } else if (opcode == 0x04) { //  Unit to Unit Voice Service Channel Grant (UU_V_CH_GRANT)
                                //unsigned long mfrid = bitset_shift_mask(tsbk, 80, 0xff);
-    // unsigned long opts  = bitset_shift_mask(tsbk,72,0xff);
+    // unsigned long opts  = bitset_shift_mask(tsbk, 72, 0xff);
     bool emergency = (bool)bitset_shift_mask(tsbk, 72, 0x80);
     bool encrypted = (bool)bitset_shift_mask(tsbk, 72, 0x40);
-    bool duplex = (bool) bitset_shift_mask(tsbk,72,0x20);
-    bool mode = (bool) bitset_shift_mask(tsbk,72,0x10);
-    unsigned long priority = bitset_shift_mask(tsbk,72,0x07);
+    bool duplex = (bool) bitset_shift_mask(tsbk, 72, 0x20);
+    bool mode = (bool) bitset_shift_mask(tsbk, 72, 0x10);
+    unsigned long priority = bitset_shift_mask(tsbk, 72, 0x07);
     unsigned long ch = bitset_shift_mask(tsbk, 64, 0xffff);
     unsigned long f = channel_id_to_frequency(ch, sys_num);
     unsigned long sa = bitset_shift_mask(tsbk, 16, 0xffffff);
@@ -479,16 +479,32 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
 
     BOOST_LOG_TRIVIAL(debug) << "tsbk04\tUnit to Unit Chan Grant\tChannel ID: " << std::setw(5) << ch << "\tFreq: " << FormatFreq(f) << "\tTarget ID: " << std::setw(7) << ta << "\tTDMA " << get_tdma_slot(ch, sys_num) << "\tSource ID: " << sa;
   } else if (opcode == 0x05) { // Unit To Unit Answer Request
-    BOOST_LOG_TRIVIAL(debug) << "tsbk05: Unit To Unit Answer Request";
+    bool emergency = (bool)bitset_shift_mask(tsbk, 72, 0x80);
+    bool encrypted = (bool)bitset_shift_mask(tsbk, 72, 0x40);
+    bool duplex = (bool) bitset_shift_mask(tsbk, 72, 0x20);
+    bool mode = (bool) bitset_shift_mask(tsbk, 72, 0x10);
+    unsigned long priority = bitset_shift_mask(tsbk, 72, 0x07);
+    unsigned long sa = bitset_shift_mask(tsbk, 16, 0xffffff);
+    unsigned long si = bitset_shift_mask(tsbk, 40, 0xffffff);
+
+    //message.message_type = UU_ANS_REQ;
+    message.emergency = emergency;
+    message.encrypted = encrypted;
+    message.duplex = duplex;
+    message.mode = mode;
+    message.priority = priority;
+    message.source = sa;
+
+    BOOST_LOG_TRIVIAL(debug) << "tsbk05\tUnit To Unit Answer Request\tsa " << sa << "\tSource ID: " << si;
   } else if (opcode == 0x06) { //  Unit to Unit Voice Channel Grant Update (UU_V_CH_GRANT_UPDT)
     //unsigned long mfrid = bitset_shift_mask(tsbk, 80, 0xff);
-    // unsigned long opts  = bitset_shift_mask(tsbk,72,0xff);
+    // unsigned long opts  = bitset_shift_mask(tsbk, 72, 0xff);
 
     bool emergency = (bool)bitset_shift_mask(tsbk, 72, 0x80);
     bool encrypted = (bool)bitset_shift_mask(tsbk, 72, 0x40);
-    bool duplex = (bool) bitset_shift_mask(tsbk,72,0x20);
-    bool mode = (bool) bitset_shift_mask(tsbk,72,0x10);
-    unsigned long priority = bitset_shift_mask(tsbk,72,0x07);
+    bool duplex = (bool) bitset_shift_mask(tsbk, 72, 0x20);
+    bool mode = (bool) bitset_shift_mask(tsbk, 72, 0x10);
+    unsigned long priority = bitset_shift_mask(tsbk, 72, 0x07);
     unsigned long ch = bitset_shift_mask(tsbk, 64, 0xffff);
     unsigned long f = channel_id_to_frequency(ch, sys_num);
     unsigned long sa = bitset_shift_mask(tsbk, 16, 0xffffff);
@@ -526,8 +542,8 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
   } else if (opcode == 0x14) {
     bool emergency = (bool)bitset_shift_mask(tsbk, 72, 0x80);
     bool encrypted = (bool)bitset_shift_mask(tsbk, 72, 0x40);
-    bool duplex = (bool) bitset_shift_mask(tsbk,72,0x20);
-    bool mode = (bool) bitset_shift_mask(tsbk,72,0x10);
+    bool duplex = (bool) bitset_shift_mask(tsbk, 72, 0x20);
+    bool mode = (bool) bitset_shift_mask(tsbk, 72, 0x10);
     unsigned long nsapi = bitset_shift_mask(tsbk, 72, 0xf);
     unsigned long chT = bitset_shift_mask(tsbk, 56, 0xffff);
     unsigned long chR = bitset_shift_mask(tsbk, 40, 0xffff);
@@ -577,7 +593,7 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
       BOOST_LOG_TRIVIAL(debug) << "tsbk27: Deny Response";
   } else if (opcode == 0x28) { // Unit Group Affiliation Response
     // unsigned long mfrid  = bitset_shift_mask(tsbk,80,0xff);
-    // unsigned long opts  = bitset_shift_mask(tsbk,72,0xff);
+    // unsigned long opts  = bitset_shift_mask(tsbk, 72, 0xff);
     unsigned long ta = bitset_shift_mask(tsbk, 16, 0xffffff);
     unsigned long ga = bitset_shift_mask(tsbk, 40, 0xffff);
     unsigned long aga = bitset_shift_mask(tsbk, 56, 0xffff);
@@ -626,7 +642,7 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
     BOOST_LOG_TRIVIAL(debug) << "tsbk2b\tLocation Registration Response\tga " << std::dec << ga  << "\tsa " << sa << "\tValue: " << rv;
   } else if (opcode == 0x2c) { // Unit Registration Response
     // unsigned long mfrid  = bitset_shift_mask(tsbk,80,0xff);
-    // unsigned long opts  = bitset_shift_mask(tsbk,72,0xff);
+    // unsigned long opts  = bitset_shift_mask(tsbk, 72, 0xff);
     unsigned long sa = bitset_shift_mask(tsbk, 16, 0xffffff);
     unsigned long si = bitset_shift_mask(tsbk, 40, 0xffffff);
 
@@ -640,7 +656,7 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
     BOOST_LOG_TRIVIAL(debug) << "tsbk2e DE-REGISTRATION ACKNOWLEDGE";
   } else if (opcode == 0x2f) { // Unit DeRegistration Ack
     // unsigned long mfrid  = bitset_shift_mask(tsbk,80,0xff);
-    // unsigned long opts  = bitset_shift_mask(tsbk,72,0xff);
+    // unsigned long opts  = bitset_shift_mask(tsbk, 72, 0xff);
     unsigned long si = bitset_shift_mask(tsbk, 16, 0xffffff);
 
     message.message_type = DEREGISTRATION;
