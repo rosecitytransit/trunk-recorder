@@ -934,7 +934,7 @@ void handle_call(TrunkMessage message, System *sys) {
 
   unit_affiliations[message.source] = message.talkgroup;
 
-  if ((sys->get_unit_script().length() != 0) && (message.source != 0)) {
+  if ((sys->get_unit_script().length() != 0) && (message.message_type == GRANT)) {
     char   shell_command[200];
     sprintf(shell_command, "%s %s %li call %li &", sys->get_unit_script().c_str(), sys->get_short_name().c_str(), message.source, message.talkgroup);
     int rc = system(shell_command);
