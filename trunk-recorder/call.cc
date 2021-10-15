@@ -141,7 +141,7 @@ void Call::end_call() {
     final_length = recorder->get_current_length();
 
 
-    
+
 
     if (freq_count > 0) {
       Rx_Status rx_status = recorder->get_rx_status();

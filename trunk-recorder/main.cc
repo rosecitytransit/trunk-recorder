@@ -756,7 +756,7 @@ void stop_inactive_recorders() {
           }
         }
       } else if (!call->get_recorder()->is_active()) {
-              // P25 Conventional Recorders need a have the graph unlocked before they can start recording.  
+              // P25 Conventional Recorders need a have the graph unlocked before they can start recording.
               Recorder *recorder = call->get_recorder();
               recorder->start(call);
               call->set_state(recording);
@@ -1378,7 +1378,7 @@ bool monitor_system() {
               rec = source->create_digital_conventional_recorder(tb);
               call->set_recorder((Recorder *)rec.get());
               calls.push_back(call);
-              
+
             }
 
             // break out of the for loop
@@ -1469,7 +1469,7 @@ int main(int argc, char **argv) {
       logging::trivial::severity >= logging::trivial::info
 
   );
-  
+
   boost::log::register_simple_formatter_factory< boost::log::trivial::severity_level, char >("Severity");
 
   boost::log::add_common_attributes();

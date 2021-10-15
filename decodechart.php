@@ -54,18 +54,18 @@ if (count($decode) < 5) {
 
 
 //start the SVG
-echo '<svg width="1500" height="450" viewBox="0 0 1500 450" class="chart" version="1.0" xmlns="http://www.w3.org/2000/svg">
+echo '<svg width="'.(count($decode)+60).'" height="450" viewBox="0 0 '.(count($decode)+60).' 450" class="chart" version="1.0" xmlns="http://www.w3.org/2000/svg">
 '.$css.'
-<rect width="1500" height="450" class="chart-bg" />
-<rect x="25" y="25" width="1450" height="400" class="chart-box" />
+<rect width="'.(count($decode)+60).'" height="450" class="chart-bg" />
+<rect x="25" y="25" width="'.(count($decode)+10).'" height="400" class="chart-box" />
 ';
 
 //draw the y axis
 for($i = 0; $i <= 9; $i++)
   echo '<text class="axisY" x="25" y="'.(($i*50)+25).'">'.(40-($i*5)).'</text>
-<line class="chart-tick" x1="25" x2="1475" y1="'.(($i*50)+25).'" y2="'.(($i*50)+25).'" />
+<line class="chart-tick" x1="25" x2="'.(count($decode)+35).'" y1="'.(($i*50)+25).'" y2="'.(($i*50)+25).'" />
 ';
-echo '<text y="15" x="750" text-anchor="middle">Last 24 hours control channel decoding rates 
+echo '<text y="15" x="750" text-anchor="middle">'.$mytitle.' control channel decoding rates 
 (<tspan id="mstext">Mount Scott</tspan>, <tspan id="cctext">Council Crest</tspan>, 
 <tspan id="lstext">Livingston</tspan>, <tspan id="osrppdxctext">OSRP</tspan>)</text>';
 
