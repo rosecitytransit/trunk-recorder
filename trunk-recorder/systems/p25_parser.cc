@@ -183,8 +183,13 @@ std::vector<TrunkMessage> P25Parser::decode_mbt_data(unsigned long opcode, boost
 
     message.message_type = GRANT;
     message.freq = f;
-    message.talkgroup = ta;
-    message.source = sa;
+    if ((sa < 1000) || ((sa > 40000) && (sa < 50000)) || ((ta > 2000) && (ta < 10000))) {
+      BOOST_LOG_TRIVIAL(error) << "SWITCHING on 0x04 U2U Voice Svc Chan Grant Extended: " << ta << "/" << sa;
+      message.talkgroup    = sa;
+      message.source       = ta; }
+    else {
+      message.talkgroup    = ta;
+      message.source       = sa; }
     message.emergency = emergency;
     message.encrypted = encrypted;
     message.duplex = dup;
@@ -458,8 +463,13 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
 
     message.message_type = GRANT;
     message.freq = f;
-    message.talkgroup = ta;
-    message.source = sa;
+    if ((sa < 1000) || ((sa > 40000) && (sa < 50000)) || ((ta > 2000) && (ta < 10000))) {
+      BOOST_LOG_TRIVIAL(error) << "SWITCHING on 0x04 Voice Svc Chan Grant: " << ta << "/" << sa;
+      message.talkgroup    = sa;
+      message.source       = ta; }
+    else {
+      message.talkgroup    = ta;
+      message.source       = sa; }
     message.emergency = emergency;
     message.encrypted = encrypted;
     message.duplex = duplex;
@@ -492,8 +502,13 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
 
     message.message_type = UPDATE;
     message.freq = f;
-    message.talkgroup = ta;
-    message.source = sa;
+    if ((sa < 1000) || ((sa > 40000) && (sa < 50000)) || ((ta > 2000) && (ta < 10000))) {
+      BOOST_LOG_TRIVIAL(error) << "SWITCHING on 0x06 U2U Voice Chan Grant Update: " << ta << "/" << sa;
+      message.talkgroup    = sa;
+      message.source       = ta; }
+    else {
+      message.talkgroup    = ta;
+      message.source       = sa; }
     if (get_tdma_slot(ch, sys_num) >= 0) {
       message.phase2_tdma = true;
       message.tdma_slot = get_tdma_slot(ch, sys_num);
