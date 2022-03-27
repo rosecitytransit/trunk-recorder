@@ -61,7 +61,6 @@
 #include <gnuradio/message.h>
 #include <gnuradio/msg_queue.h>
 #include <gnuradio/top_block.h>
-#include <gnuradio/uhd/usrp_source.h>
 
 #include "plugin_manager/plugin_manager.h"
 
