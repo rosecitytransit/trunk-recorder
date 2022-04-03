@@ -462,12 +462,15 @@ bool p25_recorder::start(Call *call) {
     int offset_amount = (center_freq - chan_freq);
 
     tune_offset(offset_amount);
+
     if (qpsk_mod) {
       modulation_selector->set_output_index(1);
       qpsk_demod->reset();
+      qpsk_p25_decode->set_rx_tg(talkgroup);
       qpsk_p25_decode->start(call);
     } else {
       modulation_selector->set_output_index(0);
+      fsk4_p25_decode->set_rx_tg(talkgroup);
       fsk4_p25_decode->start(call);
     }
     state = ACTIVE;

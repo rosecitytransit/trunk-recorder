@@ -155,6 +155,10 @@ p25_frame_assembler_impl::forecast(int nof_output_items, gr_vector_int &nof_inpu
       p1fdma.reset_rx_status();
     }
 
+    void p25_frame_assembler_impl::set_rx_tg( long tg ) {
+      p1fdma.set_rx_tg(tg);
+    }
+
     Rx_Status p25_frame_assembler_impl::get_rx_status() {
       return p1fdma.get_rx_status();
     }

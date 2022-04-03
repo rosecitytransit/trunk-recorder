@@ -75,6 +75,7 @@ namespace gr {
   void p25p2_queue_msg(int duid);
   void set_phase2_tdma(bool p);
   void reset_rx_status();
+  void set_rx_tg(long tg);
   Rx_Status get_rx_status();
 
  public:

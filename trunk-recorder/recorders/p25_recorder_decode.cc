@@ -68,6 +68,10 @@ void p25_recorder_decode::reset_rx_status() {
   op25_frame_assembler->reset_rx_status();
 }
 
+void p25_recorder_decode::set_rx_tg( long talkgroup ) {
+  op25_frame_assembler->set_rx_tg( talkgroup );
+}
+
 Rx_Status p25_recorder_decode::get_rx_status() {
   return op25_frame_assembler->get_rx_status();
 }

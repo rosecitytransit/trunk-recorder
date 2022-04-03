@@ -7,5 +7,6 @@ struct Rx_Status{
   double error_count;
   double spike_count;
   time_t last_update;
+  long talkgroup;
 };
 #endif

@@ -222,7 +222,8 @@ namespace gr {
 			rx_status.error_count = 0;
 			rx_status.total_len = 0;
 			rx_status.spike_count = 0;
-			rx_status.last_update = time(NULL);
+			rx_status.last_update = time(NULL); //should this be current time or 0? The reset sets it to 0
+			rx_status.talkgroup = 0;
 			for (int i=0; i<20; i++)
 				error_history[i] = -1;
 		}
@@ -232,8 +233,13 @@ namespace gr {
 			rx_status.total_len = 0;
 			rx_status.spike_count = 0;
 			rx_status.last_update = 0;
+			rx_status.talkgroup = 0;
 			/*for (int i=0; i<20; i++)
 				error_history[i] = -1;*/
+		}
+
+		void p25p1_fdma::set_rx_tg( long tg ) {
+			rx_status.talkgroup = tg;
 		}
 
 		Rx_Status p25p1_fdma::get_rx_status() {
@@ -464,11 +470,42 @@ namespace gr {
                             uint16_t grpaddr = (lcw[4] << 8) + lcw[5];
                             uint32_t srcaddr = (lcw[6] << 16) + (lcw[7] << 8) + lcw[8];
 
+                            if ((curr_src_id != srcaddr) && (curr_src_id != 0)) {
+                                BOOST_LOG_TRIVIAL(debug) << "Group VC source has changed; old: " << curr_src_id << " new: " << srcaddr;
+                            }
                             curr_src_id = srcaddr;
+                            if (rx_status.talkgroup == 0) {
+                                BOOST_LOG_TRIVIAL(debug) << "rx_status TG is 0; setting it to voice channel TG " << grpaddr;
+                                rx_status.talkgroup = grpaddr;
+                            } else if (rx_status.talkgroup != grpaddr) {
+                                BOOST_LOG_TRIVIAL(error) << "Talkgroup mismatch! rx_status TG: " << rx_status.talkgroup << " voice channel TG: " << grpaddr;
+                            }
                             s = "{\"srcaddr\" : " + std::to_string(srcaddr) + ", \"grpaddr\": " + std::to_string(grpaddr) + "}";
                             send_msg(s, -3);
                             if (d_debug >= 10)
                                 fprintf(stderr, ", srcaddr=%d, grpaddr=%d", srcaddr, grpaddr);
+                            break;
+                        }
+                        case 0x03: { // Unit-Unit call
+                            uint16_t srcaddr = (lcw[3] << 16) + (lcw[4] << 8) + lcw[5]; //target radio
+                            uint32_t grpaddr = (lcw[6] << 16) + (lcw[7] << 8) + lcw[8]; //source radio
+
+                            if ((curr_src_id != srcaddr) && (curr_src_id != 0)) {
+                                BOOST_LOG_TRIVIAL(debug) << "Unit call target has changed; old: " << curr_src_id << " new: " << srcaddr;
+                            }
+                            if (rx_status.talkgroup == 0) {
+                                BOOST_LOG_TRIVIAL(debug) << "rx_status TG is 0; setting it to unit source " << grpaddr;
+                                rx_status.talkgroup = grpaddr;
+                            } else if ((rx_status.talkgroup == srcaddr) && (curr_src_id == grpaddr)) {
+                                BOOST_LOG_TRIVIAL(trace) << "Unit call switch; rx_status TG: " << rx_status.talkgroup << " voice channel source: " << grpaddr;
+                            } else if (rx_status.talkgroup != grpaddr) {
+                                BOOST_LOG_TRIVIAL(error) << "Unit call mismatch! rx_status TG: " << rx_status.talkgroup << " voice channel source (TG): " << grpaddr << " voice channel target (source); " << srcaddr;
+                            }
+                            curr_src_id = srcaddr;
+                            s = "{\"source\" : " + std::to_string(srcaddr) + ", \"target\": " + std::to_string(grpaddr) + "}";
+                            send_msg(s, -3);
+                            if (d_debug >= 10)
+                                fprintf(stderr, ", source=%d, target=%d", srcaddr, grpaddr);
                             break;
                         }
                     }

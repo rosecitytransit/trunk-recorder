@@ -64,6 +64,7 @@ public:
   void start(Call *call);
   double since_last_write();
   void reset_rx_status();
+  void set_rx_tg(long tg);
   Rx_Status get_rx_status();
   void stop();
   int tdma_slot;

@@ -61,6 +61,7 @@ namespace gr {
       virtual void reset_timer() {}
       virtual void set_phase2_tdma(bool p) {}
       virtual void reset_rx_status() {}
+      virtual void set_rx_tg(long tg) {}
       virtual Rx_Status get_rx_status() {Rx_Status rx_status; return rx_status; }
       virtual void clear() {};
       virtual  void clear_silence_frame_count() {};
