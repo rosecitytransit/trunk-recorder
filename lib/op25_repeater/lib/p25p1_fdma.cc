@@ -487,25 +487,25 @@ namespace gr {
                             break;
                         }
                         case 0x03: { // Unit-Unit call
-                            uint16_t srcaddr = (lcw[3] << 16) + (lcw[4] << 8) + lcw[5]; //target radio
-                            uint32_t grpaddr = (lcw[6] << 16) + (lcw[7] << 8) + lcw[8]; //source radio
+                            uint16_t target = (lcw[3] << 16) + (lcw[4] << 8) + lcw[5];
+                            uint32_t source = (lcw[6] << 16) + (lcw[7] << 8) + lcw[8];
 
-                            if ((curr_src_id != srcaddr) && (curr_src_id != 0)) {
-                                BOOST_LOG_TRIVIAL(debug) << "Unit call target has changed; old: " << curr_src_id << " new: " << srcaddr;
-                            }
                             if (rx_status.talkgroup == 0) {
-                                BOOST_LOG_TRIVIAL(debug) << "rx_status TG is 0; setting it to unit source " << grpaddr;
-                                rx_status.talkgroup = grpaddr;
-                            } else if ((rx_status.talkgroup == srcaddr) && (curr_src_id == grpaddr)) {
-                                BOOST_LOG_TRIVIAL(trace) << "Unit call switch; rx_status TG: " << rx_status.talkgroup << " voice channel source: " << grpaddr;
-                            } else if (rx_status.talkgroup != grpaddr) {
-                                BOOST_LOG_TRIVIAL(error) << "Unit call mismatch! rx_status TG: " << rx_status.talkgroup << " voice channel source (TG): " << grpaddr << " voice channel target (source); " << srcaddr;
+                                BOOST_LOG_TRIVIAL(debug) << "rx_status TG is 0; setting it to unit source " << source;
+                                rx_status.talkgroup = source;
+                                //curr_src_id = target;
+                            } else if (rx_status.talkgroup == target) {
+                                BOOST_LOG_TRIVIAL(debug) << "Unit call switch; rx_status TG: " << rx_status.talkgroup << " curr_src_id: " << curr_src_id << " vc source: " << source << " VC target (src): " << target;
+                                rx_status.talkgroup = source;
+                                //curr_src_id = target;
+                            } else if ((rx_status.talkgroup != source) && (rx_status.talkgroup != target)) {
+                                BOOST_LOG_TRIVIAL(error) << "Unit call mismatch! rx_status TG: " << rx_status.talkgroup << " curr_src_id: " << curr_src_id << " VC source (TG): " << source << " VC target (src): " << target;
                             }
-                            curr_src_id = srcaddr;
-                            s = "{\"source\" : " + std::to_string(srcaddr) + ", \"target\": " + std::to_string(grpaddr) + "}";
+                            //curr_src_id = target;
+                            s = "{\"source\" : " + std::to_string(source) + ", \"target\": " + std::to_string(target) + "}";
                             send_msg(s, -3);
                             if (d_debug >= 10)
-                                fprintf(stderr, ", source=%d, target=%d", srcaddr, grpaddr);
+                                fprintf(stderr, ", source=%d, target=%d", source, target);
                             break;
                         }
                     }
