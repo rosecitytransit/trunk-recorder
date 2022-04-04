@@ -30,6 +30,7 @@ struct Config {
   int call_timeout;
   bool log_file;
   int control_message_warn_rate;
+  float control_message_warn_updates;
   int control_retune_limit;
   bool broadcast_signals;
   bool enable_audio_streaming;

@@ -180,7 +180,9 @@ bool load_config(string config_file) {
     config.log_dir = pt.get<std::string>("logDir", "logs");
     BOOST_LOG_TRIVIAL(info) << "Log Directory: " << config.log_dir;
     config.control_message_warn_rate = pt.get<int>("controlWarnRate", 10);
-    BOOST_LOG_TRIVIAL(info) << "Control channel warning rate: " << config.control_message_warn_rate;
+    BOOST_LOG_TRIVIAL(info) << "Control channel decoding warnings (< messages/second): " << config.control_message_warn_rate;
+    config.control_message_warn_updates = pt.get<float>("controlWarnUpdate", 3.0);
+    BOOST_LOG_TRIVIAL(info) << "Control channel decoding updates (seconds): " << config.control_message_warn_updates;
     config.control_retune_limit = pt.get<int>("controlRetuneLimit", 0);
     BOOST_LOG_TRIVIAL(info) << "Control channel retune limit: " << config.control_retune_limit;
     config.enable_audio_streaming = pt.get<bool>("audioStreaming", false);
@@ -1140,7 +1142,7 @@ void retune_system(System *system) {
   }
 }
 
-void check_message_count(float timeDiff) {
+void check_message_count(float timeDiff, bool warn) {
   plugman_setup_config(sources, systems);
   plugman_system_rates(systems, timeDiff);
 
@@ -1169,7 +1171,7 @@ void check_message_count(float timeDiff) {
         sys->retune_attempts = 0;
       }
 
-      if (msgs_decoded_per_second < config.control_message_warn_rate || config.control_message_warn_rate == -1) {
+      if ((msgs_decoded_per_second < config.control_message_warn_rate || config.control_message_warn_rate == -1) && (warn == true)) {
         BOOST_LOG_TRIVIAL(error) << "[" << sys->get_short_name() << "]\t Control Channel Message Decode Rate: " << msgs_decoded_per_second << "/sec, count:  " << sys->message_count;
       }
     }
@@ -1184,6 +1186,7 @@ void monitor_messages() {
 
   time_t lastStatusTime = time(NULL);
   time_t lastMsgCountTime = time(NULL);
+  time_t lastMsgWarnTime = time(NULL);
   time_t management_timestamp = time(NULL);
   time_t current_time = time(NULL);
   std::vector<TrunkMessage> trunk_messages;
@@ -1253,9 +1256,15 @@ void monitor_messages() {
     current_time = time(NULL);
 
     float timeDiff = current_time - lastMsgCountTime;
+    float timeDiff2 = current_time - lastMsgWarnTime;
+    bool warn = false;
 
     if (timeDiff >= 3.0) {
-      check_message_count(timeDiff);
+      if (timeDiff2 >= config.control_message_warn_updates) {
+        lastMsgWarnTime = current_time;
+        warn = true;
+      }
+      check_message_count(timeDiff, warn);
       lastMsgCountTime = current_time;
       for (vector<System *>::iterator sys_it = systems.begin(); sys_it != systems.end(); sys_it++) {
         System *system = *sys_it;
