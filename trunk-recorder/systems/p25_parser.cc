@@ -106,7 +106,7 @@ std::vector<TrunkMessage> P25Parser::decode_mbt_data(unsigned long opcode, boost
     bool encrypted = (bool)bitset_shift_mask(header, 24, 0x40);
     bool duplex = (bool)bitset_shift_mask(header, 24, 0x20);
     bool mode = (bool)bitset_shift_mask(header, 24, 0x10);
-    unsigned long priority = bitset_shift_mask(header, 24, 0x07);
+    int priority = bitset_shift_mask(header, 24, 0x07);
     unsigned long ch1 = bitset_shift_mask(mbt_data, 64, 0xffff);
     //unsigned long ch2 = bitset_shift_mask(mbt_data, 48, 0xffff);
     unsigned long ga = bitset_shift_mask(mbt_data, 32, 0xffff);
@@ -241,7 +241,7 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
     bool encrypted = (bool)bitset_shift_mask(tsbk, 72, 0x40);
     bool duplex = (bool) bitset_shift_mask(tsbk,72,0x20);
     bool mode = (bool) bitset_shift_mask(tsbk,72,0x10);
-    unsigned long priority = bitset_shift_mask(tsbk,72,0x07);
+    int priority = bitset_shift_mask(tsbk,72,0x07);
     unsigned long ch = bitset_shift_mask(tsbk, 56, 0xffff);
     unsigned long ga = bitset_shift_mask(tsbk, 40, 0xffff);
     unsigned long sa = bitset_shift_mask(tsbk, 16, 0xffffff);
@@ -289,7 +289,7 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
     bool encrypted = (bool)bitset_shift_mask(tsbk, 72, 0x40);
     bool duplex = (bool) bitset_shift_mask(tsbk,72,0x20);
     bool mode = (bool) bitset_shift_mask(tsbk,72,0x10);
-    unsigned long priority = bitset_shift_mask(tsbk,72,0x07);
+    int priority = bitset_shift_mask(tsbk,72,0x07);
 
     if (mfrid == 0x90) {
       unsigned long ch = bitset_shift_mask(tsbk, 56, 0xffff);
@@ -380,7 +380,7 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
     bool encrypted = (bool)bitset_shift_mask(tsbk, 72, 0x40);
     bool duplex = (bool) bitset_shift_mask(tsbk,72,0x20);
     bool mode = (bool) bitset_shift_mask(tsbk,72,0x10);
-    unsigned long priority = bitset_shift_mask(tsbk,72,0x07);
+    int priority = bitset_shift_mask(tsbk,72,0x07);
 
     if (mfrid == 0x90) { // MOT_GRG_CN_GRANT_UPDT
       unsigned long ch1 = bitset_shift_mask(tsbk, 64, 0xffff);
@@ -455,7 +455,7 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
     bool encrypted = (bool)bitset_shift_mask(tsbk, 72, 0x40);
     bool duplex = (bool) bitset_shift_mask(tsbk,72,0x20);
     bool mode = (bool) bitset_shift_mask(tsbk,72,0x10);
-    unsigned long priority = bitset_shift_mask(tsbk,72,0x07);
+    int priority = bitset_shift_mask(tsbk,72,0x07);
     unsigned long ch = bitset_shift_mask(tsbk, 64, 0xffff);
     unsigned long f = channel_id_to_frequency(ch, sys_num);
     unsigned long sa = bitset_shift_mask(tsbk, 16, 0xffffff);
@@ -489,7 +489,7 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
     bool encrypted = (bool)bitset_shift_mask(tsbk, 72, 0x40);
     bool duplex = (bool) bitset_shift_mask(tsbk, 72, 0x20);
     bool mode = (bool) bitset_shift_mask(tsbk, 72, 0x10);
-    unsigned long priority = bitset_shift_mask(tsbk, 72, 0x07);
+    int priority = bitset_shift_mask(tsbk, 72, 0x07);
     unsigned long sa = bitset_shift_mask(tsbk, 16, 0xffffff);
     unsigned long si = bitset_shift_mask(tsbk, 40, 0xffffff);
 
@@ -510,7 +510,7 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
     bool encrypted = (bool)bitset_shift_mask(tsbk, 72, 0x40);
     bool duplex = (bool) bitset_shift_mask(tsbk,72,0x20);
     bool mode = (bool) bitset_shift_mask(tsbk,72,0x10);
-    unsigned long priority = bitset_shift_mask(tsbk,72,0x07);
+    int priority = bitset_shift_mask(tsbk,72,0x07);
     unsigned long ch = bitset_shift_mask(tsbk, 64, 0xffff);
     unsigned long f = channel_id_to_frequency(ch, sys_num);
     unsigned long sa = bitset_shift_mask(tsbk, 16, 0xffffff);

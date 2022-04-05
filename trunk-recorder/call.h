@@ -44,6 +44,12 @@ public:
   void set_error(Rx_Status rx_status);
   void set_freq(double f);
   long get_talkgroup();
+  long get_source();
+  int get_priority();
+  bool get_mode();
+  bool get_duplex();
+  double get_error_count();
+  double get_spike_count();
   Call_Freq *get_freq_list();
   Call_Error *get_error_list();
   long get_error_list_count();
@@ -98,6 +104,7 @@ protected:
   static long call_counter;
   long call_num;
   long talkgroup;
+  long source;
   double curr_freq;
   System *sys;
   std::string short_name;
@@ -118,7 +125,7 @@ protected:
   bool mode;
   bool duplex;
   bool is_analog;
-  long priority;
+  int priority;
   char filename[255];
   char transmission_filename[255];
   char converted_filename[255];

@@ -545,7 +545,7 @@ void System::delete_talkgroup_patch(PatchData patch_data){
   }
 }
 
-void System::clear_stale_talkgroup_patches(){
+void System::clear_stale_talkgroup_patches(bool warn){
   std::vector<unsigned long> stale_patches;
 
   BOOST_FOREACH (auto& patch, talkgroup_patches) {
@@ -571,6 +571,7 @@ void System::clear_stale_talkgroup_patches(){
   }
   
   //Print out all active patches to the console
+  if (warn) {
   BOOST_LOG_TRIVIAL(debug) << "Found " << talkgroup_patches.size() << " active talkgroup patches:";
   BOOST_FOREACH (auto& patch, talkgroup_patches) {
     std::string printstring;
@@ -579,5 +580,6 @@ void System::clear_stale_talkgroup_patches(){
       printstring+= std::to_string(patch_element.first);
     }
     BOOST_LOG_TRIVIAL(debug) << "Active Patch of TGIDs" << printstring;
+  }
   }
 }

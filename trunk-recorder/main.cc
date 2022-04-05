@@ -1269,7 +1269,7 @@ void monitor_messages() {
       for (vector<System *>::iterator sys_it = systems.begin(); sys_it != systems.end(); sys_it++) {
         System *system = *sys_it;
         if (system->get_system_type() == "p25") {
-          system->clear_stale_talkgroup_patches();
+          system->clear_stale_talkgroup_patches(warn);
         }
       }
     }

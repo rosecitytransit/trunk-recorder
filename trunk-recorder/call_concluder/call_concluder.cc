@@ -52,7 +52,18 @@ int convert_media(char *filename, char *converted) {
   return nchars;
 }
 
+
+int convert_media2(char *filename) {
+  char shell_command[400];
+  int nchars = snprintf(shell_command, 400, "./encode-trimet.sh %s &", filename);
+  int rc = system(shell_command);
+  return nchars;
+}
+
+
+
 int create_call_json(Call_Data_t call_info) {
+  if (call_info.short_name.length() > 2) {
   // Create the JSON status file
   std::ofstream json_file(call_info.status_filename);
 
@@ -102,6 +113,42 @@ int create_call_json(Call_Data_t call_info) {
     BOOST_LOG_TRIVIAL(error) << "[" << call_info.short_name << "]\t\033[0;34m" << call_info.call_num << "C\033[0m \t Unable to create JSON file: " << call_info.status_filename;
     return 1;
   }
+  } else {
+    char dailylog_filename[300];
+    strcpy(dailylog_filename, call_info.filename);
+    if ( char *p = strrchr( dailylog_filename, '/' ) ) *p = '\0';
+    strcat(dailylog_filename,"/calllog.txt");
+
+      std::ofstream myfile2(dailylog_filename, std::ofstream::app);
+      if (myfile2.is_open()) {
+        myfile2 << "\n" << call_info.call_num << "," << call_info.start_time << "," << (call_info.stop_time - call_info.start_time) << "," << (int)(call_info.length + 0.5) << "," << call_info.talkgroup << "," << call_info.emergency << "," << call_info.priority << "," << call_info.duplex << "," << call_info.mode << ",";
+
+        myfile2 << call_info.source;
+        for (std::size_t i = 0; i < call_info.transmission_source_list.size(); i++) {
+          myfile2 << "|" << call_info.transmission_source_list[i].source;
+          if ((call_info.transmission_source_list[i].source > 2000) && (call_info.transmission_source_list[i].source < 8000)) {
+            char command[25];
+            char buffer[10];
+            snprintf(command, 24, "php getblock.php %ld", call_info.transmission_source_list[i].source);
+            //redi::ipstream pipe("php getblock.php %ld", src_list[i].source);
+            FILE* pipe = popen(command, "r");
+              fgets(buffer, 10, pipe);
+	        myfile2 << buffer;
+            pclose(pipe);
+          }
+        }
+        if (call_info.short_name != "cc")
+           myfile2 << "|" << call_info.short_name;
+        //myfile2 << this->get_recorder()->get_source()->get_device() << ",";
+
+        //for (int i = 0; i < freq_count; i++) {
+          myfile2 << "," << (int)call_info.freq << "|" << call_info.length << "|" << call_info.error_count << "|" << call_info.spike_count;
+          //would like to include phase2 slot here
+        //}
+        myfile2.close();
+      }
+return 0;
+  }
 }
 
 bool checkIfFile(std::string filePath)
@@ -141,7 +188,7 @@ void remove_call_files(Call_Data_t call_info) {
       if(checkIfFile(t.filename)) {
       remove(t.filename);
       }
-    }    
+    }
   }
   if (!call_info.call_log) {
     if(checkIfFile(call_info.status_filename)) {
@@ -184,8 +231,11 @@ Call_Data_t upload_call_worker(Call_Data_t call_info) {
 
     if (call_info.compress_wav) {
     // TR records files as .wav files. They need to be compressed before being upload to online services.
+      if (call_info.short_name.length() > 2) {
       result = convert_media(call_info.filename, call_info.converted);
-      
+      } else {
+        result = convert_media2(call_info.filename);
+      }
       if (result < 0) {
         call_info.status = FAILED;
         return call_info;
@@ -222,12 +272,12 @@ Call_Data_t upload_call_worker(Call_Data_t call_info) {
 Call_Data_t Call_Concluder::create_call_data(Call *call, System *sys, Config config) {
   Call_Data_t call_info;
   double total_length = 0;
-  
+
   call_info.status = INITIAL;
   call_info.process_call_time = time(0);
   call_info.retry_attempt = 0;
 
-  
+
 
   call_info.freq = call->get_freq();
   call_info.encrypted = call->get_encrypted();
@@ -242,10 +292,13 @@ Call_Data_t Call_Concluder::create_call_data(Call *call, System *sys, Config con
   call_info.call_log = sys->get_call_log();
   call_info.call_num = call->get_call_num();
   call_info.compress_wav = sys->get_compress_wav();
-  
+
   call_info.talkgroup = call->get_talkgroup();
+  call_info.source = call->get_source();
+  call_info.error_count = call->get_error_count();
+  call_info.spike_count = call->get_spike_count();
   call_info.patched_talkgroups = sys->get_talkgroup_patch(call_info.talkgroup);
-  
+
   Talkgroup *tg = sys->find_talkgroup(call->get_talkgroup());
   if (tg!=NULL) {
     call_info.talkgroup_tag = tg->tag;
@@ -277,11 +330,11 @@ Call_Data_t Call_Concluder::create_call_data(Call *call, System *sys, Config con
       if(t.length < sys->get_min_tx_duration())
       {
         if (!call_info.transmission_archive) {
-          
+
           snprintf(formattedTalkgroup, 61, "%c[%dm%10ld%c[0m", 0x1B, 35, call_info.talkgroup, 0x1B);
           std::string talkgroup_display = boost::lexical_cast<std::string>(formattedTalkgroup);
           BOOST_LOG_TRIVIAL(info) << "[" << call_info.short_name << "]\t\033[0;34m" << call_info.call_num<< "C\033[0m\tTG: " << talkgroup_display << "\tFreq: " << format_freq(call_info.freq) << "\tRemoving transmission less than " << sys->get_min_tx_duration() <<" seconds. Actual length: " << t.length << "." << std::endl;
-      
+
           if (checkIfFile(t.filename)) {
             remove(t.filename);
           }
@@ -291,7 +344,7 @@ Call_Data_t Call_Concluder::create_call_data(Call *call, System *sys, Config con
       snprintf(formattedTalkgroup, 61, "%c[%dm%10ld%c[0m", 0x1B, 35, call_info.talkgroup, 0x1B);
       std::string talkgroup_display = boost::lexical_cast<std::string>(formattedTalkgroup);
       BOOST_LOG_TRIVIAL(info) << "[" << call_info.short_name << "]\t\033[0;34m" << call_info.call_num << "C\033[0m\tTG: " << talkgroup_display << "\tFreq: " << format_freq(call_info.freq) << "\t- Transmission src: " << t.source << " pos: " << total_length << " length: " << t.length;
-      
+
       if (it == call_info.transmission_list.begin()) {
         call_info.start_time = t.start_time;
         snprintf(call_info.filename,300,"%s-call_%lu.wav",t.base_filename,call_info.call_num);
@@ -338,11 +391,11 @@ void Call_Concluder::conclude_call(Call *call, System *sys, Config config) {
     return;
   }
 
-  
-  
+
+
   call_data_workers.push_back(std::async(std::launch::async, upload_call_worker, call_info));
-  
-  
+
+
 }
 
 void Call_Concluder::manage_call_data_workers() {

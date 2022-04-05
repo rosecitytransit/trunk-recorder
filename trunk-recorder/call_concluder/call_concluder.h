@@ -23,6 +23,10 @@ class Uploader;
 enum Call_Data_Status { INITIAL, SUCCESS, RETRY, FAILED };
 struct Call_Data_t {
   long talkgroup;
+  long source;
+  bool duplex;
+  bool mode;
+  int priority;
   std::vector<unsigned long> patched_talkgroups;
   std::string talkgroup_tag;
   std::string talkgroup_alpha_tag;
@@ -41,6 +45,8 @@ struct Call_Data_t {
   char filename[300];
   char status_filename[300];
   char converted[300];
+  double error_count;
+  double spike_count;
 
 
 

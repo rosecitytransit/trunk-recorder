@@ -37,7 +37,7 @@ struct TrunkMessage {
   bool emergency;
   bool duplex;
   bool mode;
-  long priority;
+  int priority;
   int tdma_slot;
   bool phase2_tdma;
   long source;

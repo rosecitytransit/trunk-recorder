@@ -21,6 +21,7 @@ Call::Call(long t, double f, System *s, Config c) {
   curr_freq = 0;
   curr_src_id = -1;
   talkgroup = t;
+  source = 0;
   sys = s;
   start_time = time(NULL);
   stop_time = time(NULL);
@@ -50,6 +51,7 @@ Call::Call(TrunkMessage message, System *s, Config c) {
   curr_src_id = -1;
   curr_freq = 0;
   talkgroup = message.talkgroup;
+  source = message.source;
   sys = s;
   start_time = time(NULL);
   stop_time = time(NULL);
@@ -104,7 +106,7 @@ void Call::conclude_call() {
   if (state == COMPLETED) {
     final_length = recorder->get_current_length();
 
-    if (freq_count > 0) {
+    if (freq_count > 0) { //WHERE DOES THIS GET USED???
       Rx_Status rx_status = recorder->get_rx_status();
       if (rx_status.last_update > 0)
         stop_time = rx_status.last_update;
@@ -177,7 +179,7 @@ double Call::get_current_length() {
   }
 }
 
-void Call::set_error(Rx_Status rx_status) {
+void Call::set_error(Rx_Status rx_status) { //WHERE DOES THIS GET CALLED?
   Call_Error call_error = {curr_freq, rx_status.total_len, rx_status.error_count, rx_status.spike_count};
 
   if (error_list_count < 49) {
@@ -215,6 +217,40 @@ std::string Call::get_short_name() {
 }
 long Call::get_talkgroup() {
   return talkgroup;
+}
+
+long Call::get_source() {
+  return source;
+}
+
+int Call::get_priority() {
+  return priority;
+}
+
+bool Call::get_duplex() {
+  return duplex;
+}
+
+bool Call::get_mode() {
+  return mode;
+}
+
+double Call::get_error_count() {
+  long error_count;
+  if (get_recorder() && (error_count = recorder->get_rx_status().error_count)) {
+    return error_count;
+  } else {
+    return 0;
+  }
+}
+
+double Call::get_spike_count() {
+  long spike_count;
+  if (get_recorder() && (spike_count = recorder->get_rx_status().spike_count)) {
+    return spike_count;
+  } else {
+    return 0;
+  }
 }
 
 Call_Error *Call::get_error_list() {
@@ -433,6 +469,7 @@ boost::property_tree::ptree Call::get_stats() {
   call_node.put("sysNum", this->get_sys_num());
   call_node.put("shortName", this->get_short_name());
   call_node.put("talkgroup", this->get_talkgroup());
+  call_node.put("source", this->get_source());
   call_node.put("talkgrouptag", this->get_talkgroup_tag());
   call_node.put("elasped", this->elapsed());
   if (get_state() == RECORDING)
