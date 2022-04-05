@@ -217,7 +217,7 @@ public:
   std::vector<unsigned long> get_talkgroup_patch(unsigned long talkgroup);
   void update_active_talkgroup_patches(PatchData f_data);
   void delete_talkgroup_patch(PatchData f_data);
-  void clear_stale_talkgroup_patches();
+  void clear_stale_talkgroup_patches(bool warn);
 
 private:
   TalkgroupDisplayFormat talkgroup_display_format;

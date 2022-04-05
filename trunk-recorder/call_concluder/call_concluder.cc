@@ -345,12 +345,18 @@ Call_Data_t Call_Concluder::create_call_data(Call *call, System *sys, Config con
       std::string talkgroup_display = boost::lexical_cast<std::string>(formattedTalkgroup);
       BOOST_LOG_TRIVIAL(info) << "[" << call_info.short_name << "]\t\033[0;34m" << call_info.call_num << "C\033[0m\tTG: " << talkgroup_display << "\tFreq: " << format_freq(call_info.freq) << "\t- Transmission src: " << t.source << " pos: " << total_length << " length: " << t.length;
 
-      if (it == call_info.transmission_list.begin()) {
+      if ((it == call_info.transmission_list.begin()) && (call_info.short_name.length() > 2)) {
         call_info.start_time = t.start_time;
         snprintf(call_info.filename,300,"%s-call_%lu.wav",t.base_filename,call_info.call_num);
         snprintf(call_info.status_filename,300,"%s-call_%lu.json",t.base_filename,call_info.call_num);
         snprintf(call_info.converted,300,"%s-call_%lu.m4a",t.base_filename,call_info.call_num);
-      } 
+      } else {
+        call_info.start_time = t.start_time;
+        snprintf(call_info.filename,300,"%s.wav",t.base_filename);
+        snprintf(call_info.status_filename,300,"%s.json",t.base_filename);
+        snprintf(call_info.converted,300,"%s.m4a",t.base_filename);
+
+      }
 
       if (std::next(it) == call_info.transmission_list.end()) {
         call_info.stop_time = t.stop_time;
