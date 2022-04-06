@@ -1238,6 +1238,10 @@ void monitor_messages() {
         }
       }
 
+      if (msg->type() == -1) {
+        BOOST_LOG_TRIVIAL(error) << "[" << sys->get_short_name() << "]\t process_data_unit timeout";
+      }
+
       msg.reset();
     } else {
       current_time = time(NULL);
