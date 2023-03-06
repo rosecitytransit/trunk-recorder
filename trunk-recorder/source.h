@@ -3,7 +3,6 @@
 #include "./global_structs.h"
 #include <gnuradio/basic_block.h>
 #include <gnuradio/top_block.h>
-#include <gnuradio/uhd/usrp_source.h>
 #include <iostream>
 #include <numeric>
 #include <osmosdr/source.h>
@@ -129,15 +128,9 @@ public:
   inline osmosdr::source::sptr cast_to_osmo_sptr(gr::basic_block_sptr p) {
     return boost::dynamic_pointer_cast<osmosdr::source, gr::basic_block>(p);
   }
-  inline gr::uhd::usrp_source::sptr cast_to_usrp_sptr(gr::basic_block_sptr p) {
-    return boost::dynamic_pointer_cast<gr::uhd::usrp_source, gr::basic_block>(p);
-  }
 #else
   inline osmosdr::source::sptr cast_to_osmo_sptr(gr::basic_block_sptr p) {
     return std::dynamic_pointer_cast<osmosdr::source, gr::basic_block>(p);
-  }
-  inline gr::uhd::usrp_source::sptr cast_to_usrp_sptr(gr::basic_block_sptr p) {
-    return std::dynamic_pointer_cast<gr::uhd::usrp_source, gr::basic_block>(p);
   }
 #endif
   std::vector<Recorder *> get_recorders();
