@@ -307,6 +307,14 @@ double p25_recorder_impl::since_last_write() {
   }
 }
 
+double p25_recorder_impl::since_last_update() {
+  if (qpsk_mod) {
+    return qpsk_p25_decode->since_last_update();
+  } else {
+    return fsk4_p25_decode->since_last_update();
+  }
+}
+
 State p25_recorder_impl::get_state() {
   if (qpsk_mod) {
     return qpsk_p25_decode->get_state();

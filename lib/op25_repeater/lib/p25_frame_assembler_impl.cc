@@ -37,6 +37,11 @@
 namespace gr {
   namespace op25_repeater {
 
+    double p25_frame_assembler_impl::since_last_update() {
+		time_t now = time(NULL);
+		return now - p1fdma.get_rx_status().last_update;
+    }
+
     /* This is for the TPS Analog decoder */
     void p25_frame_assembler_impl::p25p2_queue_msg(int duid) {
       static const unsigned char wbuf[2] = {0xff, 0xff}; // dummy NAC

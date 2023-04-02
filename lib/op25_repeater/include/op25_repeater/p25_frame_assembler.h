@@ -61,7 +61,8 @@ namespace gr {
       virtual void reset_timer() {}
       virtual void set_phase2_tdma(bool p) {}
       virtual void clear() {};
-      virtual  void clear_silence_frame_count() {};
+      virtual void clear_silence_frame_count() {};
+      virtual double since_last_update() = 0;
     };
 
   } // namespace op25_repeater

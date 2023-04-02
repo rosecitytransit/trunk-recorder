@@ -90,6 +90,7 @@ public:
 
       void clear_silence_frame_count();
       void clear();
+      double since_last_update();
     };
 
   } // namespace op25_repeater

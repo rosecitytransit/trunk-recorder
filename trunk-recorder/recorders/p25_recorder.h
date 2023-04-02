@@ -48,6 +48,7 @@ public:
   virtual void set_record_more_transmissions(bool more) = 0;
   virtual void set_source(long src) = 0;
   virtual double since_last_write() = 0;
+  virtual double since_last_update() = 0;
   virtual double get_current_length() = 0;
   virtual bool is_active() = 0;
   virtual bool is_idle() = 0;

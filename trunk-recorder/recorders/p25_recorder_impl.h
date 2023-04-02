@@ -90,6 +90,7 @@ public:
   void set_record_more_transmissions(bool more);
   void set_source(long src);
   double since_last_write();
+  double since_last_update();
   void generate_arb_taps();
   double get_current_length();
   bool is_active();

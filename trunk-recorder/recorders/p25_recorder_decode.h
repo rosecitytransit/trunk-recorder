@@ -62,6 +62,7 @@ public:
   void switch_tdma(bool phase2_tdma);
   void start(Call *call);
   double since_last_write();
+  double since_last_update();
   void stop();
   int tdma_slot;
   bool delay_open;

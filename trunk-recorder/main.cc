@@ -852,7 +852,7 @@ void manage_calls() {
 
     // Handle Trunked Calls
     if ((call->since_last_update() > 1.0 /*config.call_timeout*/) && ((state == RECORDING) || (state == MONITORING))) {
-      if (state == RECORDING) {
+      /* if (state == RECORDING) {
         ended_call = true;
         call->set_record_more_transmissions(false);
         call->set_state(INACTIVE);
@@ -860,7 +860,7 @@ void manage_calls() {
 
         // If the call is being recorded and the wav_sink is already hit a termination flag, the call state is set to COMPLETED
         // call->stop_call();
-      }
+      } */
       // we do not need to stop Monitoring Calls, we can just delete them
       if (state == MONITORING) {
         ended_call = true;
@@ -888,12 +888,12 @@ void manage_calls() {
     }
 
     // We are checking to make sure a Call hasn't gotten stuck. If it is in the INACTIVE state
-    if (state == INACTIVE) {
+    if ((state == INACTIVE) || (state == RECORDING)) {
       Recorder *recorder = call->get_recorder();
       if (recorder != NULL) {
 
         // if the recorder has simply been going for a while and a call is inactive, end things
-        if (call->since_last_update() > config.call_timeout) {
+        if (recorder->since_last_update() > config.call_timeout) {
           // BOOST_LOG_TRIVIAL(info) << "Recorder state: " << recorder->get_state();
           BOOST_LOG_TRIVIAL(trace) << "[" << call->get_short_name() << "]\t\033[0;34m" << call->get_call_num() << "C\033[0m\tTG: " << call->get_talkgroup_display() << "\tFreq: " << format_freq(call->get_freq()) << "\t\u001b[36m Removing call that has been inactive for more than " << config.call_timeout << " Sec \u001b[0m Rec last write: " << recorder->since_last_write() << " State: " << recorder->get_state();
 
