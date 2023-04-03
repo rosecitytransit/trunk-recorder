@@ -152,8 +152,10 @@ Call_Data_t upload_call_worker(Call_Data_t call_info) {
   int result;
 
   if (call_info.status == INITIAL) {
+
     std::stringstream shell_command;
     std::string shell_command_string;
+    if (call_info.transmission_list.size() > 1) {
     std::string files;
 
     // loop through the transmission list, pull in things to fill in totals for call_info
@@ -166,6 +168,10 @@ Call_Data_t upload_call_worker(Call_Data_t call_info) {
     }
 
     combine_wav(files, call_info.filename);
+
+    } else {
+       result = rename(call_info.transmission_list.front().filename, call_info.filename);
+    }
 
     result = create_call_json(call_info);
 
