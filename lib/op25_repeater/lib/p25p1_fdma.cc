@@ -398,6 +398,7 @@ namespace gr {
                 fprintf (stderr, "%s NAC 0x%03x TDU3:  ", logts.get(d_msgq_id), framer->nac);
             }
 
+            if (framer->nac != 3623)
             process_TTDU();
 
             if (d_debug >= 10) {
@@ -410,7 +411,7 @@ namespace gr {
                 fprintf (stderr, "%s NAC 0x%03x TDU15:  ", logts.get(d_msgq_id), framer->nac);
             }
 
-            process_TTDU();
+            //process_TTDU();
 
             int i, j, k;
             size_t gly_errs = 0, errs = 0;
@@ -458,6 +459,8 @@ namespace gr {
             int pb =   (lcw[0] >> 7);
             int sf =  ((lcw[0] & 0x40) >> 6);
             int lco =   lcw[0] & 0x3f;
+            if ((framer->duid == 0x0f) && (framer->nac != 3623)) process_TTDU();
+            else if ((framer->duid == 0x0f) && (lco == 15)) process_TTDU();
             std::string s = "";
 
             if (d_debug >= 10) {

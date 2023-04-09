@@ -89,7 +89,9 @@ void transmission_sink::create_base_filename() {
 
   int nchars;
 
-  if (d_slot == -1) {
+  if (d_current_call_short_name.length() < 3) {
+    nchars = snprintf(current_base_filename, 255, "%s/%02d%02d%02d-%ld", path_string.c_str(), ltm->tm_hour, ltm->tm_min, ltm->tm_sec, d_current_call_talkgroup);
+  } else if (d_slot == -1) {
     nchars = snprintf(current_base_filename, 255, "%s/%ld-%ld_%.0f", path_string.c_str(), d_current_call_talkgroup, work_start_time, d_current_call_freq);
   } else {
     // this is for the case when it is a DMR recorder and 2 wav files are created, the slot is needed to keep them separate.

@@ -152,7 +152,6 @@ Call_Data_t upload_call_worker(Call_Data_t call_info) {
   int result;
 
   if (call_info.status == INITIAL) {
-
     std::stringstream shell_command;
     std::string shell_command_string;
     if (call_info.transmission_list.size() > 1) {
@@ -169,11 +168,40 @@ Call_Data_t upload_call_worker(Call_Data_t call_info) {
 
     combine_wav(files, call_info.filename);
 
-    } else {
+    } else if (call_info.short_name.length() > 2) {
        result = rename(call_info.transmission_list.front().filename, call_info.filename);
     }
 
+    if (call_info.short_name.length() > 2) {
     result = create_call_json(call_info);
+    } else {
+      std::stringstream dailylog; std::string dailylog2(call_info.filename);
+      std::size_t found = dailylog2.find_last_of("/");
+      dailylog << dailylog2.substr(0,found) << "/calllog.txt";
+      std::ofstream myfile2(dailylog.str(), std::ofstream::app);
+      if (myfile2.is_open()) {
+        myfile2 << "\n" << call_info.start_time << "," << (call_info.stop_time - call_info.start_time) << "," << (int)(call_info.length + 0.5) << "," << call_info.talkgroup << "," << call_info.emergency << ",0,0,0,"; //<< call_info.priority << "," << call_info.duplex << "," << call_info.mode << ",";
+
+        //myfile2 << call_info.msgsource;
+        for (std::size_t i = 0; i < call_info.transmission_source_list.size(); i++) {
+          myfile2 << "|" << call_info.transmission_source_list[i].source;
+          if ((call_info.transmission_source_list[i].source > 2000) && (call_info.transmission_source_list[i].source < 8000)) {
+            char command[25];
+            char buffer[10];
+            snprintf(command, 24, "php getblock.php %ld", call_info.transmission_source_list[i].source);
+            //redi::ipstream pipe("php getblock.php %ld", src_list[i].source);
+            FILE* pipe = popen(command, "r");
+              fgets(buffer, 10, pipe);
+	        myfile2 << buffer;
+            pclose(pipe);
+          }
+        }
+        if (call_info.short_name != "cc")
+           myfile2 << "|" << call_info.short_name;
+       myfile2 << "," << std::fixed << std::setprecision(0) << call_info.freq << "|" << call_info.transmission_list.front().length << "|" << call_info.transmission_list.front().error_count << "|" << call_info.transmission_list.front().spike_count;
+       myfile2.close();
+    }
+    }
 
     if (result < 0) {
       call_info.status = FAILED;
@@ -285,7 +313,12 @@ Call_Data_t Call_Concluder::create_call_data(Call *call, System *sys, Config con
     }
 
     BOOST_LOG_TRIVIAL(info) << "[" << call_info.short_name << "]\t\033[0;34m" << call_info.call_num << "C\033[0m\tTG: " << call_info.talkgroup_display << "\tFreq: " << format_freq(call_info.freq) << "\t- Transmission src: " << t.source << " pos: " << total_length << " length: " << t.length;
-    if (it == call_info.transmission_list.begin()) {
+    if (it == call_info.transmission_list.begin() && call_info.short_name.length() < 3) {
+      call_info.start_time = t.start_time;
+      snprintf(call_info.filename, 300, "%s_.wav", t.base_filename);
+      snprintf(call_info.status_filename, 300, "%s_.json", t.base_filename);
+      snprintf(call_info.converted, 300, "%s.m4a", t.base_filename);
+    } else if (it == call_info.transmission_list.begin()) {
       call_info.start_time = t.start_time;
       snprintf(call_info.filename, 300, "%s-call_%lu.wav", t.base_filename, call_info.call_num);
       snprintf(call_info.status_filename, 300, "%s-call_%lu.json", t.base_filename, call_info.call_num);

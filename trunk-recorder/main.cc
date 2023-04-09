@@ -861,8 +861,8 @@ void manage_calls() {
     }
 
     // Handle Trunked Calls
-    if ((call->since_last_update() > 1.0 /*config.call_timeout*/) && ((state == RECORDING) || (state == MONITORING))) {
-      /* if (state == RECORDING) {
+    if ((call->since_last_update() > 1.0 /*config.call_timeout*/) && (state == RECORDING) && (call->get_short_name().length() > 2)) {
+      //if (state == RECORDING) {
         ended_call = true;
         call->set_record_more_transmissions(false);
         call->set_state(INACTIVE);
@@ -870,14 +870,13 @@ void manage_calls() {
 
         // If the call is being recorded and the wav_sink is already hit a termination flag, the call state is set to COMPLETED
         // call->stop_call();
-      } */
+      }
       // we do not need to stop Monitoring Calls, we can just delete them
-      if (state == MONITORING) {
+      if ((call->since_last_update() > 1.0 /*config.call_timeout*/) && (state == MONITORING)) {
         ended_call = true;
         it = calls.erase(it);
         delete call;
         continue;
-      }
     }
 
     // If a call's state has been set to COMPLETED, we can conclude the call and delete it
@@ -900,10 +899,9 @@ void manage_calls() {
     // We are checking to make sure a Call hasn't gotten stuck. If it is in the INACTIVE state
     if ((state == INACTIVE) || (state == RECORDING)) {
       Recorder *recorder = call->get_recorder();
-      if (recorder != NULL) {
-
-        // if the recorder has simply been going for a while and a call is inactive, end things
-        if (recorder->since_last_update() > config.call_timeout) {
+      if ((recorder != NULL) && ((recorder->get_state() == STOPPED) || (recorder->since_last_write() > config.call_timeout))) {
+      //config.call_timeout should now be set high and be a failsafe
+      //could use recorder->since_last_update() or call (not just tx) termination flag
           // BOOST_LOG_TRIVIAL(info) << "Recorder state: " << recorder->get_state();
           BOOST_LOG_TRIVIAL(trace) << "[" << call->get_short_name() << "]\t\033[0;34m" << call->get_call_num() << "C\033[0m\tTG: " << call->get_talkgroup_display() << "\tFreq: " << format_freq(call->get_freq()) << "\t\u001b[36m Removing call that has been inactive for more than " << config.call_timeout << " Sec \u001b[0m Rec last write: " << recorder->since_last_write() << " State: " << recorder->get_state();
 
@@ -942,10 +940,7 @@ void manage_calls() {
           delete call;
           continue;
         }*/
-      } else {
-        BOOST_LOG_TRIVIAL(error) << "[" << call->get_short_name() << "]\t\033[0;34m" << call->get_call_num() << "C\033[0m\tTG: " << call->get_talkgroup_display() << "\tFreq: " << format_freq(call->get_freq()) << "\t\u001b[36m Call set to Inactive, but has no recorder\u001b[0m";
       }
-    }
 
     ++it;
     // if rx is active
@@ -1080,11 +1075,15 @@ void handle_call_grant(TrunkMessage message, System *sys) {
 
       // BOOST_LOG_TRIVIAL(info) << "[" << call->get_short_name() << "]\t\033[0;34m" << call->get_call_num() << "C\033[0m\tTG: " << call->get_talkgroup_display() << "\tFreq: " << format_freq(call->get_freq()) << "\t\u001b[36m GRANT Message for existing Call\u001b[0m";
 
-      if (call->get_state() == RECORDING) {
+      if ((call->get_state() == RECORDING) && (call->get_short_name().length() > 2)) {
         call->set_record_more_transmissions(true);
+      } else {
+        call->set_record_more_transmissions(false);
       }
       if (call->get_state() == INACTIVE) {
-        call->set_record_more_transmissions(true);
+        if (call->get_short_name().length() > 2)
+        { call->set_record_more_transmissions(true); }
+        else { call->set_record_more_transmissions(false); }
         call->set_state(RECORDING);
       }
       bool source_updated = call->update(message);
@@ -1206,7 +1205,9 @@ void handle_call_update(TrunkMessage message, System *sys) {
       // It is helpful to have both GRANT and UPDATE messages allow for new calls to be started
       // This is because GRANT message can be sometimes dropped if the control channel is not perfect
       // In either event, when a  Call times out and goes INACTIVE, then record_more_transmissions gets set to false
+      if (call->get_short_name().length() > 2)
       call->set_record_more_transmissions(true);
+      else call->set_record_more_transmissions(false);
 
       bool source_updated = call->update(message);
       if (source_updated) {
