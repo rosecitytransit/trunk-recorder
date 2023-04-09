@@ -94,6 +94,9 @@ struct Call_Data_t {
   long spike_count;
   bool encrypted;
   bool emergency;
+  long priority;
+  bool mode;
+  bool duplex;
   bool audio_archive;
   bool transmission_archive;
   bool call_log;

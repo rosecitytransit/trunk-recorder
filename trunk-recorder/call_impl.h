@@ -73,6 +73,9 @@ public:
   bool get_encrypted();
   void set_emergency(bool m);
   bool get_emergency();
+  bool get_priority();
+  bool get_mode();
+  bool get_duplex();
   std::string get_talkgroup_display();
   void set_talkgroup_tag(std::string tag);
   void clear_transmission_list();
