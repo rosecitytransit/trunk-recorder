@@ -183,25 +183,25 @@ Call_Data_t upload_call_worker(Call_Data_t call_info) {
       dailylog << dailylog2.substr(0,found) << "/calllog.txt";
       std::ofstream myfile2(dailylog.str(), std::ofstream::app);
       if (myfile2.is_open()) {
-        myfile2 << "\n" << call_info.start_time << "," << (call_info.stop_time - call_info.start_time) << "," << (int)(call_info.length + 0.5) << "," << call_info.talkgroup << "," << call_info.emergency << ",0,0,0,"; //<< call_info.priority << "," << call_info.duplex << "," << call_info.mode << ",";
+        myfile2 << "\n" << call_info.start_time << "," << (call_info.stop_time - call_info.start_time) << "," << (int)(call_info.length + 0.5) << "," << call_info.talkgroup << "," << call_info.emergency << "," << call_info.priority << "," << call_info.duplex << "," << call_info.mode << ",";
 
         //myfile2 << call_info.msgsource;
-        for (std::size_t i = 0; i < call_info.transmission_source_list.size(); i++) {
-          myfile2 << "|" << call_info.transmission_source_list[i].source;
-          if ((call_info.transmission_source_list[i].source > 2000) && (call_info.transmission_source_list[i].source < 8000)) {
+        //for (std::size_t i = 0; i < call_info.transmission_source_list.size(); i++) {
+          myfile2 << call_info.transmission_list.front().source << call_info.transmission_list.front().sources_string;
+          if ((call_info.transmission_list.front().source > 2000) && (call_info.transmission_list.front().source < 8000)) {
             char command[25];
             char buffer[10];
-            snprintf(command, 24, "php getblock.php %ld", call_info.transmission_source_list[i].source);
+            snprintf(command, 24, "php getblock.php %ld", call_info.transmission_source_list.front().source);
             //redi::ipstream pipe("php getblock.php %ld", src_list[i].source);
             FILE* pipe = popen(command, "r");
               fgets(buffer, 10, pipe);
 	        myfile2 << buffer;
             pclose(pipe);
           }
-        }
+        //}
         if (call_info.short_name != "cc")
            myfile2 << "|" << call_info.short_name;
-       myfile2 << "," << std::fixed << std::setprecision(0) << call_info.freq << "|" << call_info.transmission_list.front().length << "|" << call_info.transmission_list.front().error_count << "|" << call_info.transmission_list.front().spike_count;
+       myfile2 << "," << std::fixed << std::setprecision(0) << call_info.freq << "|" << call_info.transmission_list.front().total_length << "|" << call_info.transmission_list.front().error_count << "|" << call_info.transmission_list.front().spike_count;
        myfile2.close();
     }
     }
@@ -223,7 +223,9 @@ Call_Data_t upload_call_worker(Call_Data_t call_info) {
 
     // Handle the Upload Script, if set
     if (call_info.upload_script.length() != 0) {
+      if (call_info.short_name.length() > 2)
       shell_command << call_info.upload_script << " " << call_info.filename << " " << call_info.status_filename << " " << call_info.converted;
+      else shell_command << call_info.upload_script << " " << call_info.transmission_list.front().filename;
       shell_command_string = shell_command.str();
 
       BOOST_LOG_TRIVIAL(info) << "[" << call_info.short_name << "]\t\033[0;34m" << call_info.call_num << "C\033[0m \t Running upload script: " << shell_command_string;
