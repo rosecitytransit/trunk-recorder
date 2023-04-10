@@ -64,7 +64,6 @@
 #include <gnuradio/message.h>
 #include <gnuradio/msg_queue.h>
 #include <gnuradio/top_block.h>
-#include <gnuradio/uhd/usrp_source.h>
 
 #include "plugin_manager/plugin_manager.h"
 
@@ -862,9 +861,9 @@ void manage_calls() {
     }
 
     // Handle Trunked Calls
-    if ((call->since_last_update() > 1.0 /*config.call_timeout*/) && ((state == RECORDING) || (state == MONITORING))) {
+    if ((call->since_last_update() > 2.0 /*config.call_timeout*/) && ((state == RECORDING) || (state == MONITORING))) {
       if (state == RECORDING) {
-        ended_call = true;
+        //ended_call = true;
         call->set_record_more_transmissions(false);
         call->set_state(INACTIVE);
         // set the call state to inactive
@@ -904,7 +903,9 @@ void manage_calls() {
       if (recorder != NULL) {
 
         // if the recorder has simply been going for a while and a call is inactive, end things
-        if (call->since_last_update() > config.call_timeout) {
+        if ((recorder->get_state() == STOPPED) || (recorder->since_last_write() > config.call_timeout)) {
+      //config.call_timeout should now be set high and be a failsafe
+      //could use recorder->since_last_update() or call (not just tx) termination flag
           // BOOST_LOG_TRIVIAL(info) << "Recorder state: " << recorder->get_state();
           BOOST_LOG_TRIVIAL(trace) << "[" << call->get_short_name() << "]\t\033[0;34m" << call->get_call_num() << "C\033[0m\tTG: " << call->get_talkgroup_display() << "\tFreq: " << format_freq(call->get_freq()) << "\t\u001b[36m Removing call that has been inactive for more than " << config.call_timeout << " Sec \u001b[0m Rec last write: " << recorder->since_last_write() << " State: " << recorder->get_state();
 
