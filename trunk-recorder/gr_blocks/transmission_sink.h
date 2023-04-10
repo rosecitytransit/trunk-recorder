@@ -54,6 +54,8 @@ private:
   time_t d_stop_time;
   long d_spike_count;
   long d_error_count;
+  double d_total_length;
+  std::string d_sources_string;
   long curr_src_id;
   long next_src_id;
   char current_filename[255];

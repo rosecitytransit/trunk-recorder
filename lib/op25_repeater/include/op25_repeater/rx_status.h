@@ -7,5 +7,6 @@ struct Rx_Status{
   long error_count;
   long spike_count;
   time_t last_update;
+  std::string sources_string;
 };
 #endif

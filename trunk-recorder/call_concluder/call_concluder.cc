@@ -255,6 +255,8 @@ Call_Data_t Call_Concluder::create_call_data(Call *call, System *sys, Config con
   call_info.retry_attempt = 0;
   call_info.error_count = 0;
   call_info.spike_count = 0;
+  call_info.total_length = 0;
+  call_info.sources_string = "";
   call_info.freq = call->get_freq();
   call_info.encrypted = call->get_encrypted();
   call_info.emergency = call->get_emergency();

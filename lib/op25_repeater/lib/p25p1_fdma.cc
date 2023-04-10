@@ -223,6 +223,8 @@ namespace gr {
 			rx_status.total_len = 0;
 			rx_status.spike_count = 0;
 			rx_status.last_update = time(NULL);
+			rx_status.sources_string = "";
+			curr_src_id2 = -1;
 			for (int i=0; i<20; i++)
 				error_history[i] = -1;
 		}
@@ -232,6 +234,8 @@ namespace gr {
 			rx_status.total_len = 0;
 			rx_status.spike_count = 0;
 			rx_status.last_update = 0;
+			rx_status.sources_string = "";
+			curr_src_id2 = -1;
 			/*for (int i=0; i<20; i++)
 				error_history[i] = -1;*/
 		}
@@ -474,6 +478,11 @@ namespace gr {
                         case 0x00: { // Group Voice Channel User
                             uint16_t grpaddr = (lcw[4] << 8) + lcw[5];
                             uint32_t srcaddr = (lcw[6] << 16) + (lcw[7] << 8) + lcw[8];
+
+                            if ((framer->nac == 3623) && (curr_src_id2 != srcaddr) && (srcaddr != 0)) {
+                              curr_src_id2 = srcaddr;
+                              rx_status.sources_string += "|" + std::to_string(srcaddr);
+                            }
 
                             curr_src_id = srcaddr;
                             curr_grp_id = grpaddr;
