@@ -228,7 +228,7 @@ Call_Data_t upload_call_worker(Call_Data_t call_info) {
       else shell_command << call_info.upload_script << " " << call_info.transmission_list.front().filename;
       shell_command_string = shell_command.str();
 
-      BOOST_LOG_TRIVIAL(info) << "[" << call_info.short_name << "]\t\033[0;34m" << call_info.call_num << "C\033[0m \t Running upload script: " << shell_command_string;
+      BOOST_LOG_TRIVIAL(trace) << "[" << call_info.short_name << "]\t\033[0;34m" << call_info.call_num << "C\033[0m \t Running upload script: " << shell_command_string;
 
       result = system(shell_command_string.c_str());
     }
