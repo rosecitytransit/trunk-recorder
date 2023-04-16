@@ -1716,7 +1716,7 @@ int main(int argc, char **argv) {
   boost::log::core::get()->add_global_attribute("Scope", boost::log::attributes::named_scope());
   boost::log::core::get()->set_filter(boost::log::trivial::severity >= boost::log::trivial::info);
 
-  add_logs(boost::log::expressions::format("[%1%] (%2%)   %3%") % boost::log::expressions::format_date_time<boost::posix_time::ptime>("TimeStamp", "%Y-%m-%d %H:%M:%S.%f") % boost::log::expressions::attr<boost::log::trivial::severity_level>("Severity") % boost::log::expressions::smessage);
+//  add_logs(boost::log::expressions::format("[%1%] (%2%)   %3%") % boost::log::expressions::format_date_time<boost::posix_time::ptime>("TimeStamp", "%Y-%m-%d %H:%M:%S.%f") % boost::log::expressions::attr<boost::log::trivial::severity_level>("Severity") % boost::log::expressions::smessage);
 
   // boost::log::sinks->imbue(std::locale("C"));
   // std::locale::global(std::locale("C"));
@@ -1763,15 +1763,6 @@ int main(int argc, char **argv) {
   }
 
   start_plugins(sources, systems);
-
-  if (config.log_file) {
-    logging::add_file_log(
-        keywords::file_name = config.log_dir + "/%m-%d-%Y_%H%M_%2N.log",
-        keywords::format = "[%TimeStamp%] (%Severity%)   %Message%",
-        keywords::rotation_size = 100 * 1024 * 1024,
-        keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0),
-        keywords::auto_flush = true);
-  }
 
   if (setup_systems()) {
     signal(SIGINT, exit_interupt);
