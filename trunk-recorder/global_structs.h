@@ -96,7 +96,7 @@ struct Call_Data_t {
   long spike_count;
   bool encrypted;
   bool emergency;
-  long priority;
+  int priority;
   bool mode;
   bool duplex;
   double total_length;

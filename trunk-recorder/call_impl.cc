@@ -282,7 +282,7 @@ bool Call_impl::get_emergency() {
   return emergency;
 }
 
-bool Call_impl::get_priority() {
+int Call_impl::get_priority() {
   return priority;
 }
 
