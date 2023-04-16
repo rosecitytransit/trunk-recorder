@@ -903,7 +903,7 @@ void manage_calls() {
       if (recorder != NULL) {
 
         // if the recorder has simply been going for a while and a call is inactive, end things
-        if ((recorder->get_state() == STOPPED) || (recorder->since_last_write() > config.call_timeout)) {
+        if ((recorder->get_state() == STOPPED) || (recorder->get_state() == IDLE) || (recorder->since_last_write() > config.call_timeout)) {
       //config.call_timeout should now be set high and be a failsafe
       //could use recorder->since_last_update() or call (not just tx) termination flag
           // BOOST_LOG_TRIVIAL(info) << "Recorder state: " << recorder->get_state();
