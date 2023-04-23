@@ -908,7 +908,6 @@ std::vector<TrunkMessage> P25Parser::parse_message(gr::message::sptr msg) {
     messages.push_back(message);
     return messages;
   } else if (type < 0) {
-    BOOST_LOG_TRIVIAL(debug) << "unknown message type " << type;
     messages.push_back(message);
     return messages;
   }

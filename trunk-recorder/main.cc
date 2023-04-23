@@ -1501,6 +1501,8 @@ void monitor_messages() {
 
       if (msg->type() == -1) {
         BOOST_LOG_TRIVIAL(error) << "[" << sys->get_short_name() << "]\t process_data_unit timeout";
+      } else if (msg->type() < 0) {
+        BOOST_LOG_TRIVIAL(debug) << "[" << sys->get_short_name() << "]\t unknown message type " << msg->type();
       }
 
       msg.reset();
