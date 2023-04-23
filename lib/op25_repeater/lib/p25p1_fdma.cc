@@ -223,8 +223,6 @@ namespace gr {
 			rx_status.total_len = 0;
 			rx_status.spike_count = 0;
 			rx_status.last_update = time(NULL);
-			rx_status.sources_string = "";
-			curr_src_id2 = -1;
 			for (int i=0; i<20; i++)
 				error_history[i] = -1;
 		}
@@ -234,8 +232,6 @@ namespace gr {
 			rx_status.total_len = 0;
 			rx_status.spike_count = 0;
 			rx_status.last_update = 0;
-			rx_status.sources_string = "";
-			curr_src_id2 = -1;
 			/*for (int i=0; i<20; i++)
 				error_history[i] = -1;*/
 		}
@@ -402,7 +398,6 @@ namespace gr {
                 fprintf (stderr, "%s NAC 0x%03x TDU3:  ", logts.get(d_msgq_id), framer->nac);
             }
 
-            if (framer->nac != 3623)
             process_TTDU();
 
             if (d_debug >= 10) {
@@ -415,7 +410,7 @@ namespace gr {
                 fprintf (stderr, "%s NAC 0x%03x TDU15:  ", logts.get(d_msgq_id), framer->nac);
             }
 
-            //process_TTDU();
+            process_TTDU();
 
             int i, j, k;
             size_t gly_errs = 0, errs = 0;
@@ -463,8 +458,6 @@ namespace gr {
             int pb =   (lcw[0] >> 7);
             int sf =  ((lcw[0] & 0x40) >> 6);
             int lco =   lcw[0] & 0x3f;
-            if ((framer->duid == 0x0f) && (framer->nac != 3623)) process_TTDU();
-            else if ((framer->duid == 0x0f) && (lco == 15)) process_TTDU();
             std::string s = "";
 
             if (d_debug >= 10) {
@@ -478,11 +471,6 @@ namespace gr {
                         case 0x00: { // Group Voice Channel User
                             uint16_t grpaddr = (lcw[4] << 8) + lcw[5];
                             uint32_t srcaddr = (lcw[6] << 16) + (lcw[7] << 8) + lcw[8];
-
-                            if ((framer->nac == 3623) && (curr_src_id2 != srcaddr) && (srcaddr != 0)) {
-                              curr_src_id2 = srcaddr;
-                              rx_status.sources_string += "|" + std::to_string(srcaddr);
-                            }
 
                             curr_src_id = srcaddr;
                             curr_grp_id = grpaddr;
