@@ -544,7 +544,7 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
   } else if (opcode == 0x15) {
     BOOST_LOG_TRIVIAL(debug) << "tsbk15: SNDCP Data Page Request";
   } else if (opcode == 0x16) {
-    BOOST_LOG_TRIVIAL(debug) << "tsbk16: SNDCP Data Channel Announcement -Explicit";
+    BOOST_LOG_TRIVIAL(trace) << "tsbk16: SNDCP Data Channel Announcement -Explicit";
   } else if (opcode == 0x18) {
     BOOST_LOG_TRIVIAL(debug) << "tsbk18: Status Update";
   } else if (opcode == 0x1a) {
@@ -864,7 +864,7 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
     add_channel(iden, temp_chan, sys_num);
     BOOST_LOG_TRIVIAL(trace) << "tsbk3d iden id " << std::dec << iden << " toff " << toff * 0.25 << " spac " << spac * 0.125 << " freq " << freq * 0.000005;
   } else {
-    BOOST_LOG_TRIVIAL(debug) << "tsbk other " << std::hex << opcode;
+    BOOST_LOG_TRIVIAL(trace) << "tsbk other " << std::hex << opcode;
     return messages;
   }
   messages.push_back(message);
