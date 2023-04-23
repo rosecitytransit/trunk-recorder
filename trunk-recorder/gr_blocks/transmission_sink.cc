@@ -222,11 +222,11 @@ void transmission_sink::set_source(long src) {
   }*/
 }
 
-void transmission_sink::end_transmission() {
+void transmission_sink::end_transmission(bool end_call) {
   if (d_sample_count > 0) {
-    if (d_fp) {
+    if (d_fp && ((d_current_call_short_name.length() > 2) || end_call)) {
       close_wav(false);
-    } else {
+    } else if (d_current_call_short_name.length() > 2) {
       BOOST_LOG_TRIVIAL(error) << "Ending transmission, sample_count is greater than 0 but d_fp is null" << std::endl;
     }
     // if an Transmission has ended, send it to Call.
@@ -266,7 +266,7 @@ void transmission_sink::stop_recording() {
   gr::thread::scoped_lock guard(d_mutex);
 
   if (d_sample_count > 0) {
-    end_transmission();
+    end_transmission(true);
   }
 
   if (state == RECORDING) {
@@ -480,7 +480,7 @@ int transmission_sink::dowork(int noutput_items, gr_vector_const_void_star &inpu
     if (d_sample_count > 0) {
       BOOST_LOG_TRIVIAL(trace) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\tTERM - record_more_transmissions = false, setting Recorder More: " << record_more_transmissions << " - count: " << d_sample_count;
 
-      end_transmission();
+      end_transmission(false);
 
       // If it is a conventional call or an UPDATE or GRANT message has been received recently,
       // then set it in IDLE state, which allows a new transmission to start.
@@ -502,7 +502,7 @@ int transmission_sink::dowork(int noutput_items, gr_vector_const_void_star &inpu
     if (!record_more_transmissions) {
       BOOST_LOG_TRIVIAL(trace) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\tWAV - Weird! State was IDLE but record_more_transmissions was FALSE - count: " << d_sample_count;
     }
-    if (d_fp) {
+    if (d_fp && (d_current_call_short_name.length() > 2)) {
       // if we are already recording a file for this call, close it before starting a new one.
       BOOST_LOG_TRIVIAL(info) << "WAV - Weird! we have an existing FP, but STATE was IDLE:  " << current_filename << std::endl;
 
@@ -520,10 +520,11 @@ int transmission_sink::dowork(int noutput_items, gr_vector_const_void_star &inpu
     create_base_filename();
     strcpy(current_filename, current_base_filename);
     strcat(current_filename, ".wav");
+    if (!d_fp || (d_fp == NULL)) {
     if (!open_internal(current_filename)) {
       BOOST_LOG_TRIVIAL(error) << "can't open file";
       return noutput_items;
-    }
+    } }
 
     BOOST_LOG_TRIVIAL(trace) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\tStarting new Transmission \tSrc ID:  " << curr_src_id;
 

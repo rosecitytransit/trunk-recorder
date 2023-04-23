@@ -125,7 +125,7 @@ public:
   bool start_recording(Call *call);
   bool start_recording(Call *call, int slot);
   void stop_recording();
-  void end_transmission();
+  void end_transmission(bool end_call);
   void set_source(long src);
   void set_sample_rate(unsigned int sample_rate);
   void set_bits_per_sample(int bits_per_sample);
