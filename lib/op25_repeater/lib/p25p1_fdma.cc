@@ -222,7 +222,6 @@ namespace gr {
 			rx_status.error_count = 0;
 			rx_status.total_len = 0;
 			rx_status.spike_count = 0;
-			rx_status.last_update = time(NULL);
 			for (int i=0; i<20; i++)
 				error_history[i] = -1;
 		}
@@ -231,7 +230,6 @@ namespace gr {
 			rx_status.error_count = 0;
 			rx_status.total_len = 0;
 			rx_status.spike_count = 0;
-			rx_status.last_update = 0;
 			/*for (int i=0; i<20; i++)
 				error_history[i] = -1;*/
 		}
@@ -686,7 +684,6 @@ namespace gr {
 					}
 					rx_status.error_count += imbe_error;
 					rx_status.total_len += 144;
-					//rx_status.last_update = time(NULL); //uncomment to ignore post-voice frames
 					// output one 32-byte msg per 0.020 sec.
 					// also, 32*9 = 288 byte pkts (for use via UDP)
 					sprintf(s, "%03x %03x %03x %03x %03x %03x %03x %03x\n", u[0], u[1], u[2], u[3], u[4], u[5], u[6], u[7]);
@@ -819,7 +816,6 @@ namespace gr {
                     }
 					rx_status.error_count += framer->bch_errors;
 					rx_status.total_len += 64;
-					rx_status.last_update = time(NULL); //comment/remove if you don't care about non-voice frames
 					terminate_call = false;
 
                     process_frame();
