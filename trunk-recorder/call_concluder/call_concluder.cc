@@ -157,7 +157,7 @@ Call_Data_t upload_call_worker(Call_Data_t call_info) {
   if (call_info.status == INITIAL) {
     std::stringstream shell_command;
     std::string shell_command_string;
-    if (call_info.transmission_list.size() > 1) {
+    if ((call_info.transmission_list.size() > 1) && (call_info.short_name.length() > 2)) {
     std::string files;
 
     // loop through the transmission list, pull in things to fill in totals for call_info

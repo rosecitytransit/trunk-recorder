@@ -864,7 +864,7 @@ void manage_calls() {
     if ((call->since_last_update() > 2.0 /*config.call_timeout*/) && ((state == RECORDING) || (state == MONITORING))) {
       if (state == RECORDING) {
         //ended_call = true;
-        call->set_record_more_transmissions(false);
+        //call->set_record_more_transmissions(false);
         call->set_state(INACTIVE);
         // set the call state to inactive
 
