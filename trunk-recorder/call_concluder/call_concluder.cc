@@ -186,19 +186,22 @@ Call_Data_t upload_call_worker(Call_Data_t call_info) {
         myfile2 << "\n" << call_info.start_time << "," << (call_info.stop_time - call_info.start_time) << "," << (int)(call_info.length + 0.5) << "," << call_info.talkgroup << "," << call_info.emergency << "," << call_info.priority << "," << call_info.duplex << "," << call_info.mode << ",";
 
         //myfile2 << call_info.msgsource;
-        //for (std::size_t i = 0; i < call_info.transmission_source_list.size(); i++) {
-          myfile2 << call_info.transmission_list.front().source << call_info.transmission_list.front().sources_string;
-          if ((call_info.transmission_list.front().source > 2000) && (call_info.transmission_list.front().source < 8000)) {
+        for (std::size_t i = 0; i < call_info.transmission_source_list.size(); i++) {
+          if (i != 0) {
+            myfile2 << "|";
+          }
+          myfile2 << call_info.transmission_source_list[i].source;
+          if ((call_info.transmission_source_list[i].source > 2000) && (call_info.transmission_source_list[i].source < 8000)) {
             char command[25];
             char buffer[10];
-            snprintf(command, 24, "php getblock.php %ld", call_info.transmission_source_list.front().source);
+            snprintf(command, 24, "php getblock.php %ld", call_info.transmission_source_list[i].source);
             //redi::ipstream pipe("php getblock.php %ld", src_list[i].source);
             FILE* pipe = popen(command, "r");
               fgets(buffer, 10, pipe);
 	        myfile2 << buffer;
             pclose(pipe);
           }
-        //}
+        }
         if (call_info.short_name != "cc")
            myfile2 << "|" << call_info.short_name;
        myfile2 << "," << std::fixed << std::setprecision(0) << call_info.freq << "|" << call_info.transmission_list.front().total_length << "|" << call_info.transmission_list.front().error_count << "|" << call_info.transmission_list.front().spike_count;
@@ -258,7 +261,6 @@ Call_Data_t Call_Concluder::create_call_data(Call *call, System *sys, Config con
   call_info.error_count = 0;
   call_info.spike_count = 0;
   call_info.total_length = 0;
-  call_info.sources_string = "";
   call_info.freq = call->get_freq();
   call_info.encrypted = call->get_encrypted();
   call_info.emergency = call->get_emergency();

@@ -129,7 +129,6 @@ bool transmission_sink::start_recording(Call *call) {
   d_error_count = 0;
   d_spike_count = 0;
   d_total_length = 0;
-  d_sources_string = "";
   record_more_transmissions = true;
 
   this->clear_transmission_list();
@@ -238,7 +237,6 @@ void transmission_sink::end_transmission(bool end_call) {
     transmission.spike_count = d_spike_count;
     transmission.error_count = d_error_count;
     transmission.total_length = d_total_length;
-    transmission.sources_string = d_sources_string;
     transmission.length = length_in_seconds(); // length in seconds
     d_prior_transmission_length = d_prior_transmission_length + transmission.length;
     strcpy(transmission.filename, current_filename); // Copy the filename
@@ -249,7 +247,6 @@ void transmission_sink::end_transmission(bool end_call) {
     d_error_count = 0;
     d_spike_count = 0;
     d_total_length = 0;
-    d_sources_string = "";
     if (next_src_id > 0) {
       curr_src_id = next_src_id;
       next_src_id = -1;
@@ -335,7 +332,6 @@ int transmission_sink::work(int noutput_items, gr_vector_const_void_star &input_
   pmt::pmt_t spike_count_key(pmt::intern("spike_count"));
   pmt::pmt_t error_count_key(pmt::intern("error_count"));
   pmt::pmt_t total_length_key(pmt::intern("total_length"));
-  pmt::pmt_t sources_string_key(pmt::intern("sources_string"));
 
   // pmt::pmt_t squelch_key(pmt::intern("squelch_eob"));
   // get_tags_in_range(tags, 0, nitems_read(0), nitems_read(0) + noutput_items);
@@ -409,11 +405,6 @@ int transmission_sink::work(int noutput_items, gr_vector_const_void_star &input_
         d_total_length = pmt::to_double(tags[i].value);
 
         BOOST_LOG_TRIVIAL(trace) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\tTotal Length: " << d_total_length;
-      }
-      if (pmt::eq(sources_string_key, tags[i].key)) {
-        d_sources_string = pmt::symbol_to_string(tags[i].value);
-
-        BOOST_LOG_TRIVIAL(trace) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\tSources: " << d_sources_string;
       }
     }
   }

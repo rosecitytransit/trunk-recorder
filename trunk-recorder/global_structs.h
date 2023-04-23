@@ -12,7 +12,6 @@ struct Transmission {
   long spike_count;
   long error_count;
   double total_length;
-  std::string sources_string;
   double freq;
   double length;
   char filename[255];
@@ -100,7 +99,6 @@ struct Call_Data_t {
   bool mode;
   bool duplex;
   double total_length;
-  std::string sources_string;
   bool audio_archive;
   bool transmission_archive;
   bool call_log;
