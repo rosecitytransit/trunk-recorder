@@ -307,11 +307,11 @@ double p25_recorder_impl::since_last_write() {
   }
 }
 
-double p25_recorder_impl::since_last_update() {
+int p25_recorder_impl::new_items_count() {
   if (qpsk_mod) {
-    return qpsk_p25_decode->since_last_update();
+    return qpsk_p25_decode->new_items_count();
   } else {
-    return fsk4_p25_decode->since_last_update();
+    return fsk4_p25_decode->new_items_count();
   }
 }
 

@@ -63,8 +63,8 @@ double p25_recorder_decode::since_last_write() {
   return now - wav_sink->get_stop_time();
 }
 
-double p25_recorder_decode::since_last_update() {
-  return op25_frame_assembler->since_last_update();
+int p25_recorder_decode::new_items_count() {
+  return op25_frame_assembler->new_items_count();
 }
 
 void p25_recorder_decode::switch_tdma(bool phase2_tdma) {
@@ -88,7 +88,7 @@ void p25_recorder_decode::initialize(int silence_frames) {
   rx_queue = gr::msg_queue::make(100);
 
   int udp_port = 0;
-  int verbosity = 0; // 10 = lots of debug messages
+  int verbosity = 10; // 10 = lots of debug messages
   const char *udp_host = "127.0.0.1";
   bool do_imbe = 1;
   bool do_output = 1;

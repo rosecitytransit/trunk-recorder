@@ -58,6 +58,8 @@ namespace gr {
   int d_silence_frames;
   int silence_frame_count;
   long total_produced;
+  int general_work_items;
+  int general_work_items2;
   pmt::pmt_t d_tag_key;
   pmt::pmt_t d_tag_src;
 
@@ -90,7 +92,7 @@ public:
 
       void clear_silence_frame_count();
       void clear();
-      double since_last_update();
+      int new_items_count();
     };
 
   } // namespace op25_repeater

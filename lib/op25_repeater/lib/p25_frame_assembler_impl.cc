@@ -37,9 +37,19 @@
 namespace gr {
   namespace op25_repeater {
 
-    double p25_frame_assembler_impl::since_last_update() {
-		time_t now = time(NULL);
-		return now - p1fdma.get_rx_status().last_update;
+    int p25_frame_assembler_impl::new_items_count() {
+      if (general_work_items == 0) { //nothing yet
+        return -1;
+      } else if (general_work_items == general_work_items2) {
+        BOOST_LOG_TRIVIAL(trace) << "NO MORE general_work items; total: " << general_work_items;
+        general_work_items = 0;
+        general_work_items2 = 0;
+        return 0;
+      } else {
+        int diff = general_work_items - general_work_items2;
+        general_work_items2 = general_work_items;
+        return diff;
+      }
     }
 
     /* This is for the TPS Analog decoder */
@@ -183,6 +193,8 @@ p25_frame_assembler_impl::general_work (int noutput_items,
       // If this block is being used for Trunking, then you want to skip all of this.
       if (d_do_audio_output) {
         amt_produce = output_queue.size();
+        general_work_items++;
+        BOOST_LOG_TRIVIAL(trace) << "general_work items now " << general_work_items;
         int16_t *out = (int16_t *)output_items[0];
 
         //BOOST_LOG_TRIVIAL(trace) << "P25 Frame Assembler -  output_queue: " << output_queue.size() << " noutput_items: " <<  noutput_items << " ninput_items: " << ninput_items[0];
