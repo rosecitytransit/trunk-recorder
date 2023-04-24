@@ -234,7 +234,7 @@ p25_frame_assembler_impl::general_work (int noutput_items,
             if (status.total_len > 0 ) {
               add_item_tag(0, nitems_written(0), pmt::intern("spike_count"), pmt::from_long(status.spike_count), d_tag_src);
               add_item_tag(0, nitems_written(0), pmt::intern("error_count"), pmt::from_long(status.error_count), d_tag_src);
-              add_item_tag(0, nitems_written(0), pmt::intern("total_length"), pmt::from_double(status.total_len), d_tag_src);
+              add_item_tag(0, nitems_written(0), pmt::intern("total_len"), pmt::from_double(status.total_len), d_tag_src);
               p1fdma.reset_rx_status();
             }
             

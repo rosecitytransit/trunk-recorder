@@ -54,7 +54,7 @@ private:
   time_t d_stop_time;
   long d_spike_count;
   long d_error_count;
-  double d_total_length;
+  double d_total_len;
   long curr_src_id;
   long next_src_id;
   char current_filename[255];

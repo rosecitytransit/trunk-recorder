@@ -11,6 +11,7 @@ struct Transmission {
   long sample_count;
   long spike_count;
   long error_count;
+  double total_len;
   double total_length;
   double freq;
   double length;
@@ -53,17 +54,19 @@ struct Call_Freq {
   double freq;
   long time;
   double position;
-  double total_len;
+  double total_length;
   double error_count;
   double spike_count;
+  double total_len;
 };
 
 struct Call_Error {
   long time;
   double position;
-  double total_len;
+  double total_length;
   double error_count;
   double spike_count;
+  double total_len;
 };
 
 enum Call_Data_Status { INITIAL,
@@ -93,6 +96,7 @@ struct Call_Data_t {
   long stop_time;
   long error_count;
   long spike_count;
+  double total_len;
   bool encrypted;
   bool emergency;
   int priority;
