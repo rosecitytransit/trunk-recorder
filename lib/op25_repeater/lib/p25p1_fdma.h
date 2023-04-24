@@ -95,7 +95,6 @@ namespace gr {
                 p25p1_voice_decode p1voice_decode;
                 double error_history[20];
                 long curr_src_id;
-                long curr_src_id2;
                 long curr_grp_id;
                 bool terminate_call;
                 const char *d_udp_host;
