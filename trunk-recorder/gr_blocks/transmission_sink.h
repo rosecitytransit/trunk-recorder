@@ -72,6 +72,7 @@ private:
 
 protected:
   unsigned d_sample_count;
+  unsigned d_total_samples;
   int d_bytes_per_sample;
   FILE *d_fp;
   boost::mutex d_mutex;
@@ -124,7 +125,7 @@ public:
   bool start_recording(Call *call);
   bool start_recording(Call *call, int slot);
   void stop_recording();
-  void end_transmission(bool end_call);
+  void end_transmission();
   void set_source(long src);
   void set_sample_rate(unsigned int sample_rate);
   void set_bits_per_sample(int bits_per_sample);

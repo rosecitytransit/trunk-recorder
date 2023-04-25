@@ -1,0 +1,116 @@
+From 9d3fe1ce6dcf4330b14750e2cbc402c5b5ad906f Mon Sep 17 00:00:00 2001
+From: Jason McHuff <github@jasonmchuff.net>
+Date: Sun, 9 Apr 2023 04:38:30 -0700
+Subject: [PATCH] log call priority, mode, duplex
+
+TODO: turn on adding to JSON once supported; also does not look at status bits in voice frames, only control channel messages
+---
+ trunk-recorder/call.h                           |  3 +++
+ trunk-recorder/call_concluder/call_concluder.cc |  6 ++++++
+ trunk-recorder/call_impl.cc                     | 15 +++++++++++++++
+ trunk-recorder/call_impl.h                      |  3 +++
+ trunk-recorder/global_structs.h                 |  3 +++
+ 5 files changed, 30 insertions(+)
+
+diff --git a/trunk-recorder/call.h b/trunk-recorder/call.h
+index dd47267..ed1e099 100644
+--- a/trunk-recorder/call.h
++++ b/trunk-recorder/call.h
+@@ -71,6 +71,9 @@ public:
+   virtual bool get_encrypted() = 0;
+   virtual void set_emergency(bool m) = 0;
+   virtual bool get_emergency() = 0;
++  virtual bool get_priority() = 0;
++  virtual bool get_mode() = 0;
++  virtual bool get_duplex() = 0;
+   virtual std::string get_talkgroup_display() = 0;
+   virtual void set_talkgroup_tag(std::string tag) = 0;
+   virtual void clear_transmission_list() = 0;
+diff --git a/trunk-recorder/call_concluder/call_concluder.cc b/trunk-recorder/call_concluder/call_concluder.cc
+index 263d4d5..0cd6ebb 100644
+--- a/trunk-recorder/call_concluder/call_concluder.cc
++++ b/trunk-recorder/call_concluder/call_concluder.cc
+@@ -58,6 +58,9 @@ int create_call_json(Call_Data_t call_info) {
+     json_file << "\"start_time\": " << call_info.start_time << ",\n";
+     json_file << "\"stop_time\": " << call_info.stop_time << ",\n";
+     json_file << "\"emergency\": " << call_info.emergency << ",\n";
++    //json_file << "\"priority\": " << call_info.priority << ",\n";
++    //json_file << "\"mode\": " << call_info.mode << ",\n";
++    //json_file << "\"duplex\": " << call_info.duplex << ",\n";
+     json_file << "\"encrypted\": " << call_info.encrypted << ",\n";
+     json_file << "\"call_length\": " << call_info.length << ",\n";
+     json_file << "\"talkgroup\": " << call_info.talkgroup << ",\n";
+@@ -255,6 +258,9 @@ Call_Data_t Call_Concluder::create_call_data(Call *call, System *sys, Config con
+   call_info.freq = call->get_freq();
+   call_info.encrypted = call->get_encrypted();
+   call_info.emergency = call->get_emergency();
++  call_info.priority = call->get_priority();
++  call_info.mode = call->get_mode();
++  call_info.duplex = call->get_duplex();
+   call_info.tdma_slot = call->get_tdma_slot();
+   call_info.phase2_tdma = call->get_phase2_tdma();
+   call_info.transmission_list = call->get_transmissions();
+diff --git a/trunk-recorder/call_impl.cc b/trunk-recorder/call_impl.cc
+index c55cb8d..ed85d07 100644
+--- a/trunk-recorder/call_impl.cc
++++ b/trunk-recorder/call_impl.cc
+@@ -282,6 +282,18 @@ bool Call_impl::get_emergency() {
+   return emergency;
+ }
+ 
++bool Call_impl::get_priority() {
++  return priority;
++}
++
++bool Call_impl::get_mode() {
++  return mode;
++}
++
++bool Call_impl::get_duplex() {
++  return duplex;
++}
++
+ void Call_impl::set_tdma_slot(int m) {
+   tdma_slot = m;
+   if (!phase2_tdma && tdma_slot) {
+@@ -432,6 +444,9 @@ boost::property_tree::ptree Call_impl::get_stats() {
+   call_node.put("conventional", this->is_conventional());
+   call_node.put("encrypted", this->get_encrypted());
+   call_node.put("emergency", this->get_emergency());
++  call_node.put("priority", this->get_priority());
++  call_node.put("mode", this->get_mode());
++  call_node.put("duplex", this->get_duplex());
+   call_node.put("startTime", this->get_start_time());
+   call_node.put("stopTime", this->get_stop_time());
+   call_node.put("srcId", this->get_current_source_id());
+diff --git a/trunk-recorder/call_impl.h b/trunk-recorder/call_impl.h
+index 797fd63..b8354b0 100644
+--- a/trunk-recorder/call_impl.h
++++ b/trunk-recorder/call_impl.h
+@@ -73,6 +73,9 @@ public:
+   bool get_encrypted();
+   void set_emergency(bool m);
+   bool get_emergency();
++  bool get_priority();
++  bool get_mode();
++  bool get_duplex();
+   std::string get_talkgroup_display();
+   void set_talkgroup_tag(std::string tag);
+   void clear_transmission_list();
+diff --git a/trunk-recorder/global_structs.h b/trunk-recorder/global_structs.h
+index 7de0f57..686b136 100644
+--- a/trunk-recorder/global_structs.h
++++ b/trunk-recorder/global_structs.h
+@@ -94,6 +94,9 @@ struct Call_Data_t {
+   long spike_count;
+   bool encrypted;
+   bool emergency;
++  long priority;
++  bool mode;
++  bool duplex;
+   bool audio_archive;
+   bool transmission_archive;
+   bool call_log;
+-- 
+2.25.1
+

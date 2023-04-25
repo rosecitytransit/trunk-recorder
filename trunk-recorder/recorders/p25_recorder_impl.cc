@@ -307,11 +307,19 @@ double p25_recorder_impl::since_last_write() {
   }
 }
 
-int p25_recorder_impl::new_items_count() {
+time_t p25_recorder_impl::last_voice_frame() {
   if (qpsk_mod) {
-    return qpsk_p25_decode->new_items_count();
+    return qpsk_p25_decode->last_voice_frame();
   } else {
-    return fsk4_p25_decode->new_items_count();
+    return fsk4_p25_decode->last_voice_frame();
+  }
+}
+
+void p25_recorder_impl::clear_lvf() {
+  if (qpsk_mod) {
+    qpsk_p25_decode->clear_lvf();
+  } else {
+    fsk4_p25_decode->clear_lvf();
   }
 }
 

@@ -72,6 +72,7 @@ transmission_sink::transmission_sink(int n_channels, unsigned int sample_rate, i
   }
   d_bytes_per_sample = bits_per_sample / 8;
   d_sample_count = 0;
+  d_total_samples = 0;
   d_slot = -1;
   d_termination_flag = false;
   state = AVAILABLE;
@@ -178,6 +179,7 @@ bool transmission_sink::open_internal(const char *filename) {
   }
 
   d_sample_count = 0;
+  d_total_samples = 0;
 
   if (!wavheader_write(d_fp, d_sample_rate, d_nchans, d_bytes_per_sample)) {
     fprintf(stderr, "[%s] could not write to WAV file\n", __FILE__);
@@ -221,9 +223,9 @@ void transmission_sink::set_source(long src) {
   }*/
 }
 
-void transmission_sink::end_transmission(bool end_call) {
+void transmission_sink::end_transmission() {
   if (d_sample_count > 0) {
-    if (d_fp && ((d_current_call_short_name.length() > 2) || end_call)) {
+    if (d_fp && (d_current_call_short_name.length() > 2)) {
       close_wav(false);
     } else if (d_current_call_short_name.length() > 2) {
       BOOST_LOG_TRIVIAL(error) << "Ending transmission, sample_count is greater than 0 but d_fp is null" << std::endl;
@@ -263,7 +265,10 @@ void transmission_sink::stop_recording() {
   gr::thread::scoped_lock guard(d_mutex);
 
   if (d_sample_count > 0) {
-    end_transmission(true);
+    end_transmission();
+  }
+  if (d_fp) {
+    close_wav(true);
   }
 
   if (state == RECORDING) {
@@ -275,10 +280,11 @@ void transmission_sink::stop_recording() {
 }
 
 void transmission_sink::close_wav(bool close_call) {
-  unsigned int byte_count = d_sample_count * d_bytes_per_sample;
+  unsigned int byte_count = d_total_samples * d_bytes_per_sample;
   wavheader_complete(d_fp, byte_count);
   fclose(d_fp);
   d_fp = NULL;
+  d_total_samples = 0;
 }
 
 transmission_sink::~transmission_sink() {
@@ -471,7 +477,7 @@ int transmission_sink::dowork(int noutput_items, gr_vector_const_void_star &inpu
     if (d_sample_count > 0) {
       BOOST_LOG_TRIVIAL(trace) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\tTERM - record_more_transmissions = false, setting Recorder More: " << record_more_transmissions << " - count: " << d_sample_count;
 
-      end_transmission(false);
+      end_transmission();
 
       // If it is a conventional call or an UPDATE or GRANT message has been received recently,
       // then set it in IDLE state, which allows a new transmission to start.
@@ -545,6 +551,7 @@ int transmission_sink::dowork(int noutput_items, gr_vector_const_void_star &inpu
         wav_write_sample(d_fp, sample_buf_s, d_bytes_per_sample);
 
         d_sample_count++;
+        d_total_samples++;
       }
     }
   }

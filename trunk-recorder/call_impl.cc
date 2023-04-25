@@ -448,7 +448,7 @@ boost::property_tree::ptree Call_impl::get_stats() {
   call_node.put("mode", this->get_mode());
   call_node.put("duplex", this->get_duplex());
   call_node.put("startTime", this->get_start_time());
-  call_node.put("stopTime", this->get_stop_time());
+  call_node.put("stopTime", recorder->last_voice_frame());
   call_node.put("srcId", this->get_current_source_id());
 
   Recorder *recorder = this->get_recorder();

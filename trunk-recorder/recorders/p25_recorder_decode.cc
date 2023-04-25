@@ -63,8 +63,12 @@ double p25_recorder_decode::since_last_write() {
   return now - wav_sink->get_stop_time();
 }
 
-int p25_recorder_decode::new_items_count() {
-  return op25_frame_assembler->new_items_count();
+time_t p25_recorder_decode::last_voice_frame() {
+  return op25_frame_assembler->last_voice_frame();
+}
+
+ void p25_recorder_decode::clear_lvf() {
+  op25_frame_assembler->clear_lvf();
 }
 
 void p25_recorder_decode::switch_tdma(bool phase2_tdma) {
