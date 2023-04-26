@@ -183,7 +183,7 @@ Call_Data_t upload_call_worker(Call_Data_t call_info) {
       dailylog << dailylog2.substr(0,found) << "/calllog.txt";
       std::ofstream myfile2(dailylog.str(), std::ofstream::app);
       if (myfile2.is_open()) {
-        myfile2 << "\n" << call_info.start_time << "," << (time(NULL) - call_info.start_time) << "," << (int)(call_info.length + 0.5) << "," << call_info.talkgroup << "," << call_info.emergency << "," << call_info.priority << "," << call_info.duplex << "," << call_info.mode << ",";
+        myfile2 << "\n" << call_info.start_time << "," << (call_info.stop_time - call_info.start_time) << "," << (int)(call_info.length + 0.5) << "," << call_info.talkgroup << "," << call_info.emergency << "," << call_info.priority << "," << call_info.duplex << "," << call_info.mode << ",";
 
         //myfile2 << call_info.msgsource;
         for (std::size_t i = 0; i < call_info.transmission_source_list.size(); i++) {
@@ -339,7 +339,7 @@ Call_Data_t Call_Concluder::create_call_data(Call *call, System *sys, Config con
     }
 
     if (std::next(it) == call_info.transmission_list.end()) {
-      call_info.stop_time = t.stop_time;
+      call_info.stop_time = call->get_stop_time();
     }
 
     std::string tag = sys->find_unit_tag(t.source);
