@@ -38,6 +38,7 @@ namespace gr {
   namespace op25_repeater {
 
     time_t p25_frame_assembler_impl::last_voice_frame() {
+      BOOST_LOG_TRIVIAL(trace) << "last_voice_frame2: " << last_voice_frame2;
       return last_voice_frame2;
     }
 
@@ -186,8 +187,8 @@ p25_frame_assembler_impl::general_work (int noutput_items,
       // If this block is being used for Trunking, then you want to skip all of this.
       if (d_do_audio_output) {
         amt_produce = output_queue.size();
-        last_voice_frame2 = time_t(NULL);
-        BOOST_LOG_TRIVIAL(trace) << "p25_frame_assembler_impl::general_work";
+        last_voice_frame2 = time(NULL);
+        BOOST_LOG_TRIVIAL(trace) << "p25_frame_assembler_impl::general_work " << last_voice_frame2;
         int16_t *out = (int16_t *)output_items[0];
 
         //BOOST_LOG_TRIVIAL(trace) << "P25 Frame Assembler -  output_queue: " << output_queue.size() << " noutput_items: " <<  noutput_items << " ninput_items: " << ninput_items[0];

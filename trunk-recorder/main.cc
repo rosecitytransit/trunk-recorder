@@ -903,11 +903,11 @@ void manage_calls() {
       if (recorder != NULL) {
 
         // if the recorder has simply been going for a while and a call is inactive, end things
-        if (((time(NULL) - recorder->last_voice_frame()) > 2) || (recorder->since_last_write() > config.call_timeout)) {
+        if ((recorder->last_voice_frame() && (time(NULL) - recorder->last_voice_frame()) > 2) || (recorder->since_last_write() > config.call_timeout)) {
       //config.call_timeout should now be set high and be a failsafe
       //could use recorder->since_last_update() or call (not just tx) termination flag
           // BOOST_LOG_TRIVIAL(info) << "Recorder state: " << recorder->get_state();
-          BOOST_LOG_TRIVIAL(trace) << "[" << call->get_short_name() << "]\t\033[0;34m" << call->get_call_num() << "C\033[0m\tTG: " << call->get_talkgroup_display() << "\tFreq: " << format_freq(call->get_freq()) << "\t\u001b[36m Removing call that has been inactive for more than " << config.call_timeout << " Sec \u001b[0m Rec last write: " << recorder->since_last_write() << " State: " << recorder->get_state();
+          BOOST_LOG_TRIVIAL(debug) << "[" << call->get_short_name() << "]\t\033[0;34m" << call->get_call_num() << "C\033[0m\tTG: " << call->get_talkgroup_display() << "\tFreq: " << format_freq(call->get_freq()) << "\tsince last voice frame: " << (time(NULL) - recorder->last_voice_frame()) << " \t Rec last write: " << recorder->since_last_write() << " State: " << recorder->get_state();
 
           // since the Call state is INACTIVE and the Recorder has been going on for a while, we can now
           // set the Call state to COMPLETED
@@ -1104,6 +1104,8 @@ void handle_call_grant(TrunkMessage message, System *sys) {
         recorder_state = format_state(recorder->get_state());
       }
       BOOST_LOG_TRIVIAL(info) << "[" << call->get_short_name() << "]\t\033[0;34m" << call->get_call_num() << "C\033[0m\tTG: " << call->get_talkgroup_display() << "\tFreq: " << format_freq(call->get_freq()) << "\t\u001b[36mStopping RECORDING call, Recorder State: " << recorder_state << " RX overlapping TG message Freq, TG:" << message.talkgroup << "\u001b[0m";
+      BOOST_LOG_TRIVIAL(debug) << "[" << call->get_short_name() << "]\t\033[0;34m" << call->get_call_num() << "C\033[0m\tTG: " << call->get_talkgroup_display() << "\tFreq: " << format_freq(call->get_freq()) << "\tsince last voice frame: " << (time(NULL) - recorder->last_voice_frame()) << " \t Rec last write: " << recorder->since_last_write() << " State: " << recorder->get_state();
+
 
       call->set_state(COMPLETED);
       call->conclude_call();
@@ -1121,6 +1123,8 @@ void handle_call_grant(TrunkMessage message, System *sys) {
         recorder_state = format_state(recorder->get_state());
       }
       BOOST_LOG_TRIVIAL(info) << "[" << call->get_short_name() << "]\t\033[0;34m" << call->get_call_num() << "C\033[0m\tTG: " << call->get_talkgroup_display() << "\tFreq: " << format_freq(call->get_freq()) << "\t\u001b[36mStopping INACTIVE call, Recorder State: " << recorder_state << " RX overlapping TG message Freq TG:" << message.talkgroup << "\u001b[0m";
+      BOOST_LOG_TRIVIAL(debug) << "[" << call->get_short_name() << "]\t\033[0;34m" << call->get_call_num() << "C\033[0m\tTG: " << call->get_talkgroup_display() << "\tFreq: " << format_freq(call->get_freq()) << "\tsince last voice frame: " << (time(NULL) - recorder->last_voice_frame()) << " \t Rec last write: " << recorder->since_last_write() << " State: " << recorder->get_state();
+
 
       call->set_state(COMPLETED);
       call->conclude_call();
