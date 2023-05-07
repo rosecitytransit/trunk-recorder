@@ -591,14 +591,14 @@ void System_impl::clear_stale_talkgroup_patches() {
   }
 
   // Print out all active patches to the console
-  BOOST_LOG_TRIVIAL(debug) << "Found " << talkgroup_patches.size() << " active talkgroup patches:";
+  BOOST_LOG_TRIVIAL(trace) << "Found " << talkgroup_patches.size() << " active talkgroup patches:";
   BOOST_FOREACH (auto &patch, talkgroup_patches) {
     std::string printstring;
     BOOST_FOREACH (auto &patch_element, patch.second) {
       printstring += " ";
       printstring += std::to_string(patch_element.first);
     }
-    BOOST_LOG_TRIVIAL(debug) << "Active Patch of TGIDs" << printstring;
+    BOOST_LOG_TRIVIAL(trace) << "Active Patch of TGIDs" << printstring;
   }
 }
 

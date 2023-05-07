@@ -903,7 +903,7 @@ void manage_calls() {
       if (recorder != NULL) {
 
         // if the recorder has simply been going for a while and a call is inactive, end things
-        if ((recorder->last_voice_frame() && (time(NULL) - recorder->last_voice_frame()) > 2) || (recorder->since_last_write() > config.call_timeout)) {
+        if (((time(NULL) - recorder->last_voice_frame()) > 2) || (recorder->since_last_write() > config.call_timeout)) {
       //config.call_timeout should now be set high and be a failsafe
       //could use recorder->since_last_update() or call (not just tx) termination flag
           // BOOST_LOG_TRIVIAL(info) << "Recorder state: " << recorder->get_state();
@@ -922,6 +922,8 @@ void manage_calls() {
           it = calls.erase(it);
           delete call;
           continue;
+        } else {
+        BOOST_LOG_TRIVIAL(trace) << "[" << call->get_short_name() << "]\tcall " << call->get_call_num() << "tTG: " << call->get_talkgroup_display() << "\tFreq: " << format_freq(call->get_freq()) << "\tsince last voice frame: " << (time(NULL) - recorder->last_voice_frame()) << " \t Rec last write: " << recorder->since_last_write() << " State: " << recorder->get_state();
         }
 
         // In this case, the Call is inactive and was waiting for the recorder to finish. In this

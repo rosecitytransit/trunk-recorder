@@ -193,12 +193,12 @@ Call_Data_t upload_call_worker(Call_Data_t call_info) {
           myfile2 << call_info.transmission_source_list[i].source;
           if ((call_info.transmission_source_list[i].source > 2000) && (call_info.transmission_source_list[i].source < 8000)) {
             char command[25];
-            char buffer[10];
+            char buffer[7];
             snprintf(command, 24, "php getblock.php %ld", call_info.transmission_source_list[i].source);
             //redi::ipstream pipe("php getblock.php %ld", src_list[i].source);
             FILE* pipe = popen(command, "r");
-              fgets(buffer, 10, pipe);
-	        myfile2 << buffer;
+            if (fgets(buffer, 7, pipe) != NULL)
+	         myfile2 << buffer;
             pclose(pipe);
           }
         }

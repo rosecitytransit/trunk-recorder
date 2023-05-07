@@ -126,7 +126,7 @@ long Call_impl::get_call_num() {
 void Call_impl::conclude_call() {
 
   // BOOST_LOG_TRIVIAL(info) << "conclude_call()";
-  stop_time = time(NULL);
+  stop_time = time(NULL)-2;
 
   if (state == COMPLETED || (state == MONITORING && monitoringState == SUPERSEDED)) {
     final_length = recorder->get_current_length();
