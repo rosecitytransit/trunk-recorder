@@ -241,7 +241,7 @@ namespace gr {
 			return rx_status;
 		}
 
-		bool p25p1_fdma::get_call_terminated() {
+		bool p25p1_fdma::get_call_terminated() { //all terminate flag stuff in OP25 could be removed if it's not in upstream
 			return terminate_call;
 		}
         long p25p1_fdma::get_curr_grp_id() {

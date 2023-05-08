@@ -52,8 +52,9 @@ private:
   bool d_termination_flag;
   time_t d_start_time;
   time_t d_stop_time;
-  long d_spike_count;
-  long d_error_count;
+  //long d_spike_count;
+  //long d_error_count;
+  std::string d_status_string;
   long curr_src_id;
   long next_src_id;
   char current_filename[255];

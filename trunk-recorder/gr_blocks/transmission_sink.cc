@@ -124,8 +124,9 @@ bool transmission_sink::start_recording(Call *call) {
   d_current_call_short_name = call->get_short_name();
   d_current_call_capture_dir = call->get_capture_dir();
   d_prior_transmission_length = 0;
-  d_error_count = 0;
-  d_spike_count = 0;
+  //d_error_count = 0;
+  //d_spike_count = 0;
+  d_status_string = "";
   record_more_transmissions = true;
 
   this->clear_transmission_list();
@@ -231,8 +232,8 @@ void transmission_sink::end_transmission() {
     transmission.start_time = d_start_time; // Start time of the Call
     transmission.stop_time = d_stop_time;   // when the Call eneded
     transmission.sample_count = d_sample_count;
-    transmission.spike_count = d_spike_count;
-    transmission.error_count = d_error_count;
+    //transmission.spike_count = d_spike_count;
+    //transmission.error_count = d_error_count;
     transmission.length = length_in_seconds(); // length in seconds
     d_prior_transmission_length = d_prior_transmission_length + transmission.length;
     strcpy(transmission.filename, current_filename); // Copy the filename
@@ -240,8 +241,8 @@ void transmission_sink::end_transmission() {
     this->add_transmission(transmission);
 
     d_sample_count = 0;
-    d_error_count = 0;
-    d_spike_count = 0;
+    //d_error_count = 0;
+    //d_spike_count = 0;
     if (next_src_id > 0) {
       curr_src_id = next_src_id;
       next_src_id = -1;
@@ -254,7 +255,7 @@ void transmission_sink::end_transmission() {
   }
 }
 
-void transmission_sink::stop_recording() {
+std::string transmission_sink::stop_recording() {
   gr::thread::scoped_lock guard(d_mutex);
 
   if (d_sample_count > 0) {
@@ -264,6 +265,8 @@ void transmission_sink::stop_recording() {
   if (state == RECORDING) {
     BOOST_LOG_TRIVIAL(trace) << "stop_recording() - stopping wavfile sink but recorder state is: " << state << std::endl;
   }
+  //need to get this info into the call concluder
+  BOOST_LOG_TRIVIAL(info) << "call " << d_current_call_num << " total_len,errors,spikes: " << d_status_string;
   d_current_call = NULL;
   d_termination_flag = false;
   state = AVAILABLE;
@@ -324,8 +327,9 @@ int transmission_sink::work(int noutput_items, gr_vector_const_void_star &input_
   pmt::pmt_t src_id_key(pmt::intern("src_id"));
   pmt::pmt_t ptt_src_id_key(pmt::intern("ptt_src_id"));
   pmt::pmt_t terminate_key(pmt::intern("terminate"));
-  pmt::pmt_t spike_count_key(pmt::intern("spike_count"));
-  pmt::pmt_t error_count_key(pmt::intern("error_count"));
+  pmt::pmt_t status_string_key(pmt::intern("status_string"));
+  //pmt::pmt_t spike_count_key(pmt::intern("spike_count"));
+  //pmt::pmt_t error_count_key(pmt::intern("error_count"));
 
   // pmt::pmt_t squelch_key(pmt::intern("squelch_eob"));
   // get_tags_in_range(tags, 0, nitems_read(0), nitems_read(0) + noutput_items);
@@ -364,7 +368,7 @@ int transmission_sink::work(int noutput_items, gr_vector_const_void_star &input_
         // BOOST_LOG_TRIVIAL(info) << "Updated Voice Channel source id: " << src_id << " pos: " << pos << " offset: " << tags[i].offset - nitems_read(0);
       }
     }
-    if (pmt::eq(terminate_key, tags[i].key)) {
+    if ((pmt::eq(terminate_key, tags[i].key) || pmt::eq(status_string_key, tags[i].key)) && !d_termination_flag) {
       d_termination_flag = true;
       pos = d_sample_count + (tags[i].offset - nitems_read(0));
 
@@ -383,8 +387,13 @@ int transmission_sink::work(int noutput_items, gr_vector_const_void_star &input_
       }
       // BOOST_LOG_TRIVIAL(info) << "TERMINATOR!!";
     }
+    if (pmt::eq(status_string_key, tags[i].key)) {
+      d_status_string = pmt::to_long(tags[i].value);
+
+      BOOST_LOG_TRIVIAL(trace) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\tLen,Errors,Spikes: " << d_status_string;
+      }
     // Only process Spike and Error Count tags if the sink is currently recording
-    if (state == RECORDING) {
+    /* if (state == RECORDING) {
       if (pmt::eq(spike_count_key, tags[i].key)) {
         d_spike_count = pmt::to_long(tags[i].value);
 
@@ -395,7 +404,7 @@ int transmission_sink::work(int noutput_items, gr_vector_const_void_star &input_
 
         BOOST_LOG_TRIVIAL(trace) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\tError Count: " << d_error_count << " pos: " << pos << " offset: " << tags[i].offset;
       }
-    }
+    } */
   }
   tags.clear();
 

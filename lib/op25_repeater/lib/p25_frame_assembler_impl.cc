@@ -179,7 +179,7 @@ p25_frame_assembler_impl::general_work (int noutput_items,
         amt_produce = output_queue.size();
         int16_t *out = (int16_t *)output_items[0];
 
-        //BOOST_LOG_TRIVIAL(trace) << "P25 Frame Assembler -  output_queue: " << output_queue.size() << " noutput_items: " <<  noutput_items << " ninput_items: " << ninput_items[0];
+        BOOST_LOG_TRIVIAL(trace) << "P25 Frame Assembler -  output_queue: " << output_queue.size() << " noutput_items: " <<  noutput_items << " ninput_items: " << ninput_items[0];
 
       if (amt_produce > 0) {
           if (amt_produce >= 32768) {
@@ -212,21 +212,28 @@ p25_frame_assembler_impl::general_work (int noutput_items,
           BOOST_LOG_TRIVIAL(trace) << "setting silence_frame_count " << silence_frame_count << " to d_silence_frames: " << d_silence_frames << std::endl;
           silence_frame_count = d_silence_frames;
         } else {
-            if (terminate_call) {
-            add_item_tag(0, nitems_written(0), pmt::intern("terminate"), pmt::from_long(1), d_tag_src );
+            //if (terminate_call) {
+            //add_item_tag(0, nitems_written(0), pmt::intern("terminate"), pmt::from_long(1), d_tag_src );
             
             Rx_Status status = p1fdma.get_rx_status();
             
             // If something was recorded, send the number of Errors and Spikes that were counted during that period
             if (status.total_len > 0 ) {
-              add_item_tag(0, nitems_written(0), pmt::intern("spike_count"), pmt::from_long(status.spike_count), d_tag_src);
-              add_item_tag(0, nitems_written(0), pmt::intern("error_count"), pmt::from_long(status.error_count), d_tag_src);
-              p1fdma.reset_rx_status();
+              //sending all 3 in a single string to send 1 tag and because I do output in my fork;
+              //could definately still send individually, or parse in transmission_sink
+              std::string status_string = std::to_string(status.total_len) + "," + std::to_string(status.error_count) + "," + std::to_string(status.spike_count);
+              add_item_tag(0, nitems_written(0), pmt::intern("sources_string"), pmt::string_to_symbol(status_string), d_tag_src);
+              //add_item_tag(0, nitems_written(0), pmt::intern("spike_count"), pmt::from_long(status.spike_count), d_tag_src);
+              //add_item_tag(0, nitems_written(0), pmt::intern("error_count"), pmt::from_long(status.error_count), d_tag_src);
+              //p1fdma.reset_rx_status(); ***need way to reset on call start***
+            } else {
+              add_item_tag(0, nitems_written(0), pmt::intern("terminate"), pmt::from_long(1), d_tag_src );
+              BOOST_LOG_TRIVIAL(debug) << "P25FA amt_produce = 0, rx_status.total_len = 0, output_queue: " << output_queue.size() << " noutput_items: " <<  noutput_items << " ninput_items: " << ninput_items[0]; //this may fire on Phase 2
             }
             
               std::fill(out, out + 1, 0);
               amt_produce = 1;
-          }
+          //}
           if (silence_frame_count > 0) {
             std::fill(out, out + noutput_items, 0);
             amt_produce = noutput_items;
