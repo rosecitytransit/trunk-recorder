@@ -83,7 +83,7 @@ public:
   void tune_freq(double f);
   void tune_offset(double f);
   bool start(Call *call);
-  void stop();
+  std::string stop();
   double get_freq();
   int get_num();
   double get_current_length();

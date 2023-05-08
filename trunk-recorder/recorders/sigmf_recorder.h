@@ -36,7 +36,7 @@ public:
   virtual ~sigmf_recorder(){};
   virtual void tune_offset(double f) = 0;
   virtual bool start(Call *call) = 0;
-  virtual void stop() = 0;
+  virtual std::string stop() = 0;
   virtual double get_freq() = 0;
   virtual int get_num() = 0;
   virtual double get_current_length() = 0;

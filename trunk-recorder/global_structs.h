@@ -48,7 +48,7 @@ struct Call_Source {
   std::string tag;
 };
 
-struct Call_Freq {
+/* struct Call_Freq {
   double freq;
   long time;
   double position;
@@ -57,13 +57,13 @@ struct Call_Freq {
   double spike_count;
 };
 
-struct Call_Error {
+ struct Call_Error {
   long time;
   double position;
   double total_len;
   double error_count;
   double spike_count;
-};
+}; */
 
 enum Call_Data_Status { INITIAL,
                         SUCCESS,
@@ -90,8 +90,9 @@ struct Call_Data_t {
   double freq;
   long start_time;
   long stop_time;
-  long error_count;
-  long spike_count;
+  std::string error_count;
+  std::string spike_count;
+  std::string status_string;
   bool encrypted;
   bool emergency;
   bool audio_archive;
@@ -112,7 +113,7 @@ struct Call_Data_t {
   bool phase2_tdma;
 
   std::vector<Call_Source> transmission_source_list;
-  std::vector<Call_Error> transmission_error_list;
+  //std::vector<Call_Error> transmission_error_list;
   std::vector<Transmission> transmission_list;
 
   Call_Data_Status status;

@@ -55,6 +55,7 @@ int create_call_json(Call_Data_t call_info) {
   if (json_file.is_open()) {
     json_file << "{\n";
     json_file << "\"freq\": " << std::fixed << std::setprecision(0) << call_info.freq << ",\n";
+    json_file << "\"status\": " << call_info.status_string << ",\n";
     json_file << "\"start_time\": " << call_info.start_time << ",\n";
     json_file << "\"stop_time\": " << call_info.stop_time << ",\n";
     json_file << "\"emergency\": " << call_info.emergency << ",\n";
@@ -79,14 +80,14 @@ int create_call_json(Call_Data_t call_info) {
       }
       json_file << "],\n";
     }
-    json_file << "\"freqList\": [ ";
+    /* json_file << "\"freqList\": [ ";
     for (std::size_t i = 0; i < call_info.transmission_error_list.size(); i++) {
       if (i != 0) {
         json_file << ", ";
       }
       json_file << "{\"freq\": " << std::fixed << std::setprecision(0) << call_info.freq << ", \"time\": " << call_info.transmission_error_list[i].time << ", \"pos\": " << std::fixed << std::setprecision(2) << call_info.transmission_error_list[i].position << ", \"len\": " << call_info.transmission_error_list[i].total_len << ", \"error_count\": \"" << std::fixed << std::setprecision(0) << call_info.transmission_error_list[i].error_count << "\", \"spike_count\": \"" << call_info.transmission_error_list[i].spike_count << "\"}";
     }
-    json_file << " ],\n";
+    json_file << " ],\n"; */
     json_file << "\"srcList\": [ ";
 
     for (std::size_t i = 0; i < call_info.transmission_source_list.size(); i++) {
@@ -224,8 +225,9 @@ Call_Data_t Call_Concluder::create_call_data(Call *call, System *sys, Config con
   call_info.status = INITIAL;
   call_info.process_call_time = time(0);
   call_info.retry_attempt = 0;
-  call_info.error_count = 0;
-  call_info.spike_count = 0;
+  call_info.error_count = "";
+  call_info.spike_count = "";
+  call_info.status_string = call->get_status_string();
   call_info.freq = call->get_freq();
   call_info.encrypted = call->get_encrypted();
   call_info.emergency = call->get_emergency();
@@ -292,14 +294,15 @@ Call_Data_t Call_Concluder::create_call_data(Call *call, System *sys, Config con
       display_tag = " (\033[0;34m" + tag + "\033[0m)";
     }
 
-    std::stringstream transmission_info;
+    BOOST_LOG_TRIVIAL(info) << "[" << call_info.short_name << "]\t\033[0;34m" << call_info.call_num << "C\033[0m\tTG: " << call_info.talkgroup_display << "\tFreq: " << format_freq(call_info.freq) << "\t- Transmission src: " << t.source << display_tag << " pos: " << format_time(total_length) << " length: " << format_time(t.length);
+    /* std::stringstream transmission_info;
     transmission_info << "[" << call_info.short_name << "]\t\033[0;34m" << call_info.call_num << "C\033[0m\tTG: " << call_info.talkgroup_display << "\tFreq: " << format_freq(call_info.freq) << "\t- Transmission src: " << t.source << display_tag << " pos: " << format_time(total_length) << " length: " << format_time(t.length);
 
     if (t.error_count < 1) {
       BOOST_LOG_TRIVIAL(info) << transmission_info.str();
     } else {
       BOOST_LOG_TRIVIAL(error) << transmission_info.str() << "\033[0;31m errors: " << t.error_count << " spikes: " << t.spike_count << "\033[0m";
-    }
+    } */
 
     if (it == call_info.transmission_list.begin()) {
       call_info.start_time = t.start_time;
@@ -313,15 +316,17 @@ Call_Data_t Call_Concluder::create_call_data(Call *call, System *sys, Config con
     }
 
     Call_Source call_source = {t.source, t.start_time, total_length, false, "", tag};
-    Call_Error call_error = {t.start_time, total_length, t.length, t.error_count, t.spike_count};
-    call_info.error_count = call_info.error_count + t.error_count;
-    call_info.spike_count = call_info.spike_count + t.spike_count;
+    //Call_Error call_error = {t.start_time, total_length, t.length, t.error_count, t.spike_count};
+    //call_info.error_count = call_info.error_count + t.error_count;
+    //call_info.spike_count = call_info.spike_count + t.spike_count;
     call_info.transmission_source_list.push_back(call_source);
-    call_info.transmission_error_list.push_back(call_error);
+    //call_info.transmission_error_list.push_back(call_error);
 
     total_length = total_length + t.length;
     it++;
   }
+  call_info.error_count = call_info.status_string.substr(call_info.status_string.find(","), call_info.status_string.rfind(","));
+  call_info.spike_count = call_info.status_string.substr(call_info.status_string.rfind(","));;
 
   call_info.length = total_length;
 

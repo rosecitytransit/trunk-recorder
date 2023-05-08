@@ -94,7 +94,7 @@ public:
   void tune_offset(double f);
   void tune_freq(double f);
   bool start(Call *call);
-  void stop();
+  std::string stop();
   double get_freq();
   int get_num();
   void set_tdma(bool phase2);

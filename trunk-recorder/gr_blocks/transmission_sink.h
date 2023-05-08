@@ -123,7 +123,7 @@ public:
   char *get_filename();
   bool start_recording(Call *call);
   bool start_recording(Call *call, int slot);
-  void stop_recording();
+  std::string stop_recording();
   void end_transmission();
   void set_source(long src);
   void set_sample_rate(unsigned int sample_rate);

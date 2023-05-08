@@ -278,12 +278,12 @@ void analog_recorder::set_record_more_transmissions(bool more) {
   wav_sink->set_record_more_transmissions(more);
 }
 
-void analog_recorder::stop() {
+std::string analog_recorder::stop() {
   if (state == ACTIVE) {
     recording_duration += wav_sink->length_in_seconds();
     state = INACTIVE;
     valve->set_enabled(false);
-    wav_sink->stop_recording();
+    return wav_sink->stop_recording();
   } else {
 
     BOOST_LOG_TRIVIAL(error) << "analog_recorder.cc: Stopping an inactive Logger \t[ " << rec_num << " ] - freq[ " << format_freq(chan_freq) << "] \t talkgroup[ " << talkgroup << " ]";
@@ -293,6 +293,7 @@ void analog_recorder::stop() {
   decoder_sink->set_fsync_enabled(false);
   decoder_sink->set_star_enabled(false);
   decoder_sink->set_tps_enabled(false);
+  return "";
 }
 
 void analog_recorder::process_message_queues() {

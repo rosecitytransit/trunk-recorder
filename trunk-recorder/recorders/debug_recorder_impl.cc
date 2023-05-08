@@ -244,7 +244,7 @@ State debug_recorder_impl::get_state() {
   return state;
 }
 
-void debug_recorder_impl::stop() {
+std::string debug_recorder_impl::stop() {
   if (state == ACTIVE) {
     BOOST_LOG_TRIVIAL(error) << "debug_recorder.cc: Stopping Logger \t[ " << rec_num << " ] - freq[ " << chan_freq << "] \t talkgroup[ " << talkgroup << " ]";
     state = INACTIVE;
@@ -252,6 +252,7 @@ void debug_recorder_impl::stop() {
   } else {
     BOOST_LOG_TRIVIAL(error) << "debug_recorder.cc: Trying to Stop an Inactive Logger!!!";
   }
+  return "";
 }
 
 bool debug_recorder_impl::start(Call *call) {

@@ -73,7 +73,7 @@ public:
   ~analog_recorder();
   void tune_offset(double f);
   bool start(Call *call);
-  void stop();
+  std::string stop();
   double get_freq();
   void set_source(long src);
   Source *get_source();

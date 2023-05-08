@@ -74,7 +74,7 @@ public:
   virtual void tune_offset(double f){};
   virtual void tune_freq(double f){};
   virtual bool start(Call *call) { return false; };
-  virtual void stop(){};
+  virtual std::string stop(){ return ""; };
   virtual void set_tdma_slot(int slot){};
   virtual double get_freq() { return 0; };
   virtual Source *get_source() { return NULL; };

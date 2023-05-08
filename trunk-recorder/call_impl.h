@@ -83,6 +83,8 @@ public:
   double get_final_length();
   long get_current_source_id();
   bool get_conversation_mode();
+  void set_status_string(std::string status);
+  std::string get_status_string();
   System *get_system();
   std::vector<Transmission> get_transmissions();
 
@@ -121,6 +123,7 @@ protected:
   bool phase2_tdma;
   int tdma_slot;
   double final_length;
+  std::string status_string;
 
   Config config;
   Recorder *recorder;

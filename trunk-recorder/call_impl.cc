@@ -136,7 +136,7 @@ void Call_impl::conclude_call() {
     }
     BOOST_LOG_TRIVIAL(info) << "[" << sys->get_short_name() << "]\t\033[0;34m" << this->get_call_num() << "C\033[0m\tTG: " << this->get_talkgroup_display() << "\tFreq: " << format_freq(get_freq()) << "\t\u001b[33mConcluding Recorded Call\u001b[0m - Last Update: " << this->since_last_update() << "s\tCall Elapsed: " << this->elapsed();
 
-    this->get_recorder()->stop();
+    status_string = this->get_recorder()->stop();
     transmission_list = this->get_recorder()->get_transmission_list();
     if (this->get_sigmf_recording() == true) {
       this->get_sigmf_recorder()->stop();
@@ -393,6 +393,14 @@ bool Call_impl::get_conversation_mode() {
     return false;
   }
   return sys->get_conversation_mode();
+}
+
+void Call_impl::set_status_string(std::string status) {
+  status_string = status;
+}
+
+std::string Call_impl::get_status_string(){
+  return status_string;
 }
 
 void Call_impl::update_talkgroup_display() {

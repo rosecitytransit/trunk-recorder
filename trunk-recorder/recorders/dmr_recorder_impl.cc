@@ -377,7 +377,7 @@ std::vector<Transmission> dmr_recorder_impl::get_transmission_list() {
   return return_list;
 }
 
-void dmr_recorder_impl::stop() {
+std::string dmr_recorder_impl::stop() {
   if (state == ACTIVE) {
 
     recording_duration += wav_sink_slot0->total_length_in_seconds();
@@ -386,11 +386,13 @@ void dmr_recorder_impl::stop() {
 
     state = INACTIVE;
     valve->set_enabled(false);
-    wav_sink_slot0->stop_recording();
-    wav_sink_slot1->stop_recording();
+    std::string unused0 = wav_sink_slot0->stop_recording();
+    std::string unused1 = wav_sink_slot1->stop_recording();
+    return unused0 + ";" + unused1;
   } else {
     BOOST_LOG_TRIVIAL(error) << "dmr_recorder.cc: Trying to Stop an Inactive Logger!!!";
   }
+  return "";
 }
 
 void dmr_recorder_impl::set_tdma_slot(int slot) {

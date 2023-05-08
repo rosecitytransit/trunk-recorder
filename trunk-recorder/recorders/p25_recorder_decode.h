@@ -62,7 +62,7 @@ public:
   void switch_tdma(bool phase2_tdma);
   void start(Call *call);
   double since_last_write();
-  void stop();
+  std::string stop();
   int tdma_slot;
   bool delay_open;
   virtual ~p25_recorder_decode();

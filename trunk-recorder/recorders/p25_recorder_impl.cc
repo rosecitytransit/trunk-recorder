@@ -422,7 +422,7 @@ std::vector<Transmission> p25_recorder_impl::get_transmission_list() {
   }
 }
 
-void p25_recorder_impl::stop() {
+std::string p25_recorder_impl::stop() {
   if (state == ACTIVE) {
     if (qpsk_mod) {
       recording_duration += qpsk_p25_decode->get_current_length();
@@ -436,13 +436,14 @@ void p25_recorder_impl::stop() {
     state = INACTIVE;
     valve->set_enabled(false);
     if (qpsk_mod) {
-      qpsk_p25_decode->stop();
+      return qpsk_p25_decode->stop();
     } else {
-      fsk4_p25_decode->stop();
+      return fsk4_p25_decode->stop();
     }
   } else {
     BOOST_LOG_TRIVIAL(error) << "p25_recorder.cc: Trying to Stop an Inactive Logger!!!";
   }
+  return "";
 }
 
 void p25_recorder_impl::set_tdma_slot(int slot) {

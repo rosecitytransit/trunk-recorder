@@ -87,7 +87,7 @@ State sigmf_recorder_impl::get_state() {
   return state;
 }
 
-void sigmf_recorder_impl::stop() {
+std::string sigmf_recorder_impl::stop() {
   if (state == ACTIVE) {
     BOOST_LOG_TRIVIAL(error) << "sigmf_recorder.cc: Stopping Logger \t[ " << rec_num << " ] - freq[ " << freq << "] \t talkgroup[ " << talkgroup << " ]";
     state = INACTIVE;
@@ -96,6 +96,7 @@ void sigmf_recorder_impl::stop() {
   } else {
     BOOST_LOG_TRIVIAL(error) << "sigmf_recorder.cc: Trying to Stop an Inactive Logger!!!";
   }
+  return "";
 }
 
 bool sigmf_recorder_impl::start(Call *call) {

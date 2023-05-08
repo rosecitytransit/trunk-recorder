@@ -265,11 +265,10 @@ std::string transmission_sink::stop_recording() {
   if (state == RECORDING) {
     BOOST_LOG_TRIVIAL(trace) << "stop_recording() - stopping wavfile sink but recorder state is: " << state << std::endl;
   }
-  //need to get this info into the call concluder
-  BOOST_LOG_TRIVIAL(info) << "call " << d_current_call_num << " total_len,errors,spikes: " << d_status_string;
   d_current_call = NULL;
   d_termination_flag = false;
   state = AVAILABLE;
+  return d_status_string;
 }
 
 void transmission_sink::close_wav(bool close_call) {

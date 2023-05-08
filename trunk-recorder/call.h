@@ -81,6 +81,8 @@ public:
   virtual double get_final_length() = 0;
   virtual long get_current_source_id() = 0;
   virtual bool get_conversation_mode() = 0;
+  virtual void set_status_string(std::string status) = 0;
+  virtual std::string get_status_string() = 0;
   virtual System *get_system() = 0;
   virtual std::vector<Transmission> get_transmissions() = 0;
 };

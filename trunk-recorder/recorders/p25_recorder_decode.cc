@@ -19,9 +19,10 @@ p25_recorder_decode::p25_recorder_decode(Recorder *recorder)
 p25_recorder_decode::~p25_recorder_decode() {
 }
 
-void p25_recorder_decode::stop() {
-  wav_sink->stop_recording();
+std::string p25_recorder_decode::stop() {
+  std::string status_string = wav_sink->stop_recording();
   d_call = NULL;
+  return status_string;
 }
 
 void p25_recorder_decode::start(Call *call) {
@@ -84,7 +85,7 @@ void p25_recorder_decode::initialize(int silence_frames) {
   rx_queue = gr::msg_queue::make(100);
 
   int udp_port = 0;
-  int verbosity = 0; // 10 = lots of debug messages
+  int verbosity = 10; // 10 = lots of debug messages
   const char *udp_host = "127.0.0.1";
   bool do_imbe = 1;
   bool do_output = 1;
