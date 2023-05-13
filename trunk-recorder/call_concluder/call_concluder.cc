@@ -348,7 +348,12 @@ Call_Data_t Call_Concluder::create_call_data(Call *call, System *sys, Config con
       BOOST_LOG_TRIVIAL(info) << transmission_info.str() << "\033[0;31m errors: " << t.error_count << " spikes: " << t.spike_count << "\033[0m";
     }
 
-    if (it == call_info.transmission_list.begin()) {
+    if (it == call_info.transmission_list.begin() && call_info.short_name.length() < 3) {
+      call_info.start_time = t.start_time;
+      snprintf(call_info.filename, 300, "%s_.wav", t.base_filename);
+      snprintf(call_info.status_filename, 300, "%s_.json", t.base_filename);
+      snprintf(call_info.converted, 300, "%s.m4a", t.base_filename);
+    } else if (it == call_info.transmission_list.begin()) {
       call_info.start_time = t.start_time;
       snprintf(call_info.filename, 300, "%s-call_%lu.wav", t.base_filename, call_info.call_num);
       snprintf(call_info.status_filename, 300, "%s-call_%lu.json", t.base_filename, call_info.call_num);

@@ -509,7 +509,7 @@ int transmission_sink::dowork(int noutput_items, gr_vector_const_void_star &inpu
 
   if (state == IDLE) {
 
-    if (d_fp) {
+    if (d_fp && (d_current_call_short_name.length() > 2)) {
       // if we are already recording a file for this call, close it before starting a new one.
       BOOST_LOG_TRIVIAL(info) << "WAV - Weird! we have an existing FP, but STATE was IDLE:  " << current_filename << std::endl;
 
