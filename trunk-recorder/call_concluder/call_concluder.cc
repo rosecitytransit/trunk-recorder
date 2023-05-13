@@ -160,13 +160,21 @@ Call_Data_t upload_call_worker(Call_Data_t call_info) {
     if ((call_info.transmission_list.size() > 1) && (call_info.short_name.length() > 2)) {
     std::string files;
 
+    struct stat statbuf;
     // loop through the transmission list, pull in things to fill in totals for call_info
     // Using a for loop with iterator
     for (std::vector<Transmission>::iterator it = call_info.transmission_list.begin(); it != call_info.transmission_list.end(); ++it) {
       Transmission t = *it;
 
-      files.append(t.filename);
-      files.append(" ");
+      if (stat(t.filename, &statbuf) == 0)
+      {
+          files.append(t.filename);
+          files.append(" ");
+      }
+      else
+      {
+          BOOST_LOG_TRIVIAL(error) << "Somehow, " << t.filename << " doesn't exist, not attempting to provide it to sox";
+      }
     }
 
     combine_wav(files, call_info.filename);
@@ -325,13 +333,22 @@ Call_Data_t Call_Concluder::create_call_data(Call *call, System *sys, Config con
       continue;
     }
 
-    BOOST_LOG_TRIVIAL(info) << "[" << call_info.short_name << "]\t\033[0;34m" << call_info.call_num << "C\033[0m\tTG: " << call_info.talkgroup_display << "\tFreq: " << format_freq(call_info.freq) << "\t- Transmission src: " << t.source << " pos: " << total_length << " length: " << t.length;
-    if (it == call_info.transmission_list.begin() && call_info.short_name.length() < 3) {
-      call_info.start_time = t.start_time;
-      snprintf(call_info.filename, 300, "%s_.wav", t.base_filename);
-      snprintf(call_info.status_filename, 300, "%s_.json", t.base_filename);
-      snprintf(call_info.converted, 300, "%s.m4a", t.base_filename);
-    } else if (it == call_info.transmission_list.begin()) {
+    std::string tag = sys->find_unit_tag(t.source);
+    std::string display_tag = "";
+    if (tag != "") {
+      display_tag = " (\033[0;34m" + tag + "\033[0m)";
+    }
+
+    std::stringstream transmission_info;
+    transmission_info << "[" << call_info.short_name << "]\t\033[0;34m" << call_info.call_num << "C\033[0m\tTG: " << call_info.talkgroup_display << "\tFreq: " << format_freq(call_info.freq) << "\t- Transmission src: " << t.source << display_tag << " pos: " << format_time(total_length) << " length: " << format_time(t.length);
+
+    if (t.error_count < 1) {
+      BOOST_LOG_TRIVIAL(info) << transmission_info.str();
+    } else {
+      BOOST_LOG_TRIVIAL(info) << transmission_info.str() << "\033[0;31m errors: " << t.error_count << " spikes: " << t.spike_count << "\033[0m";
+    }
+
+    if (it == call_info.transmission_list.begin()) {
       call_info.start_time = t.start_time;
       snprintf(call_info.filename, 300, "%s-call_%lu.wav", t.base_filename, call_info.call_num);
       snprintf(call_info.status_filename, 300, "%s-call_%lu.json", t.base_filename, call_info.call_num);
@@ -342,7 +359,6 @@ Call_Data_t Call_Concluder::create_call_data(Call *call, System *sys, Config con
       call_info.stop_time = call->get_stop_time();
     }
 
-    std::string tag = sys->find_unit_tag(t.source);
     Call_Source call_source = {t.source, t.start_time, total_length, false, "", tag};
     Call_Error call_error = {t.start_time, total_length, t.length, t.error_count, t.spike_count, t.total_len};
     call_info.error_count = call_info.error_count + t.error_count;
