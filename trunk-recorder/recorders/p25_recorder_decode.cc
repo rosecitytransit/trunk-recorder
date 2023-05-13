@@ -33,9 +33,6 @@ void p25_recorder_decode::start(Call *call) {
 void p25_recorder_decode::set_xor_mask(const char *mask) {
   op25_frame_assembler->set_xormask(mask);
 }
-void p25_recorder_decode::set_record_more_transmissions(bool more) {
-  wav_sink->set_record_more_transmissions(more);
-}
 
 void p25_recorder_decode::set_source(long src) {
   wav_sink->set_source(src);
@@ -59,8 +56,9 @@ State p25_recorder_decode::get_state() {
 }
 
 double p25_recorder_decode::since_last_write() {
-  time_t now = time(NULL);
-  return now - wav_sink->get_stop_time();
+  auto end = std::chrono::steady_clock::now();
+  std::chrono::duration<double> diff = end - wav_sink->get_last_write_time();
+  return diff.count();
 }
 
 time_t p25_recorder_decode::last_voice_frame() {

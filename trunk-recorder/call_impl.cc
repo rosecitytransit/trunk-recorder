@@ -88,24 +88,6 @@ Call_impl::~Call_impl() {
 void Call_impl::restart_call() {
 }
 
-void Call_impl::set_record_more_transmissions(bool more) {
-  if (this->get_recorder() != NULL) {
-    this->get_recorder()->set_record_more_transmissions(more);
-  }
-}
-
-void Call_impl::inactive_call() {
-  if (this->get_recorder() != NULL) {
-    // If the call is being recorded, check to see if the recorder is currently in an INACTIVE state. This means that the recorder is not
-    // doing anything and can be stopped.
-    if ((state == RECORDING) && this->get_recorder()->is_idle()) {
-      BOOST_LOG_TRIVIAL(info) << "[" << sys->get_short_name() << "]\t\033[0;34m" << this->get_call_num() << "C\033[0m\tTG: " << this->get_talkgroup_display() << "\tFreq: " << format_freq(get_freq()) << "\tStopping Recorded Call_impl, setting call state to INACTIVE - Last Update: " << this->since_last_update() << "s";
-      this->set_state(INACTIVE);
-    }
-    this->get_recorder()->set_record_more_transmissions(false);
-  }
-}
-
 void Call_impl::stop_call() {
 
   if (this->get_recorder() != NULL) {
@@ -114,10 +96,7 @@ void Call_impl::stop_call() {
     if ((state == RECORDING) && this->get_recorder()->is_idle()) {
       BOOST_LOG_TRIVIAL(info) << "[" << sys->get_short_name() << "]\t\033[0;34m" << this->get_call_num() << "C\033[0m\tTG: " << this->get_talkgroup_display() << "\tFreq: " << format_freq(get_freq()) << "\tStopping Recorded Call_impl, setting call state to COMPLETED - Last Update: " << this->since_last_update() << "s";
       this->set_state(COMPLETED);
-    } else {
-      BOOST_LOG_TRIVIAL(info) << "[" << sys->get_short_name() << "]\t\033[0;34m" << this->get_call_num() << "C\033[0m\tTG: " << this->get_talkgroup_display() << "\tFreq: " << format_freq(get_freq()) << "\tTrying to COMPLETE, Recorder still active, setting call state to INACTIVE - Last Update: " << this->since_last_update() << "s";
-      this->set_state(INACTIVE);
-    }
+    } 
   }
 }
 long Call_impl::get_call_num() {
@@ -363,6 +342,17 @@ int Call_impl::since_last_update() {
   return time(NULL) - last_update;
 }
 
+double Call_impl::since_last_voice_update() {
+    if (state == RECORDING) {
+    Recorder *rec = this->get_recorder();
+    if (rec != NULL) {
+      return rec->since_last_write();
+    }
+  }
+  return -1;
+}
+
+
 long Call_impl::elapsed() {
   return time(NULL) - start_time;
 }
@@ -384,7 +374,7 @@ long Call_impl::get_stop_time() {
 }
 
 std::string Call_impl::get_system_type() {
-  return sys->get_system_type().c_str();
+  return sys->get_system_type();
 }
 
 void Call_impl::set_talkgroup_tag(std::string tag) {

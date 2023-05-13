@@ -124,13 +124,18 @@ bool transmission_sink::start_recording(Call *call) {
   d_current_call_freq = call->get_freq();
   d_current_call_talkgroup = call->get_talkgroup();
   d_current_call_talkgroup_display = call->get_talkgroup_display();
+  if (call->get_system_type() == "smartnet") {
+    d_current_call_talkgroup_encoded = (call->get_talkgroup() >> 4);
+  } else {
+    d_current_call_talkgroup_encoded = call->get_talkgroup();
+  }
   d_current_call_short_name = call->get_short_name();
   d_current_call_capture_dir = call->get_capture_dir();
   d_prior_transmission_length = 0;
   d_error_count = 0;
   d_spike_count = 0;
-  d_total_len = 0;
-  record_more_transmissions = true;
+  d_last_write_time = std::chrono::steady_clock::now(); // we want to make sure the call doesn't get cleaned up before data starts coming in. 
+
 
   this->clear_transmission_list();
   d_conventional = call->is_conventional();
@@ -245,6 +250,8 @@ void transmission_sink::end_transmission() {
     strcpy(transmission.base_filename, current_base_filename);
     this->add_transmission(transmission);
 
+    // Reset the recorder to be ready to record the next Transmission
+    state = IDLE;
     d_sample_count = 0;
     d_error_count = 0;
     d_spike_count = 0;
@@ -264,6 +271,10 @@ void transmission_sink::end_transmission() {
 void transmission_sink::stop_recording() {
   gr::thread::scoped_lock guard(d_mutex);
 
+  if (state == RECORDING) {
+    BOOST_LOG_TRIVIAL(trace) << "stop_recording() - stopping wavfile sink but recorder state is: " << state << std::endl;
+  }
+
   if (d_sample_count > 0) {
     end_transmission();
   }
@@ -271,9 +282,6 @@ void transmission_sink::stop_recording() {
     close_wav(true);
   }
 
-  if (state == RECORDING) {
-    BOOST_LOG_TRIVIAL(trace) << "stop_recording() - stopping wavfile sink but recorder state is: " << state << std::endl;
-  }
   d_current_call = NULL;
   d_termination_flag = false;
   state = AVAILABLE;
@@ -332,8 +340,9 @@ int transmission_sink::work(int noutput_items, gr_vector_const_void_star &input_
   }
 
   std::vector<gr::tag_t> tags;
-  pmt::pmt_t src_id_key(pmt::intern("src_id"));
-  pmt::pmt_t ptt_src_id_key(pmt::intern("ptt_src_id"));
+  pmt::pmt_t src_id_key(pmt::intern("src_id")); // This is the src id from Phase 1 and DMR
+  pmt::pmt_t grp_id_key(pmt::intern("grp_id")); // This is the src id from Phase 1 and DMR
+  pmt::pmt_t ptt_src_id_key(pmt::intern("ptt_src_id"));  // This is the src id from Phase 2
   pmt::pmt_t terminate_key(pmt::intern("terminate"));
   pmt::pmt_t spike_count_key(pmt::intern("spike_count"));
   pmt::pmt_t error_count_key(pmt::intern("error_count"));
@@ -347,6 +356,21 @@ int transmission_sink::work(int noutput_items, gr_vector_const_void_star &input_
 
   for (unsigned int i = 0; i < tags.size(); i++) {
     // BOOST_LOG_TRIVIAL(info) << "TAG! " << tags[i].key;
+    if (pmt::eq(grp_id_key, tags[i].key)) {
+      long grp_id = pmt::to_long(tags[i].value);
+
+      if ((state == IDLE) || (state == RECORDING)) {
+        if(d_current_call_talkgroup_encoded != grp_id) {
+          BOOST_LOG_TRIVIAL(info) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\tGROUP MISMATCH - Trunk Channel Call: " << d_current_call_talkgroup_encoded << " Voice Channel: " << grp_id << " Recorder state: " << format_state(state);
+              if (d_sample_count > 0) {
+                BOOST_LOG_TRIVIAL(info) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\tEnding Transmission and STOPping - count: " << d_sample_count;
+                end_transmission();
+              }
+          state = STOPPED;
+        }
+      }
+    }
+
     if (pmt::eq(src_id_key, tags[i].key)) {
       long src_id = pmt::to_long(tags[i].value);
       pos = d_sample_count + (tags[i].offset - nitems_read(0));
@@ -376,6 +400,7 @@ int transmission_sink::work(int noutput_items, gr_vector_const_void_star &input_
         // BOOST_LOG_TRIVIAL(info) << "Updated Voice Channel source id: " << src_id << " pos: " << pos << " offset: " << tags[i].offset - nitems_read(0);
       }
     }
+
     if (pmt::eq(terminate_key, tags[i].key)) {
       d_termination_flag = true;
       pos = d_sample_count + (tags[i].offset - nitems_read(0));
@@ -384,6 +409,7 @@ int transmission_sink::work(int noutput_items, gr_vector_const_void_star &input_
 
       // BOOST_LOG_TRIVIAL(info) << "TERMINATOR!!";
     }
+
     if (pmt::eq(ptt_src_id_key, tags[i].key)) {
       long src_id = pmt::to_long(tags[i].value);
       if (src_id != curr_src_id) {
@@ -393,7 +419,6 @@ int transmission_sink::work(int noutput_items, gr_vector_const_void_star &input_
 
         //BOOST_LOG_TRIVIAL(info) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\tPTT Termination - rec sample count " << d_sample_count << " pos: " << pos << " offset: " << tags[i].offset;
       }
-      // BOOST_LOG_TRIVIAL(info) << "TERMINATOR!!";
     }
     // Only process Spike and Error Count tags if the sink is currently recording
     if (state == RECORDING) {
@@ -418,8 +443,11 @@ int transmission_sink::work(int noutput_items, gr_vector_const_void_star &input_
 
   // if the System for this call is in Transmission Mode, and we have a recording and we got a flag that a Transmission ended...
   int nwritten = dowork(noutput_items, input_items, output_items);
-  d_stop_time = time(NULL);
 
+  if (nwritten > 1) {
+    d_stop_time = time(NULL);
+    d_last_write_time = std::chrono::steady_clock::now();
+  }
   return nwritten;
 }
 
@@ -431,21 +459,12 @@ time_t transmission_sink::get_stop_time() {
   return d_stop_time;
 }
 
-void transmission_sink::add_transmission(Transmission t) {
-  transmission_list.push_back(t);
+std::chrono::time_point<std::chrono::steady_clock> transmission_sink::get_last_write_time() {
+  return d_last_write_time;
 }
 
-void transmission_sink::set_record_more_transmissions(bool more) {
-  if (record_more_transmissions != more) {
-    BOOST_LOG_TRIVIAL(trace) << "wav - setting record_more to: " << more << ", State: " << format_state(state) << " sample count: " << d_sample_count;
-  }
-  // If a Recorder is STOPPED and record_more_transmissions is false, prep it so it is ready to go.
-  if ((record_more_transmissions == false) && (more == true) && (state == STOPPED)) {
-    d_sample_count = 0;
-    state = IDLE;
-  }
-
-  record_more_transmissions = more;
+void transmission_sink::add_transmission(Transmission t) {
+  transmission_list.push_back(t);
 }
 
 void transmission_sink::clear_transmission_list() {
@@ -475,31 +494,22 @@ int transmission_sink::dowork(int noutput_items, gr_vector_const_void_star &inpu
     }
 
     if (d_sample_count > 0) {
-      BOOST_LOG_TRIVIAL(trace) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\tTERM - record_more_transmissions = false, setting Recorder More: " << record_more_transmissions << " - count: " << d_sample_count;
-
+      BOOST_LOG_TRIVIAL(info) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\tTERMINATING! - count: " << d_sample_count;
       end_transmission();
-
-      // If it is a conventional call or an UPDATE or GRANT message has been received recently,
-      // then set it in IDLE state, which allows a new transmission to start.
-      if (d_conventional || (record_more_transmissions == true)) {
-        state = IDLE;
-      } else {
-        state = STOPPED;
-      }
-
+      
       if (noutput_items > 1) {
-        BOOST_LOG_TRIVIAL(trace) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\tTERM - skipped: " << noutput_items;
+        BOOST_LOG_TRIVIAL(info) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\tTERM - there were some items to output: " << noutput_items;
       }
+    } else {
+      BOOST_LOG_TRIVIAL(trace) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\tTERM - skipped....   - count: " << d_sample_count;
     }
     // In order to actually transmit the Tag, you need to attach it to a sample. An empty sample is used and it should be discarded.
     return noutput_items;
   }
 
   if (state == IDLE) {
-    if (!record_more_transmissions) {
-      BOOST_LOG_TRIVIAL(trace) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\tWAV - Weird! State was IDLE but record_more_transmissions was FALSE - count: " << d_sample_count;
-    }
-    if (d_fp && (d_current_call_short_name.length() > 2)) {
+
+    if (d_fp) {
       // if we are already recording a file for this call, close it before starting a new one.
       BOOST_LOG_TRIVIAL(info) << "WAV - Weird! we have an existing FP, but STATE was IDLE:  " << current_filename << std::endl;
 
@@ -523,10 +533,9 @@ int transmission_sink::dowork(int noutput_items, gr_vector_const_void_star &inpu
       return noutput_items;
     } }
 
-    BOOST_LOG_TRIVIAL(trace) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\tStarting new Transmission \tSrc ID:  " << curr_src_id;
+    BOOST_LOG_TRIVIAL(info) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\tStarting new Transmission \tSrc ID:  " << curr_src_id;
 
     // curr_src_id = d_current_call->get_current_source_id();
-    //record_more_transmissions = false;
     state = RECORDING;
   }
 
@@ -558,6 +567,8 @@ int transmission_sink::dowork(int noutput_items, gr_vector_const_void_star &inpu
 
   if (nwritten < noutput_items) {
     BOOST_LOG_TRIVIAL(error) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\tFailed to Write! Wrote: " << nwritten << " of " << noutput_items;
+  } else {
+    BOOST_LOG_TRIVIAL(trace) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\t Wrote: " << nwritten << " of " << noutput_items;
   }
   return noutput_items;
 }

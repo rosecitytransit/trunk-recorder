@@ -239,6 +239,9 @@ namespace gr {
 			return rx_status;
 		}
 
+        void p25p1_fdma::reset_call_terminated() {
+            terminate_call = false;
+        }
 		bool p25p1_fdma::get_call_terminated() {
 			return terminate_call;
 		}
@@ -308,6 +311,7 @@ namespace gr {
                 ess_keyid = ((HB[j+2] & 0x03) << 14) + (HB[j+3] << 8) + (HB[j+4] << 2) + (HB[j+5] >> 4);	// 16 bit KeyId
                 vf_tgid   = ((HB[j+5] & 0x0f) << 12) + (HB[j+6] << 6) +  HB[j+7];				// 16 bit TGID
 
+                curr_grp_id = vf_tgid;
                 if (d_debug >= 10) {
                     fprintf (stderr, "ESS: tgid=%d, mfid=%x, algid=%x, keyid=%x, mi=%02x %02x %02x %02x %02x %02x %02x %02x %02x",
                             vf_tgid, MFID, ess_algid, ess_keyid,

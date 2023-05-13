@@ -52,6 +52,7 @@ private:
   bool d_termination_flag;
   time_t d_start_time;
   time_t d_stop_time;
+   std::chrono::time_point<std::chrono::steady_clock> d_last_write_time;
   long d_spike_count;
   long d_error_count;
   double d_total_len;
@@ -67,8 +68,9 @@ private:
   double d_current_call_freq;
   double d_prior_transmission_length;
   long d_current_call_talkgroup;
+  long d_current_call_talkgroup_encoded;
   std::string d_current_call_talkgroup_display;
-  bool record_more_transmissions;
+
 
 protected:
   unsigned d_sample_count;
@@ -129,7 +131,6 @@ public:
   void set_source(long src);
   void set_sample_rate(unsigned int sample_rate);
   void set_bits_per_sample(int bits_per_sample);
-  void set_record_more_transmissions(bool more);
   void clear_transmission_list();
   std::vector<Transmission> get_transmission_list();
   void add_transmission(Transmission t);
@@ -145,6 +146,7 @@ public:
   State get_state();
   time_t get_start_time();
   time_t get_stop_time();
+   std::chrono::time_point<std::chrono::steady_clock> get_last_write_time();
 };
 
 } /* namespace blocks */
