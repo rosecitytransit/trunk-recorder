@@ -307,22 +307,6 @@ double p25_recorder_impl::since_last_write() {
   }
 }
 
-time_t p25_recorder_impl::last_voice_frame() {
-  if (qpsk_mod) {
-    return qpsk_p25_decode->last_voice_frame();
-  } else {
-    return fsk4_p25_decode->last_voice_frame();
-  }
-}
-
-void p25_recorder_impl::clear_lvf() {
-  if (qpsk_mod) {
-    qpsk_p25_decode->clear_lvf();
-  } else {
-    fsk4_p25_decode->clear_lvf();
-  }
-}
-
 State p25_recorder_impl::get_state() {
   if (qpsk_mod) {
     return qpsk_p25_decode->get_state();

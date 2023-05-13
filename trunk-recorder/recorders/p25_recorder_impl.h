@@ -89,8 +89,6 @@ public:
   void set_tdma_slot(int slot);
   void set_source(long src);
   double since_last_write();
-  time_t last_voice_frame();
-  void clear_lvf();
   void generate_arb_taps();
   double get_current_length();
   bool is_active();

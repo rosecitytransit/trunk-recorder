@@ -94,8 +94,6 @@ public:
   virtual bool is_squelched() { return true; };
   virtual double get_current_length() { return 0; };
   virtual double since_last_write() { return 0; };
-  virtual time_t last_voice_frame() { return time_t(NULL); };
-  virtual void clear_lvf(){};
   virtual void clear(){};
   int rec_num;
   static int rec_counter;

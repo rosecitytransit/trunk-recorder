@@ -61,14 +61,6 @@ double p25_recorder_decode::since_last_write() {
   return diff.count();
 }
 
-time_t p25_recorder_decode::last_voice_frame() {
-  return op25_frame_assembler->last_voice_frame();
-}
-
- void p25_recorder_decode::clear_lvf() {
-  op25_frame_assembler->clear_lvf();
-}
-
 void p25_recorder_decode::switch_tdma(bool phase2_tdma) {
   op25_frame_assembler->set_phase2_tdma(phase2_tdma);
 }

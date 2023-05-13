@@ -58,7 +58,6 @@ namespace gr {
   int d_silence_frames;
   int silence_frame_count;
   long total_produced;
-  time_t last_voice_frame2;
   pmt::pmt_t d_tag_key;
   pmt::pmt_t d_tag_src;
 

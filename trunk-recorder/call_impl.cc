@@ -105,11 +105,10 @@ long Call_impl::get_call_num() {
 void Call_impl::conclude_call() {
 
   // BOOST_LOG_TRIVIAL(info) << "conclude_call()";
-  stop_time = time(NULL)-2;
+  stop_time = time(NULL);
 
   if (state == COMPLETED || (state == MONITORING && monitoringState == SUPERSEDED)) {
     final_length = recorder->get_current_length();
-    stop_time = recorder->last_voice_frame();
 
     if (!recorder) {
       BOOST_LOG_TRIVIAL(error) << "Call_impl::end_call() State is recording, but no recorder assigned!";

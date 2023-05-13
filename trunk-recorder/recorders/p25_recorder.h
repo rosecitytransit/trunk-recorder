@@ -47,8 +47,6 @@ public:
   virtual void set_tdma_slot(int slot) = 0;
   virtual void set_source(long src) = 0;
   virtual double since_last_write() = 0;
-  virtual time_t last_voice_frame() = 0;
-  virtual void clear_lvf() = 0;
   virtual double get_current_length() = 0;
   virtual bool is_active() = 0;
   virtual bool is_idle() = 0;
