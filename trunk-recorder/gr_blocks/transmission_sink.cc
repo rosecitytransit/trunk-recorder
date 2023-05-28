@@ -447,6 +447,14 @@ int transmission_sink::work(int noutput_items, gr_vector_const_void_star &input_
   if (nwritten > 1) {
     d_stop_time = time(NULL);
     d_last_write_time = std::chrono::steady_clock::now();
+  } else if (nwritten == 1) {
+    BOOST_LOG_TRIVIAL(trace) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << " nwritten: " << nwritten << " stop time diff: " << time(NULL)-d_stop_time << " state: " << state;
+    if ((time(NULL)-d_stop_time) < 3) {
+      d_stop_time = time(NULL);
+      d_last_write_time = std::chrono::steady_clock::now();
+    }
+  } else {
+    BOOST_LOG_TRIVIAL(debug) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << " nwritten: " << nwritten << " stop time diff: " << time(NULL)-d_stop_time << " state: " << state;
   }
   return nwritten;
 }
