@@ -231,7 +231,7 @@ namespace gr {
 			rx_status.error_count = 0;
 			rx_status.total_len = 0;
 			rx_status.spike_count = 0;
-			curr_grp_id2 = 0;
+			//curr_grp_id2 = 0;
 			/*for (int i=0; i<20; i++)
 				error_history[i] = -1;*/
 		}
@@ -483,6 +483,11 @@ namespace gr {
             int sf =  ((lcw[0] & 0x40) >> 6);
             int lco =   lcw[0] & 0x3f;
             std::string s = "";
+
+            if (lco == 15) {
+                fprintf (stderr, "%s NAC 0x%03x TDU15/lco15 for TG %d", logts.get(d_msgq_id), framer->nac, curr_grp_id2);
+                curr_grp_id2 = 0;
+            }
 
             if (d_debug >= 10) {
                 fprintf(stderr, "LCW: ec=%d, pb=%d, sf=%d, lco=%d : %02x %02x %02x %02x %02x %02x %02x %02x %02x",
