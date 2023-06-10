@@ -399,10 +399,12 @@ double System_impl::get_current_control_channel() {
 }
 
 double System_impl::get_next_control_channel() {
+  BOOST_LOG_TRIVIAL(info) << "[" << this->get_short_name() << "/" << short_name << "] old currrent_control_channel=" << current_control_channel << ", control_channels.size()=" << control_channels.size() << ", control_channels[]=" << this->control_channels[current_control_channel];
   current_control_channel++;
   if (current_control_channel >= control_channels.size()) {
     current_control_channel = 0;
   }
+  BOOST_LOG_TRIVIAL(info) << "[" << this->get_short_name() << "/" << short_name << "] currrent_control_channel=" << current_control_channel << ", control_channels[]=" << this->control_channels[current_control_channel];
   return this->control_channels[current_control_channel];
 }
 
