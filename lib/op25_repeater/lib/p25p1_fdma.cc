@@ -231,6 +231,7 @@ namespace gr {
 			rx_status.error_count = 0;
 			rx_status.total_len = 0;
 			rx_status.spike_count = 0;
+			curr_grp_id2 = 0;
 			/*for (int i=0; i<20; i++)
 				error_history[i] = -1;*/
 		}
@@ -312,6 +313,14 @@ namespace gr {
                 vf_tgid   = ((HB[j+5] & 0x0f) << 12) + (HB[j+6] << 6) +  HB[j+7];				// 16 bit TGID
 
                 curr_grp_id = vf_tgid;
+                if (curr_grp_id2 == 0) {
+                    curr_grp_id2 = vf_tgid;
+                } else if (curr_grp_id2 != vf_tgid) {
+                    fprintf (stderr, "%s old tgid=%d, vf_tgid=%d, mfid=%x, algid=%x, keyid=%x, mi=%02x %02x %02x %02x %02x %02x %02x %02x %02x\n",
+                            logts.get(d_msgq_id), curr_grp_id2, vf_tgid, MFID, ess_algid, ess_keyid,
+                            ess_mi[0], ess_mi[1], ess_mi[2], ess_mi[3], ess_mi[4], ess_mi[5],ess_mi[6], ess_mi[7], ess_mi[8]);
+                    curr_grp_id2 = vf_tgid;
+                }
                 if (d_debug >= 10) {
                     fprintf (stderr, "ESS: tgid=%d, mfid=%x, algid=%x, keyid=%x, mi=%02x %02x %02x %02x %02x %02x %02x %02x %02x",
                             vf_tgid, MFID, ess_algid, ess_keyid,
@@ -489,6 +498,12 @@ namespace gr {
 
                             curr_src_id = srcaddr;
                             curr_grp_id = grpaddr;
+                            if (curr_grp_id2 == 0) {
+                                curr_grp_id2 = grpaddr;
+                            } else if (curr_grp_id2 != grpaddr) {
+                                fprintf (stderr, "%s old tgid=%d, Group Voice Chhannel User tgid=%d\n", logts.get(d_msgq_id), curr_grp_id2, grpaddr);
+                                curr_grp_id2 = grpaddr;
+                            }
                             s = "{\"srcaddr\" : " + std::to_string(srcaddr) + ", \"grpaddr\": " + std::to_string(grpaddr) + "}";
                             send_msg(s, -3);
                             if (d_debug >= 10)
@@ -523,7 +538,13 @@ namespace gr {
                             uint16_t ch_T    = (lcw[5] << 8) + lcw[6];
                             uint16_t ch_R    = (lcw[7] << 8) + lcw[8];
 
-                            curr_grp_id = grpaddr;
+                            //curr_grp_id = grpaddr;
+                            if (curr_grp_id2 == 0) {
+                                curr_grp_id2 = grpaddr;
+                            } else if (curr_grp_id2 != grpaddr) {
+                                fprintf (stderr, "%s old tgid=%d, Group Voice Chhannel Update Explicit tgid=%d\n", logts.get(d_msgq_id), curr_grp_id2, grpaddr);
+                                curr_grp_id2 = grpaddr;
+                            }
                             if (d_debug >= 10)
                                 fprintf(stderr, ", svcopts=0x%02x, grpaddr=%d, ch_T=%d, ch_R=%d", svcopts, grpaddr, ch_T, ch_R);
                             tsbk[0] = 0xff; tsbk[1] = 0xff;

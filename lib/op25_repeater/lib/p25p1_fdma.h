@@ -96,6 +96,7 @@ namespace gr {
                 double error_history[20];
                 long curr_src_id;
                 long curr_grp_id;
+                long curr_grp_id2;
                 bool terminate_call;
                 const char *d_udp_host;
                 int  d_port;
