@@ -56,9 +56,11 @@ State p25_recorder_decode::get_state() {
 }
 
 double p25_recorder_decode::since_last_write() {
-  auto end = std::chrono::steady_clock::now();
-  std::chrono::duration<double> diff = end - wav_sink->get_last_write_time();
-  return diff.count();
+//  auto end = std::chrono::steady_clock::now();
+//  std::chrono::duration<double> diff = end - wav_sink->get_last_write_time();
+//  return diff.count();
+  time_t now = time(NULL);
+  return difftime(now, wav_sink->get_stop_time());
 }
 
 void p25_recorder_decode::switch_tdma(bool phase2_tdma) {

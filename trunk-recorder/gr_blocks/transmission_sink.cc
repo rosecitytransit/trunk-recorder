@@ -134,7 +134,8 @@ bool transmission_sink::start_recording(Call *call) {
   d_prior_transmission_length = 0;
   d_error_count = 0;
   d_spike_count = 0;
-  d_last_write_time = std::chrono::steady_clock::now(); // we want to make sure the call doesn't get cleaned up before data starts coming in. 
+  d_stop_time = time(NULL)+5;
+//  d_last_write_time = std::chrono::steady_clock::now(); // we want to make sure the call doesn't get cleaned up before data starts coming in. 
 
 
   this->clear_transmission_list();
@@ -312,6 +313,7 @@ int transmission_sink::work(int noutput_items, gr_vector_const_void_star &input_
   gr::thread::scoped_lock guard(d_mutex); // hold mutex for duration of this
 
   // it is possible that we could get part of a transmission after a call has stopped. We shouldn't do any recording if this happens.... this could mean that we miss part of the recording though
+
   if (!d_current_call) {
     time_t now = time(NULL);
     double its_been = difftime(now, d_stop_time);
@@ -359,7 +361,7 @@ int transmission_sink::work(int noutput_items, gr_vector_const_void_star &input_
     if (pmt::eq(grp_id_key, tags[i].key)) {
       long grp_id = pmt::to_long(tags[i].value);
 
-      if ((state == IDLE) || (state == RECORDING)) {
+      if (state == RECORDING) {
         if(d_current_call_talkgroup_encoded != grp_id) {
           BOOST_LOG_TRIVIAL(info) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\tGROUP MISMATCH - Trunk Channel Call: " << d_current_call_talkgroup_encoded << " Voice Channel: " << grp_id << " Recorder state: " << format_state(state);
               if (d_sample_count > 0) {
@@ -443,19 +445,24 @@ int transmission_sink::work(int noutput_items, gr_vector_const_void_star &input_
 
   // if the System for this call is in Transmission Mode, and we have a recording and we got a flag that a Transmission ended...
   int nwritten = dowork(noutput_items, input_items, output_items);
-
-  if (nwritten > 1) {
+  if ((d_stop_time > time(NULL)) && (nwritten > 1)) {
+    BOOST_LOG_TRIVIAL(debug) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\td_stop_time diff: " << (d_stop_time-time(NULL)) << "s";
     d_stop_time = time(NULL);
-    d_last_write_time = std::chrono::steady_clock::now();
-  } else if (nwritten == 1) {
-    BOOST_LOG_TRIVIAL(trace) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << " nwritten: " << nwritten << " stop time diff: " << time(NULL)-d_stop_time << " state: " << state;
-    if ((time(NULL)-d_stop_time) < 3) {
-      d_stop_time = time(NULL);
-      d_last_write_time = std::chrono::steady_clock::now();
-    }
-  } else {
-    BOOST_LOG_TRIVIAL(debug) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << " nwritten: " << nwritten << " stop time diff: " << time(NULL)-d_stop_time << " state: " << state;
+  } else if (d_stop_time < time(NULL)) {
+    d_stop_time = time(NULL);
   }
+//  if (nwritten > 1) {
+//    d_stop_time = time(NULL);
+//    d_last_write_time = std::chrono::steady_clock::now(); =
+//  } else if (nwritten == 1) {
+//    BOOST_LOG_TRIVIAL(trace) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << " nwritten: " << nwritten << " stop time diff: " << time(NULL)-d_stop_time << " state: " << state;
+//    if ((time(NULL)-d_stop_time) < 3) {
+//      d_stop_time = time(NULL);
+//      d_last_write_time = std::chrono::steady_clock::now();
+//    }
+//  } else {
+//    BOOST_LOG_TRIVIAL(debug) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << " nwritten: " << nwritten << " stop time diff: " << time(NULL)-d_stop_time << " state: " << state;
+//  }
   return nwritten;
 }
 
@@ -467,9 +474,9 @@ time_t transmission_sink::get_stop_time() {
   return d_stop_time;
 }
 
-std::chrono::time_point<std::chrono::steady_clock> transmission_sink::get_last_write_time() {
-  return d_last_write_time;
-}
+//std::chrono::time_point<std::chrono::steady_clock> transmission_sink::get_last_write_time() {
+//  return d_last_write_time;
+//}
 
 void transmission_sink::add_transmission(Transmission t) {
   transmission_list.push_back(t);
