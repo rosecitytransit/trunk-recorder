@@ -37,7 +37,8 @@ RUN apt-get update && \
     libxtrx-dev \
     pkg-config \
     software-properties-common \
-    sox && \
+    sox \
+    wget && \
   rm -rf /var/lib/apt/lists/*
 
 COPY lib/gr-osmosdr/airspy_source_c.cc.patch /tmp/airspy_source_c.cc.patch
@@ -53,7 +54,7 @@ RUN cd /tmp && \
   git apply ../airspy_source_c.cc.patch && \
   mkdir build && \
   cd build && \
-  cmake .. && \
+  cmake -DENABLE_NONFREE=TRUE .. && \
   make -j$(nproc) && \
   make install && \
   ldconfig && \

@@ -198,7 +198,7 @@ namespace gr {
                 fprintf(stderr, "%s p25p1_fdma::set_nac: 0x%03x\n", logts.get(d_msgq_id), d_nac);
         }
 
-        p25p1_fdma::p25p1_fdma(const op25_audio& udp, log_ts& logger, int debug, bool do_imbe, bool do_output, bool do_msgq, gr::msg_queue::sptr queue, std::deque<int16_t> &output_queue, bool do_audio_output, int msgq_id) :
+        p25p1_fdma::p25p1_fdma(const op25_audio& udp, log_ts& logger, int debug, bool do_imbe, bool do_output, bool do_msgq, gr::msg_queue::sptr queue, std::deque<int16_t> &output_queue, bool do_audio_output, bool soft_vocoder, int msgq_id) :
             write_bufp(0),
             d_debug(debug),
             d_do_imbe(do_imbe),
@@ -208,6 +208,7 @@ namespace gr {
             d_do_audio_output(do_audio_output),
             d_nac(0),
             d_msg_queue(queue),
+            d_soft_vocoder(soft_vocoder),
             output_queue(output_queue),
             framer(new p25_framer(logger, debug, msgq_id)),
             qtimer(op25_timer(TIMEOUT_THRESHOLD)),
@@ -313,14 +314,6 @@ namespace gr {
                 vf_tgid   = ((HB[j+5] & 0x0f) << 12) + (HB[j+6] << 6) +  HB[j+7];				// 16 bit TGID
 
                 curr_grp_id = vf_tgid;
-                if (curr_grp_id2 == 0) {
-                    curr_grp_id2 = vf_tgid;
-                } else if (curr_grp_id2 != vf_tgid) {
-                    fprintf (stderr, "%s old tgid=%d, vf_tgid=%d, mfid=%x, algid=%x, keyid=%x, mi=%02x %02x %02x %02x %02x %02x %02x %02x %02x\n",
-                            logts.get(d_msgq_id), curr_grp_id2, vf_tgid, MFID, ess_algid, ess_keyid,
-                            ess_mi[0], ess_mi[1], ess_mi[2], ess_mi[3], ess_mi[4], ess_mi[5],ess_mi[6], ess_mi[7], ess_mi[8]);
-                    curr_grp_id2 = vf_tgid;
-                }
                 if (d_debug >= 10) {
                     fprintf (stderr, "ESS: tgid=%d, mfid=%x, algid=%x, keyid=%x, mi=%02x %02x %02x %02x %02x %02x %02x %02x %02x",
                             vf_tgid, MFID, ess_algid, ess_keyid,
@@ -543,13 +536,7 @@ namespace gr {
                             uint16_t ch_T    = (lcw[5] << 8) + lcw[6];
                             uint16_t ch_R    = (lcw[7] << 8) + lcw[8];
 
-                            //curr_grp_id = grpaddr;
-                            if (curr_grp_id2 == 0) {
-                                curr_grp_id2 = grpaddr;
-                            } else if (curr_grp_id2 != grpaddr) {
-                                fprintf (stderr, "%s old tgid=%d, Group Voice Chhannel Update Explicit tgid=%d\n", logts.get(d_msgq_id), curr_grp_id2, grpaddr);
-                                curr_grp_id2 = grpaddr;
-                            }
+                            // Don't use this grpaddr, you can get Updates for Talkgroups that are on other frequencies, the GRP here may not be the one the being recordered
                             if (d_debug >= 10)
                                 fprintf(stderr, ", svcopts=0x%02x, grpaddr=%d, ch_T=%d, ch_R=%d", svcopts, grpaddr, ch_T, ch_R);
                             tsbk[0] = 0xff; tsbk[1] = 0xff;
@@ -746,27 +733,31 @@ namespace gr {
                     if (d_do_audio_output) {
                         if ( !encrypted()) {
                             // This is the Vocoder that OP25 currently uses.
-                            /*software_decoder.decode_fullrate(u[0], u[1], u[2], u[3], u[4], u[5], u[6], u[7], E0, ET);
-                            audio_samples *samples = software_decoder.audio();
-                            for (int i=0; i < SND_FRAME; i++) {
-                           	    if (samples->size() > 0) {
-                       		        snd[i] = (int16_t)(samples->front());
-                                    samples->pop_front();
-                                } else {
-                                    snd[i] = 0;
+
+                            if (d_soft_vocoder) {
+                                // This is vocoder that is for half-rate
+                                software_decoder.decode_fullrate(u[0], u[1], u[2], u[3], u[4], u[5], u[6], u[7], E0, ET);
+                                audio_samples *samples = software_decoder.audio();
+                                for (int i=0; i < SND_FRAME; i++) {
+                                    if (samples->size() > 0) {
+                                        snd[i] = (int16_t)(samples->front());
+                                        samples->pop_front();
+                                    } else {
+                                        snd[i] = 0;
+                                    }
                                 }
-                            }*/
+                            } else {
 
-                            // This is the older, fullrate vocoder
-                            // it was copied from p25p1_voice_decode.cc
-                            int16_t frame_vector[8];
+                                // This is the older, fullrate vocoder
+                                // it was copied from p25p1_voice_decode.cc
+                                int16_t frame_vector[8];
 
-                            for (int i=0; i < 8; i++) { // Ugh. For compatibility convert imbe params from uint32_t to int16_t
-                                frame_vector[i] = u[i];
+                                for (int i=0; i < 8; i++) { // Ugh. For compatibility convert imbe params from uint32_t to int16_t
+                                    frame_vector[i] = u[i];
+                                }
+                                frame_vector[7] >>= 1;
+                                vocoder.imbe_decode(frame_vector, snd);
                             }
-                            frame_vector[7] >>= 1;
-                            vocoder.imbe_decode(frame_vector, snd);
-
 
                             if (op25audio.enabled()) {      // decoded audio goes out via UDP (normal code path)
                                 op25audio.send_audio(snd, SND_FRAME * sizeof(int16_t));

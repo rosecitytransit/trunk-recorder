@@ -42,12 +42,12 @@ std::string format_state(State state) {
       return "active";
     else if (state == IDLE)
       return "idle";
-    else if (state == COMPLETED)
-      return "completed";
     else if (state == STOPPED)
       return "stopped";
     else if (state == AVAILABLE)
       return "available";
+    else if (state == IGNORE)
+      return "ignore";
     return "Unknown";
   }
   return boost::lexical_cast<std::string>(state);
@@ -83,8 +83,6 @@ std::string format_state(State state, MonitoringState monitoringState) {
       return "active";
     else if (state == IDLE)
       return "idle";
-    else if (state == COMPLETED)
-      return "completed";
     else if (state == STOPPED)
       return "stopped";
     else if (state == AVAILABLE)

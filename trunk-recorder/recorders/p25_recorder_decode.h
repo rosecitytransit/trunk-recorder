@@ -3,6 +3,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <gnuradio/block.h>
+#include <gnuradio/block_detail.h>
 #include <gnuradio/blocks/short_to_float.h>
 #include <gnuradio/hier_block2.h>
 #include <gnuradio/io_signature.h>
@@ -34,13 +35,13 @@ typedef boost::shared_ptr<p25_recorder_decode> p25_recorder_decode_sptr;
 typedef std::shared_ptr<p25_recorder_decode> p25_recorder_decode_sptr;
 #endif
 
-p25_recorder_decode_sptr make_p25_recorder_decode(Recorder *recorder, int silence_frames);
+p25_recorder_decode_sptr make_p25_recorder_decode(Recorder *recorder, int silence_frames, bool d_soft_vocoder);
 
 class p25_recorder_decode : public gr::hier_block2 {
-  friend p25_recorder_decode_sptr make_p25_recorder_decode(Recorder *recorder, int silence_frames);
+  friend p25_recorder_decode_sptr make_p25_recorder_decode(Recorder *recorder, int silence_frames, bool d_soft_vocoder);
 
 protected:
-  virtual void initialize(int silence_frames);
+  virtual void initialize(int silence_frames, bool d_soft_vocoder);
   Recorder *d_recorder;
   Call *d_call;
   gr::op25_repeater::p25_frame_assembler::sptr op25_frame_assembler;
@@ -62,6 +63,8 @@ public:
   void start(Call *call);
   double since_last_write();
   void stop();
+  void reset();
+  void reset_block(gr::basic_block_sptr block); 
   int tdma_slot;
   bool delay_open;
   virtual ~p25_recorder_decode();
@@ -69,5 +72,7 @@ public:
   void plugin_callback_handler(int16_t *samples, int sampleCount);
   double get_output_sample_rate();
   State get_state();
+  gr::op25_repeater::p25_frame_assembler::sptr get_transmission_sink();
+
 };
 #endif

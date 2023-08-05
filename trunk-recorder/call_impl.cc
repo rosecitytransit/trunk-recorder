@@ -12,6 +12,11 @@
 std::string Call_impl::get_capture_dir() {
   return this->config.capture_dir;
 }
+
+std::string Call_impl::get_temp_dir() { 
+  return this->config.temp_dir; 
+}
+
 /*
 Call * Call::make(long t, double f, System *s, Config c) {
 
@@ -46,6 +51,7 @@ Call_impl::Call_impl(long t, double f, System *s, Config c) {
   duplex = false;
   mode = false;
   is_analog = false;
+  was_update = false;
   priority = 0;
   set_freq(f);
   this->update_talkgroup_display();
@@ -76,6 +82,11 @@ Call_impl::Call_impl(TrunkMessage message, System *s, Config c) {
   mode = message.mode;
   is_analog = false;
   priority = message.priority;
+  if (message.message_type == GRANT) {
+    was_update = false;
+  } else {
+    was_update = true;
+  }
   set_freq(message.freq);
   add_source(message.source);
   this->update_talkgroup_display();
@@ -94,8 +105,7 @@ void Call_impl::stop_call() {
     // If the call is being recorded, check to see if the recorder is currently in an INACTIVE state. This means that the recorder is not
     // doing anything and can be stopped.
     if ((state == RECORDING) && this->get_recorder()->is_idle()) {
-      BOOST_LOG_TRIVIAL(info) << "[" << sys->get_short_name() << "]\t\033[0;34m" << this->get_call_num() << "C\033[0m\tTG: " << this->get_talkgroup_display() << "\tFreq: " << format_freq(get_freq()) << "\tStopping Recorded Call_impl, setting call state to COMPLETED - Last Update: " << this->since_last_update() << "s";
-      this->set_state(COMPLETED);
+      BOOST_LOG_TRIVIAL(info) << "[" << sys->get_short_name() << "]\t\033[0;34m" << this->get_call_num() << "C\033[0m\tTG: " << this->get_talkgroup_display() << "\tFreq: " << format_freq(get_freq()) << "\tStopping Recorded Call_impl - Last Update: " << this->since_last_update() << "s";
     } 
   }
 }
@@ -107,14 +117,17 @@ void Call_impl::conclude_call() {
   // BOOST_LOG_TRIVIAL(info) << "conclude_call()";
   stop_time = time(NULL);
 
-  if (state == COMPLETED || (state == MONITORING && monitoringState == SUPERSEDED)) {
+  if (state == RECORDING || (state == MONITORING && monitoringState == SUPERSEDED)) {
     final_length = recorder->get_current_length();
 
     if (!recorder) {
       BOOST_LOG_TRIVIAL(error) << "Call_impl::end_call() State is recording, but no recorder assigned!";
     }
-    BOOST_LOG_TRIVIAL(info) << "[" << sys->get_short_name() << "]\t\033[0;34m" << this->get_call_num() << "C\033[0m\tTG: " << this->get_talkgroup_display() << "\tFreq: " << format_freq(get_freq()) << "\t\u001b[33mConcluding Recorded Call\u001b[0m - Last Update: " << this->since_last_update() << "s\tCall Elapsed: " << this->elapsed();
+    BOOST_LOG_TRIVIAL(info) << "[" << sys->get_short_name() << "]\t\033[0;34m" << this->get_call_num() << "C\033[0m\tTG: " << this->get_talkgroup_display() << "\tFreq: " << format_freq(get_freq()) << "\t\u001b[33mConcluding Recorded Call\u001b[0m - Last Update: " << this->since_last_update() << "s\tRecorder last write:" << recorder->since_last_write() << "\tCall Elapsed: " << this->elapsed();
 
+    if (was_update) {
+      BOOST_LOG_TRIVIAL(info) << "[" << sys->get_short_name() << "]\t\033[0;34m" << this->get_call_num() << "C\033[0m\tTG: " << this->get_talkgroup_display() << "\tFreq: " << format_freq(get_freq()) << "\t\u001b[33mCall was UPDATE not GRANT\u001b[0m";
+    }
     this->get_recorder()->stop();
     transmission_list = this->get_recorder()->get_transmission_list();
     if (this->get_sigmf_recording() == true) {
@@ -126,9 +139,6 @@ void Call_impl::conclude_call() {
     }
 
     Call_Concluder::conclude_call(this, sys, config);
-  }
-   else {
-    BOOST_LOG_TRIVIAL(error) << "[" << sys->get_short_name() << "]\t\033[0;34m" << this->get_call_num() << "C\033[0m\tTG: " << this->get_talkgroup_display() << "Concluding call, but call state is not COMPLETED!";
   }
 }
 
@@ -324,16 +334,12 @@ bool Call_impl::add_source(long src) {
 }
 
 bool Call_impl::update(TrunkMessage message) {
-  if ((state == INACTIVE) || (state == COMPLETED)) {
-    BOOST_LOG_TRIVIAL(error) << "[" << sys->get_short_name() << "]\t\033[0;34m" << this->get_call_num() << "C\033[0m\tCall_impl Update, but state is: " << state << " - Call_impl TG: " << get_talkgroup() << "\t Call_impl Freq: " << get_freq() << "\tMsg Tg: " << message.talkgroup << "\tMsg Freq: " << message.freq;
-  } else {
     last_update = time(NULL);
     if ((message.freq != this->curr_freq) || (message.talkgroup != this->talkgroup)) {
       BOOST_LOG_TRIVIAL(error) << "[" << sys->get_short_name() << "]\t\033[0;34m" << this->get_call_num() << "C\033[0m\tCall_impl Update, message mismatch - Call_impl TG: " << get_talkgroup() << "\t Call_impl Freq: " << get_freq() << "\tMsg Tg: " << message.talkgroup << "\tMsg Freq: " << message.freq;
     } else {
       return add_source(message.source);
     }
-  }
   return false;
 }
 

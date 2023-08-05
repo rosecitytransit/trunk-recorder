@@ -38,6 +38,7 @@ public:
   int get_sys_num();
   std::string get_short_name();
   std::string get_capture_dir();
+  std::string get_temp_dir();
   void set_freq(double f);
   long get_talkgroup();
 
@@ -67,7 +68,7 @@ public:
   void set_is_analog(bool a);
   const char *get_xor_mask();
   virtual time_t get_start_time() { return start_time; }
-  virtual bool is_conventional() { return false; }
+  bool is_conventional() { return false; }
   void set_encrypted(bool m);
   bool get_encrypted();
   void set_emergency(bool m);
@@ -107,6 +108,7 @@ protected:
   time_t start_time;
   bool debug_recording;
   bool sigmf_recording;
+  bool was_update;
   bool encrypted;
   bool emergency;
   bool mode;
