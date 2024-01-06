@@ -212,7 +212,7 @@ void transmission_sink::set_source(long src) {
 
   if (curr_src_id == -1) {
     
-    BOOST_LOG_TRIVIAL(info) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\tUnit ID set via Control Channel, ext: " << src << "\tcurrent: " << curr_src_id << "\t samples: " << d_sample_count;
+    BOOST_LOG_TRIVIAL(info) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\tUnit ID set via CC, ext: " << src << "\tcurrent: " << curr_src_id << "\t samples: " << d_sample_count;
 
     curr_src_id = src;
   }
@@ -363,7 +363,7 @@ int transmission_sink::work(int noutput_items, gr_vector_const_void_star &input_
 
       if ((state == IDLE) || (state == RECORDING)) {
         if(d_current_call_talkgroup_encoded != grp_id) {
-          BOOST_LOG_TRIVIAL(info) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\tGROUP MISMATCH - Trunk Channel Call: " << d_current_call_talkgroup_encoded << " Voice Channel: " << grp_id << " Recorder state: " << format_state(state);
+          BOOST_LOG_TRIVIAL(info) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\tGROUP MISMATCH,  Voice Channel TG: " << grp_id << " Recorder state: " << format_state(state);
           if (state == RECORDING) {
               if (d_sample_count > 0) {
                 BOOST_LOG_TRIVIAL(info) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\tEnding Transmission and STOPping - count: " << d_sample_count;
@@ -446,10 +446,7 @@ int transmission_sink::work(int noutput_items, gr_vector_const_void_star &input_
 
   // if the System for this call is in Transmission Mode, and we have a recording and we got a flag that a Transmission ended...
   int nwritten = dowork(noutput_items, input_items, output_items);
-  if ((d_stop_time > time(NULL)) && (nwritten > 1)) {
-    BOOST_LOG_TRIVIAL(debug) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << d_current_call_talkgroup_display << "\tFreq: " << format_freq(d_current_call_freq) << "\td_stop_time diff: " << (d_stop_time-time(NULL)) << "s";
-    d_stop_time = time(NULL);
-  } else if (d_stop_time < time(NULL)) {
+  if (d_stop_time < time(NULL)) {
     d_stop_time = time(NULL);
   }
 //  if (nwritten > 1) {

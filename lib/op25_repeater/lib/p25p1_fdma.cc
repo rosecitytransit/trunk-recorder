@@ -316,9 +316,9 @@ namespace gr {
                 if (curr_grp_id2 == 0) {
                     curr_grp_id2 = vf_tgid;
                 } else if (curr_grp_id2 != vf_tgid) {
-                    fprintf (stderr, "%s old tgid=%d, vf_tgid=%d, mfid=%x, algid=%x, keyid=%x, mi=%02x %02x %02x %02x %02x %02x %02x %02x %02x\n",
-                            logts.get(d_msgq_id), curr_grp_id2, vf_tgid, MFID, ess_algid, ess_keyid,
-                            ess_mi[0], ess_mi[1], ess_mi[2], ess_mi[3], ess_mi[4], ess_mi[5],ess_mi[6], ess_mi[7], ess_mi[8]);
+                    //fprintf (stderr, "%s old tgid=%d, vf_tgid=%d, mfid=%x, algid=%x, keyid=%x, mi=%02x %02x %02x %02x %02x %02x %02x %02x %02x\n",
+                    //        logts.get(d_msgq_id), curr_grp_id2, vf_tgid, MFID, ess_algid, ess_keyid,
+                    //        ess_mi[0], ess_mi[1], ess_mi[2], ess_mi[3], ess_mi[4], ess_mi[5],ess_mi[6], ess_mi[7], ess_mi[8]);
                     curr_grp_id2 = vf_tgid;
                 }
                 if (d_debug >= 10) {
@@ -485,7 +485,7 @@ namespace gr {
             std::string s = "";
 
             if (lco == 15) {
-                fprintf (stderr, "%s NAC 0x%03x TDU15/lco15 for TG %d", logts.get(d_msgq_id), framer->nac, curr_grp_id2);
+                //fprintf (stderr, "%s NAC 0x%03x TDU15/lco15 for TG %d", logts.get(d_msgq_id), framer->nac, curr_grp_id2);
                 curr_grp_id2 = 0;
             }
 
@@ -506,7 +506,7 @@ namespace gr {
                             if (curr_grp_id2 == 0) {
                                 curr_grp_id2 = grpaddr;
                             } else if (curr_grp_id2 != grpaddr) {
-                                fprintf (stderr, "%s old tgid=%d, Group Voice Chhannel User tgid=%d\n", logts.get(d_msgq_id), curr_grp_id2, grpaddr);
+                                //fprintf (stderr, "%s old tgid=%d, Group Voice Chhannel User tgid=%d\n", logts.get(d_msgq_id), curr_grp_id2, grpaddr);
                                 curr_grp_id2 = grpaddr;
                             }
                             s = "{\"srcaddr\" : " + std::to_string(srcaddr) + ", \"grpaddr\": " + std::to_string(grpaddr) + "}";
@@ -547,7 +547,7 @@ namespace gr {
                             if (curr_grp_id2 == 0) {
                                 curr_grp_id2 = grpaddr;
                             } else if (curr_grp_id2 != grpaddr) {
-                                fprintf (stderr, "%s old tgid=%d, Group Voice Chhannel Update Explicit tgid=%d\n", logts.get(d_msgq_id), curr_grp_id2, grpaddr);
+                                //fprintf (stderr, "%s old tgid=%d, Group Voice Chhannel Update Explicit tgid=%d\n", logts.get(d_msgq_id), curr_grp_id2, grpaddr);
                                 curr_grp_id2 = grpaddr;
                             }
                             if (d_debug >= 10)
