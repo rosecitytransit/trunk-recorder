@@ -4,7 +4,7 @@ This test walks through the steps for setting up both MQTT plugins and running t
 
 ## Setup
 
-- Install the [MQTT Status Plugin](https://github.com/robotastic/trunk-recorder-mqtt-status) & [MQTT Statistics Plugin](https://github.com/robotastic/trunk-recorder-mqtt-statistics)
+- Install the [MQTT Status Plugin](https://github.com/robotastic/trunk-recorder-mqtt-status) & [MQTT Statistics Plugin](https://github.com/aaknitt/trunk-recorder-mqtt-statistics)
 
 - Starting Mosquitto on a Mac:
 ```bash

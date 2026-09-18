@@ -23,7 +23,7 @@ Need help? Got something working? Share it!
 
 ![screenshot](./docs/media/screenshot.jpg)
 
-Trunk Recorder is able to record the calls on trunked and conventional radio systems. It uses 1 or more Software Defined Radios (SDRs) to do this. The SDRs capture large swathes of RF and then use software to process what was received. [GNU Radio](https://gnuradio.org/) is used to do this processing because it provides lots of convenient RF blocks that can be pieced together to allow for complex RF processing. The libraries from the amazing [OP25](http://op25.osmocom.org/trac/wiki) project are used for a lot of the P25 functionality. Multiple radio systems can be recorded at the same time.
+Trunk Recorder is able to record the calls on trunked and conventional radio systems. It uses 1 or more Software Defined Radios (SDRs) to do this. The SDRs capture large swathes of RF and then use software to process what was received. [GNU Radio](https://gnuradio.org/) is used to do this processing because it provides lots of convenient RF blocks that can be pieced together to allow for complex RF processing. The libraries from the amazing [OP25](https://osmocom.org/projects/op25/wiki) project are used for a lot of the P25 functionality. Multiple radio systems can be recorded at the same time.
 
 
 Trunk Recorder currently supports the following:
@@ -81,7 +81,7 @@ By default, Trunk Recorder just dumps a lot of recorded files into a directory. 
 ### Plugins
 
 * [MQTT Status](https://github.com/robotastic/trunk-recorder-mqtt-status): Publishes the current status of a Trunk Recorder instance over MQTT
-* [MQTT Statistics](https://github.com/robotastic/trunk-recorder-mqtt-statistics): Publishes statistics about a Trunk Recorder instance over MQTT
+* [MQTT Statistics](https://github.com/aaknitt/trunk-recorder-mqtt-statistics): Publishes statistics about a Trunk Recorder instance over MQTT
 * [Decode rates logger](https://github.com/rosecitytransit/trunk-recorder-decode-rate): Logs trunking control channel decode rates to a CSV file, and includes a PHP file that outputs an SVG graph
 * [Daily call log and live Web page](https://github.com/rosecitytransit/trunk-recorder-daily-log): Creates a daily log of calls (instead of just individual JSON files) and includes an updating PHP Web page w/audio player
 * [Prometheus exporter](https://github.com/USA-RedDragon/trunk-recorder-prometheus): Publishes statistics to a metrics endpoint via HTTP
