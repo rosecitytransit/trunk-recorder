@@ -71,7 +71,7 @@ sudo port selfupdate
 
 #### Install GNU Radio
 
-The preferred method for [installing GNU Radio](http://gnuradio.org/redmine/projects/gnuradio/wiki/InstallingGR) on macOS is: 
+The preferred method for [installing GNU Radio](https://wiki.gnuradio.org/index.php/InstallingGR) on macOS is: 
  
 ```bash
 sudo port install gnuradio uhd gr-osmosdr
@@ -120,7 +120,7 @@ sudo make install
 
 ## Configuring Trunk Recorder
 
-The next step is to [configure Trunk Recorder](CONFIGURE.md) for the system you are trying to capture.
+The next step is to [configure Trunk Recorder](../CONFIGURE.md) for the system you are trying to capture.
 
 ## Running trunk recorder. 
 
